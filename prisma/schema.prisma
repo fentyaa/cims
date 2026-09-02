@@ -1,0 +1,261 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                   String              @id @default(cuid())
+  profilePhoto         String?
+  fullName             String
+  email                String              @unique
+  phoneNumber          String
+  password             String
+  role                 Role                @default(INTERN)
+  participantType      ParticipantType?
+  status               AccountStatus       @default(PENDING)
+  university           String?
+  studyProgram         String?
+  studentId            String?
+  schoolName           String?
+  major                String?
+  classGrade           String?
+  internshipPeriod     String
+  internshipStartDate  DateTime?           @db.Date
+  internshipEndDate    DateTime?           @db.Date
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  mentorId             String?
+  announcements        Announcement[]
+  documentTemplates    DocumentTemplate[]
+  documentsGenerated   Document[]          @relation("GeneratedBy")
+  documents            Document[]
+  evaluationsCreated   Evaluation[]        @relation("MentorEvaluation")
+  evaluations          Evaluation?
+  documentsHistory     GenerationHistory[] @relation("GeneratedByHistory")
+  generationHistory    GenerationHistory[]
+  logbooks             Logbook[]
+  presences            Presence[]
+  mentor               User?               @relation("MentorMentee", fields: [mentorId], references: [id])
+  mentees              User[]              @relation("MentorMentee")
+
+  @@index([role, status])
+  @@index([mentorId])
+  @@index([status])
+  @@map("users")
+}
+
+model Session {
+  sid    String   @id
+  sess   Json
+  expire DateTime
+
+  @@index([expire])
+  @@map("Session")
+}
+
+model Presence {
+  id        String         @id @default(cuid())
+  userId    String
+  date      DateTime       @db.Date
+  status    PresenceStatus @default(WFO)
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
+  @@index([userId, status])
+  @@map("presences")
+}
+
+model Announcement {
+  id          String               @id @default(cuid())
+  title       String
+  content     String
+  category    AnnouncementCategory
+  targetType  AnnouncementTarget   @default(ALL)
+  attachment  String?
+  publishDate DateTime
+  expireDate  DateTime?
+  status      AnnouncementStatus   @default(DRAFT)
+  createdById String
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  createdBy   User                 @relation(fields: [createdById], references: [id], map: "announcements_created_by_fkey")
+
+  @@index([status, publishDate])
+  @@index([targetType])
+  @@index([createdById])
+  @@map("announcements")
+}
+
+model Evaluation {
+  id             String           @id @default(cuid())
+  userId         String           @unique
+  discipline     Int
+  responsibility Int
+  communication  Int
+  teamwork       Int
+  initiative     Int
+  technicalSkill Int
+  finalScore     Float            @default(0)
+  grade          String           @default("")
+  mentorComment  String?
+  recommendation String?
+  status         EvaluationStatus @default(DRAFT)
+  publishedAt    DateTime?
+  mentorId       String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  mentor         User?            @relation("MentorEvaluation", fields: [mentorId], references: [id])
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([mentorId])
+  @@map("evaluations")
+}
+
+model Logbook {
+  id            String        @id @default(cuid())
+  userId        String
+  date          DateTime      @db.Date
+  activity      String
+  obstacle      String?
+  nextPlan      String?
+  mentorComment String?
+  status        LogbookStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
+  @@index([userId, status])
+  @@map("logbooks")
+}
+
+model DocumentTemplate {
+  id                String              @id @default(cuid())
+  name              String
+  documentType      DocumentType
+  version           String
+  filePath          String
+  status            TemplateStatus      @default(ACTIVE)
+  uploadedById      String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  uploadedBy        User                @relation(fields: [uploadedById], references: [id])
+  documents         Document[]
+  generationHistory GenerationHistory[]
+
+  @@map("document_templates")
+}
+
+model Document {
+  id            String           @id @default(cuid())
+  userId        String
+  documentType  DocumentType
+  templateId    String
+  filePath      String
+  generatedById String
+  createdAt     DateTime         @default(now())
+  generatedBy   User             @relation("GeneratedBy", fields: [generatedById], references: [id])
+  template      DocumentTemplate @relation(fields: [templateId], references: [id])
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([documentType])
+  @@map("documents")
+}
+
+model GenerationHistory {
+  id            String           @id @default(cuid())
+  userId        String
+  documentType  DocumentType
+  templateId    String
+  generatedById String
+  status        String           @default("SUCCESS")
+  createdAt     DateTime         @default(now())
+  generatedBy   User             @relation("GeneratedByHistory", fields: [generatedById], references: [id])
+  template      DocumentTemplate @relation(fields: [templateId], references: [id])
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([documentType])
+  @@index([createdAt])
+  @@map("generation_history")
+}
+
+enum Role {
+  MENTOR
+  INTERN
+}
+
+enum ParticipantType {
+  UNIVERSITY
+  SMK
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  ARCHIVED
+}
+
+enum PresenceStatus {
+  WFO
+  WFH
+  IZIN
+  SAKIT
+}
+
+enum AnnouncementCategory {
+  INFORMASI
+  JADWAL
+  TUGAS
+  LIBUR
+  PENTING
+  LAINNYA
+}
+
+enum AnnouncementTarget {
+  ALL
+  UNIVERSITY
+  SMK
+}
+
+enum AnnouncementStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EvaluationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum LogbookStatus {
+  PENDING
+  REVIEWED
+}
+
+enum DocumentType {
+  CERTIFICATE
+  LETTER
+}
+
+enum TemplateStatus {
+  ACTIVE
+  INACTIVE
+}

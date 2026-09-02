@@ -1,0 +1,53 @@
+<!-- General Error Page - Terjadi Kesalahan (Phase 4 Polish) -->
+
+<div class="row justify-content-center my-4 my-md-5">
+  <div class="col-12 col-md-10 col-lg-8 text-center">
+    <div class="error-card-modern">
+      <!-- Status Badge -->
+      <div>
+        <span class="error-status-badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">
+          <i class="bi bi-shield-exclamation"></i>
+          <span>Kendala Sistem</span>
+        </span>
+      </div>
+
+      <!-- Icon Visual Illustration -->
+      <div class="error-icon-wrapper bg-danger bg-opacity-10 text-danger">
+        <i class="bi bi-gear-wide-connected"></i>
+      </div>
+
+      <!-- Error Title -->
+      <h2 class="fw-bold text-dark mb-2">
+        <%= typeof title !== 'undefined' && title ? title : 'Terjadi Sedikit Kendala' %>
+      </h2>
+
+      <!-- Reassuring Description -->
+      <p class="text-muted small mx-auto mb-2" style="max-width: 460px; line-height: 1.6;">
+        <%= typeof message !== 'undefined' && message ? message : 'Sistem sedang mengalami kendala sementara saat memproses permintaan Anda.' %>
+      </p>
+      <p class="text-secondary small mx-auto mb-4" style="font-size: 0.8rem;">
+        Jangan khawatir, data Anda tetap aman. Silakan muat ulang halaman atau coba kembali dalam beberapa saat.
+      </p>
+
+      <!-- Recovery Actions -->
+      <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-2 mb-4">
+        <button type="button" onclick="window.location.reload()" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm w-100 w-sm-auto">
+          <i class="bi bi-arrow-clockwise"></i>
+          <span>Muat Ulang Halaman</span>
+        </button>
+        <a href="/" class="btn btn-outline-secondary rounded-3 px-4 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 w-100 w-sm-auto">
+          <i class="bi bi-house-door"></i>
+          <span>Halaman Utama</span>
+        </a>
+      </div>
+
+      <!-- Support Notice -->
+      <div class="pt-3 border-top text-muted small">
+        <span class="d-inline-flex align-items-center gap-1">
+          <i class="bi bi-info-circle me-1 text-primary"></i>
+          Butuh bantuan lebih lanjut? Hubungi administrator atau tim HR melalui <strong class="text-dark">hr@perusahaan.com</strong>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

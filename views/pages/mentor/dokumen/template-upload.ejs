@@ -1,0 +1,518 @@
+<!-- Upload / Buat Template -->
+<div class="mb-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <a href="/mentor/dokumen/template" class="btn btn-sm btn-outline-secondary rounded-3">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <div>
+        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-plus-circle me-2 text-primary"></i>Buat / Upload Template Dokumen</h5>
+        <p class="text-muted small mb-0">Tambahkan template resmi baru untuk Sertifikat Kelulusan atau Surat Magang</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Validation Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger border-0 rounded-3 small py-2 px-3 mb-3">
+    <ul class="mb-0 ps-3">
+      <% errors.forEach(e => { %>
+        <li><%= e %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="card-body p-4">
+    <form method="POST" action="/mentor/dokumen/template/upload" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="row g-3">
+        <!-- Nama Template -->
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold small text-dark">Nama Template <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm rounded-3"
+            name="name"
+            placeholder="Contoh: Template Sertifikat Kelulusan 2026"
+            value="<%= typeof formData !== 'undefined' ? formData.name : '' %>"
+            required
+          />
+          <div class="form-text" style="font-size: 0.75rem;">Nama yang mudah dikenali untuk template ini.</div>
+        </div>
+
+        <!-- Jenis Dokumen -->
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-semibold small text-dark">Jenis Dokumen <span class="text-danger">*</span></label>
+          <select class="form-select form-select-sm rounded-3" name="documentType" id="docTypeSelect" required>
+            <option value="">Pilih...</option>
+            <option value="CERTIFICATE" <%= typeof formData !== 'undefined' && formData.documentType === 'CERTIFICATE' ? 'selected' : '' %>>Sertifikat Kelulusan</option>
+            <option value="LETTER" <%= typeof formData !== 'undefined' && formData.documentType === 'LETTER' ? 'selected' : '' %>>Surat Keterangan Magang</option>
+          </select>
+        </div>
+
+        <!-- Versi -->
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-semibold small text-dark">Versi <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm rounded-3"
+            name="version"
+            placeholder="Contoh: 1.0"
+            value="<%= typeof formData !== 'undefined' && formData.version ? formData.version : '1.0' %>"
+            required
+          />
+        </div>
+
+        <!-- Placeholder Chips -->
+        <div class="col-12 mt-3">
+          <div class="p-3 bg-light rounded-3 border">
+            <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-1">
+              <label class="form-label fw-bold text-dark small mb-0">
+                <i class="bi bi-tag-fill text-primary me-1"></i>Variabel Placeholder Otomatis Database:
+              </label>
+              <div class="d-flex gap-1 flex-wrap">
+                <button type="button" class="btn btn-sm btn-light border py-0 px-2 small" id="btnLoadKeteranganSample">Contoh Surat Keterangan</button>
+                <button type="button" class="btn btn-sm btn-light border py-0 px-2 small" id="btnLoadBalasanSample">Contoh Balasan Magang</button>
+                <button type="button" class="btn btn-sm btn-light border py-0 px-2 small" id="btnLoadCertSample">Contoh Sertifikat</button>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap gap-1 mt-2" id="placeholderChips">
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NAMA_PESERTA}}">+ {{NAMA_PESERTA}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{INSTANSI}}">+ {{INSTANSI}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{JURUSAN}}">+ {{JURUSAN}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NIM_NIS}}">+ {{NIM_NIS}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{PERIODE_MAGANG}}">+ {{PERIODE_MAGANG}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NILAI_AKHIR}}">+ {{NILAI_AKHIR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{GRADE}}">+ {{GRADE}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{PREDIKAT}}">+ {{PREDIKAT}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{KOMENTAR_MENTOR}}">+ {{KOMENTAR_MENTOR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{REKOMENDASI}}">+ {{REKOMENDASI}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NAMA_MENTOR}}">+ {{NAMA_MENTOR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{TANGGAL_CETAK}}">+ {{TANGGAL_CETAK}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NOMOR_SURAT}}">+ {{NOMOR_SURAT}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{KOTA_PENERBITAN}}">+ {{KOTA_PENERBITAN}}</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- OPSI 1: Editor HTML Langsung -->
+        <div class="col-12 mt-3">
+          <label class="form-label fw-semibold small text-dark d-flex justify-content-between">
+            <span>Opsi A: Tulis / Tempel Kode HTML Template (Disarankan)</span>
+            <small class="text-muted">Template langsung disimpan dan siap digenerate.</small>
+          </label>
+          <textarea
+            class="form-control font-monospace rounded-3"
+            name="templateContent"
+            id="templateContentArea"
+            rows="12"
+            placeholder="Ketik atau tempel kode HTML template lengkap di sini..."
+            style="font-size: 0.85rem; background-color: #f8fafc;"
+          ><%= typeof formData !== 'undefined' ? formData.templateContent : '' %></textarea>
+        </div>
+
+        <!-- OPSI 2: Upload File Template -->
+        <div class="col-12 mt-3">
+          <label class="form-label fw-semibold small text-dark">Opsi B: Atau Upload File Template (.HTML / .PDF / .DOCX)</label>
+          <div class="border rounded-3 p-3 text-center bg-light">
+            <input
+              type="file"
+              class="form-control form-control-sm w-auto mx-auto"
+              name="templateFile"
+              accept=".html,.htm,.pdf,.docx,.doc"
+              id="templateFile"
+            />
+            <div class="form-text mt-1" style="font-size: 0.75rem;">Format didukung: .HTML, .HTM, .PDF, .DOCX (Maks: 10 MB).</div>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="col-12 mt-4 pt-3 border-top">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm rounded-3 px-4 py-2 fw-semibold">
+              <i class="bi bi-cloud-upload me-1"></i>Simpan & Aktifkan Template
+            </button>
+            <a href="/mentor/dokumen/template" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-2">Batal</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('templateContentArea');
+    const chips = document.querySelectorAll('.placeholder-chip');
+    const docTypeSelect = document.getElementById('docTypeSelect');
+    const btnKeterangan = document.getElementById('btnLoadKeteranganSample');
+    const btnBalasan = document.getElementById('btnLoadBalasanSample');
+    const btnCert = document.getElementById('btnLoadCertSample');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const tag = this.getAttribute('data-tag');
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+
+        textarea.value = text.substring(0, start) + tag + text.substring(end);
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+      });
+    });
+
+    if (btnKeterangan) {
+      btnKeterangan.addEventListener('click', function() {
+        docTypeSelect.value = 'LETTER';
+        textarea.value = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Surat Keterangan - {{NAMA_PESERTA}}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #000; padding: 30px 40px; font-size: 14.5px; line-height: 1.65; }
+    .kop { display: flex; align-items: center; gap: 20px; }
+    .kop-logo { width: 80px; }
+    .comp-title { font-size: 21px; font-weight: bold; margin-bottom: 2px; }
+    .comp-desc { font-size: 12.5px; line-height: 1.35; margin-bottom: 2px; }
+    .kop-line { margin: 6px 0 35px; }
+    .line-thick { height: 3.5px; background: #000; margin-bottom: 2px; }
+    .line-thin { height: 1px; background: #000; }
+    .letter-heading { text-align: center; margin-bottom: 35px; }
+    .title-text { font-size: 16px; font-weight: bold; text-decoration: underline; }
+    .table-info { width: 100%; margin-bottom: 16px; border-collapse: collapse; }
+    .table-info td { padding: 2px 4px; vertical-align: top; }
+    .table-info td:first-child { width: 120px; }
+    .content-p { margin-bottom: 18px; text-align: justify; }
+    .signature-wrapper { display: flex; justify-content: flex-end; margin-top: 45px; }
+    .sign-block { width: 290px; text-align: center; position: relative; }
+    .stamp-sign-area { height: 110px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .official-stamp { position: absolute; left: 15px; top: 0; z-index: 2; }
+    .signature-svg { position: absolute; right: 40px; top: 25px; z-index: 1; }
+  </style>
+</head>
+<body>
+  <div class="kop">
+    <div class="kop-logo">
+      <svg width="75" height="75" viewBox="0 0 100 100" fill="none">
+        <path d="M50 8C26.8 8 8 26.8 8 50C8 73.2 26.8 92 50 92C63.2 92 74.9 85.9 82.6 76.4L50 50L82.6 23.6C74.9 14.1 63.2 8 50 8Z" fill="#111827"/>
+        <path d="M50 22C34.5 22 22 34.5 22 50C22 65.5 34.5 78 50 78C58.8 78 66.5 74 71.7 67.8L50 50L71.7 32.2C66.5 26 58.8 22 50 22Z" fill="#ffffff"/>
+        <circle cx="50" cy="50" r="13" fill="#111827"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="comp-title">PT. CIKARA BAKTI NUSANTARA</h1>
+      <p class="comp-desc">Alamat Kantor Sekertariat: Perum Cipta Graha Mandiri, Blok A, No. 23,<br>Sukarindik, Bungursari, Tasikmalaya, Jawa Barat (46151)</p>
+      <p class="comp-desc">Nomor Telepon : 085317563748 Web-Site : <span style="text-decoration: underline; color: #0000EE;">www.cikarastudio.com</span></p>
+      <p class="comp-desc">E-Mail : <span style="text-decoration: underline; color: #0000EE;">cikarastudio@gmail.com</span></p>
+    </div>
+  </div>
+  <div class="kop-line"><div class="line-thick"></div><div class="line-thin"></div></div>
+
+  <div class="letter-heading">
+    <h2 class="title-text">SURAT KETERANGAN</h2>
+    <p>No: {{NOMOR_SURAT}}</p>
+  </div>
+
+  <p>Yang bertanda tangan dibawah ini :</p>
+  <table class="table-info">
+    <tr><td>Nama</td><td>: {{NAMA_MENTOR}}</td></tr>
+    <tr><td>Jabatan</td><td>: {{JABATAN_MENTOR}}</td></tr>
+  </table>
+
+  <p>Menerangkan bahwa :</p>
+  <table class="table-info">
+    <tr><td>Nama</td><td>: <strong>{{NAMA_PESERTA}}</strong></td></tr>
+    <tr><td>NPM</td><td>: {{NIM_NIS}}</td></tr>
+  </table>
+
+  <p class="content-p">
+    Telah melaksanakan Praktek Kerja mengenai <em>{{BIDANG_MAGANG}}</em> di PT. CIKARA BAKTI NUSANTARA.
+  </p>
+  <p class="content-p">
+    Pelaksanaan Praktek Kerja di PT. CIKARA BAKTI NUSANTARA terhitung mulai tanggal {{TANGGAL_MULAI}} - {{TANGGAL_SELESAI}}.
+  </p>
+  <p class="content-p">
+    Demikian Surat Keterangan ini dibuat untuk dapat dipergunakan seperlunya,<br>
+    Atas kerjasama yang baik, kami ucapkan terima kasih.
+  </p>
+
+  <div class="signature-wrapper">
+    <div class="sign-block">
+      <p>{{KOTA_PENERBITAN}}, {{TANGGAL_CETAK}}</p>
+      <p>Pembimbing Lapangan<br><strong>PT. CIKARA BAKTI NUSANTARA</strong></p>
+      <div class="stamp-sign-area">
+        <svg width="120" height="120" viewBox="0 0 200 200" class="official-stamp">
+          <g transform="rotate(-8 100 100)">
+            <circle cx="100" cy="100" r="92" stroke="#1d4ed8" stroke-width="4" fill="none" opacity="0.88"/>
+            <circle cx="100" cy="100" r="85" stroke="#1d4ed8" stroke-width="1.6" fill="none" opacity="0.88"/>
+            <circle cx="100" cy="100" r="54" stroke="#1d4ed8" stroke-width="1.8" fill="none" opacity="0.88"/>
+            <path d="M100 68 C82 68 68 82 68 100 C68 118 82 132 100 132 C110 132 119 127 125 120 L100 100 L125 80 C119 73 110 68 100 68 Z" fill="#1d4ed8" opacity="0.85"/>
+            <circle cx="100" cy="100" r="9" fill="#ffffff"/><circle cx="100" cy="100" r="5" fill="#1d4ed8" opacity="0.85"/>
+            <path id="stampP1" d="M 28,100 A 72,72 0 1,1 172,100" fill="none" />
+            <text fill="#1d4ed8" font-family="'Times New Roman', serif" font-size="14.5" font-weight="bold" letter-spacing="2.2" opacity="0.9">
+              <textPath href="#stampP1" startOffset="50%" text-anchor="middle">PT. CIKARA BAKTI NUSANTARA</textPath>
+            </text>
+            <path id="stampP2" d="M 170,105 A 72,72 0 0,1 30,105" fill="none" />
+            <text fill="#1d4ed8" font-family="'Times New Roman', serif" font-size="14" font-weight="bold" letter-spacing="3" opacity="0.9">
+              <textPath href="#stampP2" startOffset="50%" text-anchor="middle">TASIKMALAYA</textPath>
+            </text>
+          </g>
+        </svg>
+        <svg width="120" height="70" viewBox="0 0 160 90" class="signature-svg">
+          <path d="M20 65 Q45 15 70 50 T120 40 Q135 30 145 60" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>
+          <path d="M50 45 Q70 65 95 35" stroke="#000000" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.8"/>
+        </svg>
+      </div>
+      <p>{{NAMA_MENTOR}}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+      });
+    }
+
+    if (btnBalasan) {
+      btnBalasan.addEventListener('click', function() {
+        docTypeSelect.value = 'LETTER';
+        textarea.value = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Balasan Kerja Magang - {{NAMA_PESERTA}}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #000; padding: 30px 40px; font-size: 14.5px; line-height: 1.6; }
+    .kop { display: flex; align-items: center; gap: 20px; }
+    .kop-logo { width: 80px; }
+    .comp-title { font-size: 21px; font-weight: bold; margin-bottom: 2px; }
+    .comp-desc { font-size: 12.5px; line-height: 1.35; margin-bottom: 2px; }
+    .kop-line { margin: 6px 0 30px; }
+    .line-thick { height: 3.5px; background: #000; margin-bottom: 2px; }
+    .line-thin { height: 1px; background: #000; }
+    .letter-heading { text-align: center; margin-bottom: 25px; }
+    .title-text { font-size: 16px; font-weight: bold; text-decoration: underline; }
+    .top-date { text-align: right; margin-bottom: 25px; }
+    .recipient-box { margin-bottom: 25px; line-height: 1.45; }
+    .content-p { margin-bottom: 14px; text-align: justify; }
+    .data-table { width: 100%; border-collapse: collapse; margin: 15px 0 20px; }
+    .data-table th, .data-table td { border: 1px solid #000; padding: 6px 10px; }
+    .data-table th { font-weight: bold; text-align: center; }
+    .terms-list { margin: 10px 0 16px 20px; padding-left: 10px; }
+    .terms-list li { margin-bottom: 8px; text-align: justify; }
+    .signature-wrapper { display: flex; justify-content: flex-end; margin-top: 40px; }
+    .sign-block { width: 290px; text-align: center; position: relative; }
+    .stamp-sign-area { height: 110px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .official-stamp { position: absolute; left: 15px; top: 0; z-index: 2; }
+    .signature-svg { position: absolute; right: 40px; top: 25px; z-index: 1; }
+  </style>
+</head>
+<body>
+  <div class="kop">
+    <div class="kop-logo">
+      <svg width="75" height="75" viewBox="0 0 100 100" fill="none">
+        <path d="M50 8C26.8 8 8 26.8 8 50C8 73.2 26.8 92 50 92C63.2 92 74.9 85.9 82.6 76.4L50 50L82.6 23.6C74.9 14.1 63.2 8 50 8Z" fill="#111827"/>
+        <path d="M50 22C34.5 22 22 34.5 22 50C22 65.5 34.5 78 50 78C58.8 78 66.5 74 71.7 67.8L50 50L71.7 32.2C66.5 26 58.8 22 50 22Z" fill="#ffffff"/>
+        <circle cx="50" cy="50" r="13" fill="#111827"/>
+      </svg>
+    </div>
+    <div>
+      <h1 class="comp-title">PT. CIKARA BAKTI NUSANTARA</h1>
+      <p class="comp-desc">Alamat Kantor Sekertariat: Perum Cipta Graha Mandiri, Blok A, No. 23,<br>Sukarindik, Bungursari, Tasikmalaya, Jawa Barat (46151)</p>
+      <p class="comp-desc">Nomor Telepon : 085317563748 E-Mail : <span style="text-decoration: underline; color: #0000EE;">cikarastudio@gmail.com</span></p>
+    </div>
+  </div>
+  <div class="kop-line"><div class="line-thick"></div><div class="line-thin"></div></div>
+
+  <div class="letter-heading">
+    <h2 class="title-text">BALASAN KERJA MAGANG</h2>
+    <p>No: {{NOMOR_SURAT_BALASAN}}</p>
+  </div>
+
+  <p class="top-date">{{KOTA_PENERBITAN}}, {{TANGGAL_CETAK}}</p>
+
+  <div class="recipient-box">
+    <p>Yang terhormat,</p>
+    <p style="margin-top: 5px;"><strong>{{INSTANSI}}</strong><br>{{ALAMAT_INSTANSI}}<br>{{KOTA_INSTANSI}}</p>
+  </div>
+
+  <p class="content-p">
+    Menjawab surat Wakil Dekan Bidang Akademik dan Kemahasiswaan Fakultas Teknik {{INSTANSI}} No. {{NOMOR_SURAT_PERMOHONAN}}, tanggal {{TANGGAL_SURAT_PERMOHONAN}} perihal : Permohonan Kerja Praktek / Magang, untuk mahasiswa :
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 140px;">NPM</th>
+        <th>Nama</th>
+        <th style="width: 160px;">Jurusan</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: center;">{{NIM_NIS}}</td>
+        <td><strong>{{NAMA_PESERTA}}</strong></td>
+        <td>{{JURUSAN}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="content-p">
+    Bersama ini disampaikan bahwa PT. Cikara Bakti Nusantara menyampaikan ucapan terima kasih atas kepercayaan menjadi tempat kegiatan penelitian Kerja Praktek Akademisi {{INSTANSI}} dan menyetujui permohonan dengan syarat dan ketentuan sebagai berikut :
+  </p>
+
+  <ol class="terms-list">
+    <li>Pelaksanaan kegiatan Magang/Kerja Praktek Berlaku tmt. {{TANGGAL_MULAI}} s/d {{TANGGAL_SELESAI}} ({{TOTAL_HARI_KERJA}} Hari Kerja), waktu jam kerja kantor PT. Cikara Bakti Nusantara.</li>
+    <li>Selama melakukan kegiatan Magang/Praktek Kerja Lapangan mahasiswa wajib mematuhi tata tertib yang berlaku di kantor PT. Cikara Bakti Nusantara.</li>
+    <li>Membuat laporan (topik/tema) dan mempresentasikan serta memberi masukan untuk perbaikan PT. Cikara Bakti Nusantara selama kegiatan magang kepada pembimbing dan segala biaya yang timbul menjadi beban mahasiswa yang bersangkutan.</li>
+  </ol>
+
+  <p class="content-p">
+    Demikian surat balasan ini disampaikan, atas perhatian dan kepercayaan Bapak/Ibu kami ucapkan terima kasih.
+  </p>
+
+  <div class="signature-wrapper">
+    <div class="sign-block">
+      <p>Direktur<br><strong>PT. Cikara Bakti Nusantara</strong></p>
+      <div class="stamp-sign-area">
+        <svg width="120" height="120" viewBox="0 0 200 200" class="official-stamp">
+          <g transform="rotate(-8 100 100)">
+            <circle cx="100" cy="100" r="92" stroke="#1d4ed8" stroke-width="4" fill="none" opacity="0.88"/>
+            <circle cx="100" cy="100" r="85" stroke="#1d4ed8" stroke-width="1.6" fill="none" opacity="0.88"/>
+            <circle cx="100" cy="100" r="54" stroke="#1d4ed8" stroke-width="1.8" fill="none" opacity="0.88"/>
+            <path d="M100 68 C82 68 68 82 68 100 C68 118 82 132 100 132 C110 132 119 127 125 120 L100 100 L125 80 C119 73 110 68 100 68 Z" fill="#1d4ed8" opacity="0.85"/>
+            <circle cx="100" cy="100" r="9" fill="#ffffff"/><circle cx="100" cy="100" r="5" fill="#1d4ed8" opacity="0.85"/>
+            <path id="stampPB1" d="M 28,100 A 72,72 0 1,1 172,100" fill="none" />
+            <text fill="#1d4ed8" font-family="'Times New Roman', serif" font-size="14.5" font-weight="bold" letter-spacing="2.2" opacity="0.9">
+              <textPath href="#stampPB1" startOffset="50%" text-anchor="middle">PT. CIKARA BAKTI NUSANTARA</textPath>
+            </text>
+            <path id="stampPB2" d="M 170,105 A 72,72 0 0,1 30,105" fill="none" />
+            <text fill="#1d4ed8" font-family="'Times New Roman', serif" font-size="14" font-weight="bold" letter-spacing="3" opacity="0.9">
+              <textPath href="#stampPB2" startOffset="50%" text-anchor="middle">TASIKMALAYA</textPath>
+            </text>
+          </g>
+        </svg>
+        <svg width="120" height="70" viewBox="0 0 160 90" class="signature-svg">
+          <path d="M20 65 Q45 15 70 50 T120 40 Q135 30 145 60" stroke="#000000" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.85"/>
+          <path d="M50 45 Q70 65 95 35" stroke="#000000" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.8"/>
+        </svg>
+      </div>
+      <p>{{NAMA_MENTOR}}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+      });
+    }
+    if (btnCert) {
+      btnCert.addEventListener('click', function() {
+        docTypeSelect.value = 'CERTIFICATE';
+        textarea.value = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate - {{NAMA_PESERTA}}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Montserrat:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: #f1f5f9; color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; font-family: 'Plus Jakarta Sans', Arial, sans-serif; }
+    .cert-container { width: 1060px; height: 748px; background: #ffffff; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.15); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 60px 70px 40px; }
+    .cert-border { position: absolute; top: 18px; left: 18px; right: 18px; bottom: 18px; border: 1.5px solid #d99b26; pointer-events: none; z-index: 10; }
+    .bg-graphics { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    .company-brand { position: absolute; top: 30px; left: 35px; display: flex; align-items: center; gap: 12px; z-index: 20; }
+    .company-logo-svg { width: 44px; height: 44px; flex-shrink: 0; }
+    .company-text { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; line-height: 1.25; letter-spacing: 0.5px; text-transform: uppercase; }
+    .ribbon-badge { position: absolute; top: 24px; right: 50px; z-index: 20; display: flex; flex-direction: column; align-items: center; }
+    .badge-starburst { width: 66px; height: 66px; background: radial-gradient(circle, #fcd34d 0%, #e5a823 60%, #b47b16 100%); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 0 0 2px #fef08a, inset 0 0 0 4px #b47b16; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 2; }
+    .badge-star { color: #ffffff; font-size: 16px; margin-bottom: -1px; }
+    .badge-text { color: #ffffff; font-family: 'Montserrat', sans-serif; font-size: 7.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; }
+    .ribbon-tails { display: flex; gap: 4px; margin-top: -12px; z-index: 1; }
+    .ribbon-tail { width: 18px; height: 28px; background: linear-gradient(180deg, #d99b26 0%, #b47b16 100%); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%); }
+    .cert-content { position: relative; z-index: 15; text-align: center; width: 100%; max-width: 820px; margin-top: 15px; }
+    .cert-main-title { font-family: 'Montserrat', sans-serif; font-size: 44px; font-weight: 800; color: #0284c7; letter-spacing: 4px; line-height: 1; margin-bottom: 6px; text-transform: uppercase; }
+    .cert-sub-title { font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 600; color: #0369a1; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 22px; }
+    .cert-presented-to { font-family: 'Montserrat', sans-serif; font-size: 12.5px; font-weight: 600; color: #0369a1; letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 12px; }
+    .cert-recipient-name { font-family: 'Great Vibes', 'Alex Brush', cursive; font-size: 50px; color: #0f172a; line-height: 1.25; padding: 0 30px; display: inline-block; margin-bottom: 6px; }
+    .recipient-divider { width: 280px; height: 1px; background: linear-gradient(90deg, transparent, #94a3b8, transparent); margin: 0 auto 16px; }
+    .cert-body-desc { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; color: #0369a1; line-height: 1.65; max-width: 760px; margin: 0 auto 28px; }
+    .cert-body-desc p { margin-bottom: 3px; }
+    .cert-body-desc strong { color: #0f172a; font-weight: 600; }
+    .cert-footer-row { display: flex; justify-content: space-around; align-items: flex-end; width: 100%; max-width: 700px; margin: 0 auto; }
+    .footer-col { text-align: center; width: 260px; }
+    .footer-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 600; color: #0f172a; margin-bottom: 6px; }
+    .footer-line { width: 100%; height: 2px; background: #38bdf8; margin-bottom: 8px; }
+    .footer-label { font-family: 'Montserrat', sans-serif; font-size: 11.5px; font-weight: 600; color: #0369a1; letter-spacing: 1.5px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="cert-container">
+    <div class="cert-border"></div>
+    <svg class="bg-graphics" viewBox="0 0 1060 748" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <polygon points="0,0 480,0 260,260 0,180" fill="#cbd5e1" opacity="0.6"/>
+      <polygon points="0,0 450,0 210,250 0,225" fill="#d99b26"/>
+      <polygon points="0,0 420,0 180,240 0,140" fill="#2572ca"/>
+      <polygon points="0,0 350,0 0,150" fill="#132b50"/>
+      <polygon points="620,0 1060,0 1060,85 700,45" fill="#2572ca"/>
+      <polygon points="760,0 1060,0 1060,50" fill="#132b50"/>
+      <polygon points="0,620 480,700 0,748" fill="#2572ca"/>
+      <polygon points="0,675 320,748 0,748" fill="#132b50"/>
+      <polygon points="600,748 1060,530 1060,748" fill="#cbd5e1" opacity="0.5"/>
+      <polygon points="660,748 1060,560 1060,748" fill="#2572ca"/>
+      <polygon points="700,748 1060,600 1060,748" fill="#d99b26"/>
+      <polygon points="780,748 1060,670 1060,748" fill="#132b50"/>
+    </svg>
+    <div class="company-brand">
+      <div class="company-logo-svg">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 6C25.7 6 6 25.7 6 50C6 74.3 25.7 94 50 94C63.8 94 76.1 87.7 84.1 77.8L50 50L84.1 22.2C76.1 12.3 63.8 6 50 6Z" fill="#ffffff"/>
+          <circle cx="50" cy="50" r="14" fill="#132b50"/>
+        </svg>
+      </div>
+      <div class="company-text">PT. CIKARA<br>BAKTI NUSANTARA</div>
+    </div>
+    <div class="ribbon-badge">
+      <div class="badge-starburst"><span class="badge-star">★</span><span class="badge-text">INTERNSHIP</span></div>
+      <div class="ribbon-tails"><div class="ribbon-tail"></div><div class="ribbon-tail"></div></div>
+    </div>
+    <div class="cert-content">
+      <h1 class="cert-main-title">CERTIFICATE</h1>
+      <h2 class="cert-sub-title">OF APPRECIATION</h2>
+      <p class="cert-presented-to">IS PROUDLY PRESENTED TO</p>
+      <div class="cert-recipient-name">{{NAMA_PESERTA}}</div>
+      <div class="recipient-divider"></div>
+      <div class="cert-body-desc">
+        <p>Has participated in the Vocational Apprenticeship Program in the field of <strong>{{BIDANG_MAGANG}}</strong> at <strong>PT. Cikara Bakti Nusantara</strong>.</p>
+        <p>The apprenticeship program was conducted from <strong>{{TANGGAL_MULAI_EN}}</strong> to <strong>{{TANGGAL_SELESAI_EN}}</strong>.</p>
+        <p>During the program, the participant has been declared competent as a Junior Game Developer in accordance with the competency standards of Cikara.</p>
+      </div>
+      <div class="cert-footer-row">
+        <div class="footer-col"><div class="footer-value">{{TANGGAL_SELESAI_DOT}}</div><div class="footer-line"></div><div class="footer-label">DATE</div></div>
+        <div class="footer-col"><div class="footer-value">{{NAMA_CHIEF}}</div><div class="footer-line"></div><div class="footer-label">{{JABATAN_CHIEF}}</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+      });
+    }
+  });
+</script>

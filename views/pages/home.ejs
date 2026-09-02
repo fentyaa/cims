@@ -1,0 +1,167 @@
+<!-- Halaman Home - Internship Management System (UX Refinement) -->
+
+<!-- 1. HERO SECTION -->
+<div class="card public-hero-card border shadow-sm mb-5">
+  <div class="card-body p-4 p-md-5 text-center">
+    <!-- Brand Badge -->
+    <div class="mb-3">
+      <span class="public-badge-brand">
+        <i class="bi bi-building-gear"></i>
+        <span>Internship Management System</span>
+      </span>
+    </div>
+
+    <!-- Main Headline -->
+    <h1 class="public-hero-title mb-3">
+      Kelola Program Magang Lebih <span class="text-primary">Terstruktur & Transparan</span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="lead text-muted mb-4 mx-auto" style="max-width: 680px;">
+      <%= typeof tagline !== 'undefined' && tagline ? tagline : 'Platform terintegrasi untuk Mahasiswa & PKL SMK dalam mengelola presensi harian, jurnal logbook, kalender kegiatan, dan evaluasi capaian secara efisien.' %>
+    </p>
+
+    <!-- Informative Feature Highlights (Replacing Marketing CTAs) -->
+    <div class="d-flex flex-wrap justify-content-center align-items-center gap-2 gap-md-4 pt-3 border-top text-muted small">
+      <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-check2-circle text-success fw-bold fs-6"></i>
+        <span>Presensi WFO & WFH</span>
+      </span>
+      <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-check2-circle text-success fw-bold fs-6"></i>
+        <span>Jurnal Logbook Digital</span>
+      </span>
+      <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-check2-circle text-success fw-bold fs-6"></i>
+        <span>Kalender Kegiatan Magang</span>
+      </span>
+      <span class="d-flex align-items-center gap-2">
+        <i class="bi bi-check2-circle text-success fw-bold fs-6"></i>
+        <span>Evaluasi Capaian Terukur</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- 2. ROLE VALUE PROPOSITION (2 COLUMNS) -->
+<div class="row g-4 mb-5">
+  <!-- Peserta Magang Role Card -->
+  <div class="col-12 col-lg-6">
+    <div class="public-role-card h-100">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="public-feature-icon bg-success bg-opacity-10 text-success mb-0">
+          <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0 text-dark">Untuk Peserta Magang</h5>
+          <small class="text-muted">Mahasiswa Perguruan Tinggi & Siswa PKL SMK</small>
+        </div>
+      </div>
+      <p class="text-muted small mb-3">
+        Pengalaman magang yang terstruktur dengan pencatatan digital harian yang mudah diakses dari perangkat apapun.
+      </p>
+      <ul class="list-unstyled d-flex flex-column gap-2 small text-muted mb-0">
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-success mt-1 flex-shrink-0"></i>
+          <span><strong>Presensi Harian Presisi</strong>: Catat kehadiran WFO, WFH, Izin, atau Sakit dengan keterangan lengkap.</span>
+        </li>
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-success mt-1 flex-shrink-0"></i>
+          <span><strong>Jurnal Logbook Interaktif</strong>: Laporkan rincian aktivitas harian, kendala, dan rencana tindak lanjut.</span>
+        </li>
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-success mt-1 flex-shrink-0"></i>
+          <span><strong>Kalender Kerja Terpadu</strong>: Pantau jadwal hari aktif kerja, hari libur nasional, dan masa magang.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Mentor Pembimbing Role Card -->
+  <div class="col-12 col-lg-6">
+    <div class="public-role-card h-100">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="public-feature-icon bg-primary bg-opacity-10 text-primary mb-0">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div>
+          <h5 class="fw-bold mb-0 text-dark">Untuk Mentor Pembimbing</h5>
+          <small class="text-muted">Pembimbing Lapangan & HR Management</small>
+        </div>
+      </div>
+      <p class="text-muted small mb-3">
+        Dashboard kendali terpadu untuk memantau kehadiran, meninjau laporan harian, dan memberikan penilaian berkala.
+      </p>
+      <ul class="list-unstyled d-flex flex-column gap-2 small text-muted mb-0">
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
+          <span><strong>Verifikasi & Persetujuan Akun</strong>: Tinjau dan setujui pendaftaran calon peserta magang dengan cepat.</span>
+        </li>
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
+          <span><strong>Review Logbook Terpusat</strong>: Berikan umpan balik, catatan perbaikan, dan status review langsung.</span>
+        </li>
+        <li class="d-flex align-items-start gap-2">
+          <i class="bi bi-check-circle-fill text-primary mt-1 flex-shrink-0"></i>
+          <span><strong>Evaluasi Kompetensi</strong>: Lembar penilaian objektif berdasarkan disiplin, inisiatif, kerja tim, dan skill.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 3. INTERNSHIP WORKFLOW (3 STEPS) -->
+<div class="mb-5">
+  <div class="text-center mb-4">
+    <h5 class="fw-bold text-dark mb-1">Alur Pelaksanaan Magang Terpadu</h5>
+    <p class="text-muted small mb-0">Tiga langkah mudah dalam manajemen program magang di IMS</p>
+  </div>
+
+  <div class="row g-3">
+    <!-- Step 1 -->
+    <div class="col-12 col-md-4">
+      <div class="public-workflow-card h-100">
+        <div class="public-step-number bg-primary bg-opacity-10 text-primary">1</div>
+        <h6 class="fw-bold text-dark mb-2">Pendaftaran & Persetujuan</h6>
+        <p class="text-muted small mb-0">
+          Peserta mendaftar dengan melengkapi data institusi dan periode magang, kemudian diverifikasi oleh mentor pembimbing.
+        </p>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="col-12 col-md-4">
+      <div class="public-workflow-card h-100">
+        <div class="public-step-number bg-warning bg-opacity-15 text-warning-emphasis">2</div>
+        <h6 class="fw-bold text-dark mb-2">Aktivitas & Logbook Harian</h6>
+        <p class="text-muted small mb-0">
+          Peserta mengisi presensi setiap hari kerja dan menyusun jurnal logbook yang ditinjau secara berkala oleh mentor.
+        </p>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="col-12 col-md-4">
+      <div class="public-workflow-card h-100">
+        <div class="public-step-number bg-success bg-opacity-15 text-success">3</div>
+        <h6 class="fw-bold text-dark mb-2">Evaluasi & Rekapitulasi</h6>
+        <p class="text-muted small mb-0">
+          Mentor menyusun lembar evaluasi akhir, menghitung capaian nilai kompetensi, dan menerbitkan rekapitulasi magang.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. SECURITY & TRUST FOOTER BANNER (PURE INFORMATIVE) -->
+<div class="p-3 p-md-4 rounded-4 border card shadow-sm d-flex flex-column flex-md-row align-items-center gap-3 text-center text-md-start">
+  <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+    <i class="bi bi-shield-lock-fill fs-5"></i>
+  </div>
+  <div>
+    <h6 class="fw-bold mb-1 text-dark">Sistem Terenkripsi & Terlindungi</h6>
+    <p class="text-muted small mb-0">
+      Akses data program magang terlindungi dengan autentikasi aman, proteksi CSRF, dan kontrol akses berbasis peran (Role-Based Access Control).
+    </p>
+  </div>
+</div>

@@ -1,0 +1,366 @@
+<!-- Intern Presensi Page (FASE 2) -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="bi bi-calendar-check-fill me-2 text-primary"></i>Presensi Harian
+    </h5>
+    <p class="text-muted small mb-0">Catat kehadiran harian Anda (WFO, WFH, Izin, Sakit)</p>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Status Card & Action -->
+<div class="row g-3 mb-4">
+  <!-- Left Column: Form / Status Presensi Hari Ini -->
+  <div class="col-12 col-lg-7">
+    <div class="card border-0 shadow-sm rounded-4 h-100" style="border: 1px solid #e2e8f0 !important;">
+      <div class="card-body p-3 p-md-4">
+        <% if (!todayPresence) { %>
+          <% if (typeof todayRedDate !== 'undefined' && todayRedDate && todayRedDate.isRedDate) { %>
+            <!-- Banner Tanggal Merah / Libur Resmi -->
+            <div class="alert border-0 rounded-4 p-3 mb-3 d-flex align-items-center gap-3" style="background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444 !important;">
+              <div class="rounded-circle bg-danger bg-opacity-15 text-danger d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
+                <i class="bi bi-calendar-x fs-4"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1 text-danger">🚩 Hari Ini Libur (<%= todayRedDate.label %>)</h6>
+                <p class="small text-muted mb-0">Hari ini adalah tanggal merah. Peserta magang <strong>libur</strong> dan tidak diwajibkan melakukan presensi.</p>
+              </div>
+            </div>
+          <% } %>
+
+          <!-- Kondisi: Belum Presensi Hari Ini -->
+          <div class="d-flex align-items-center gap-3 pb-3 mb-3 border-bottom">
+            <div class="rounded-circle bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; flex-shrink: 0;">
+              <i class="bi bi-calendar-plus fs-4"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-0 text-dark">Presensi Hari Ini</h6>
+              <span class="text-muted small">
+                <i class="bi bi-calendar3 me-1"></i><%= new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+              </span>
+            </div>
+          </div>
+
+          <!-- Form Presensi Harian -->
+          <form action="/intern/presensi" method="POST">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-dark mb-2">Pilih Status Kehadiran <span class="text-danger">*</span></label>
+
+              <% if (typeof participantType !== 'undefined' && participantType === 'SMK') { %>
+                <!-- Khusus Siswa PKL SMK: WFO, Izin, Sakit (WFH Tidak Diperkenankan) -->
+                <div class="p-2 px-3 mb-3 rounded-3" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25);">
+                  <small class="text-primary fw-semibold d-block" style="font-size: 0.775rem;">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Ketentuan Siswa PKL SMK:</strong> Peserta PKL SMK wajib hadir WFO di kantor. Jika terdapat kendala/halangan, silakan pilih <strong>Izin</strong> atau <strong>Sakit</strong>.
+                  </small>
+                </div>
+
+                <div class="row g-2">
+                  <!-- WFO Selection Card -->
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="status" id="statusWFO" value="WFO" checked required>
+                    <label class="presence-select-card presence-card-wfo w-100" for="statusWFO">
+                      <span class="fs-4 mb-1">🏢</span>
+                      <span class="fw-bold small text-dark">WFO</span>
+                      <span class="badge bg-success bg-opacity-15 text-success rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Hadir Kantor</span>
+                    </label>
+                  </div>
+
+                  <!-- IZIN Selection Card -->
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="status" id="statusIZIN" value="IZIN" required>
+                    <label class="presence-select-card presence-card-izin w-100" for="statusIZIN">
+                      <span class="fs-4 mb-1">📋</span>
+                      <span class="fw-bold small text-dark">Izin</span>
+                      <span class="badge bg-warning bg-opacity-20 text-dark rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Ada Kendala</span>
+                    </label>
+                  </div>
+
+                  <!-- SAKIT Selection Card -->
+                  <div class="col-4">
+                    <input type="radio" class="btn-check" name="status" id="statusSAKIT" value="SAKIT" required>
+                    <label class="presence-select-card presence-card-sakit w-100" for="statusSAKIT">
+                      <span class="fs-4 mb-1">🏥</span>
+                      <span class="fw-bold small text-dark">Sakit</span>
+                      <span class="badge bg-danger bg-opacity-15 text-danger rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Tidak Aktif</span>
+                    </label>
+                  </div>
+                </div>
+              <% } else { %>
+                <!-- Khusus Mahasiswa Kuliah: WFO, WFH, Izin, Sakit -->
+                <div class="row g-2">
+                  <!-- WFO Selection Card -->
+                  <div class="col-6 col-sm-3">
+                    <input type="radio" class="btn-check" name="status" id="statusWFO" value="WFO" checked required>
+                    <label class="presence-select-card presence-card-wfo w-100" for="statusWFO">
+                      <span class="fs-4 mb-1">🏢</span>
+                      <span class="fw-bold small text-dark">WFO</span>
+                      <span class="badge bg-success bg-opacity-15 text-success rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Hari Aktif</span>
+                    </label>
+                  </div>
+
+                  <!-- WFH Selection Card -->
+                  <div class="col-6 col-sm-3">
+                    <input type="radio" class="btn-check" name="status" id="statusWFH" value="WFH" required>
+                    <label class="presence-select-card presence-card-wfh w-100" for="statusWFH">
+                      <span class="fs-4 mb-1">🏠</span>
+                      <span class="fw-bold small text-dark">WFH</span>
+                      <span class="badge bg-info bg-opacity-15 text-info rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Hari Aktif</span>
+                    </label>
+                  </div>
+
+                  <!-- IZIN Selection Card -->
+                  <div class="col-6 col-sm-3">
+                    <input type="radio" class="btn-check" name="status" id="statusIZIN" value="IZIN" required>
+                    <label class="presence-select-card presence-card-izin w-100" for="statusIZIN">
+                      <span class="fs-4 mb-1">📋</span>
+                      <span class="fw-bold small text-dark">Izin</span>
+                      <span class="badge bg-warning bg-opacity-20 text-dark rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Tidak Aktif</span>
+                    </label>
+                  </div>
+
+                  <!-- SAKIT Selection Card -->
+                  <div class="col-6 col-sm-3">
+                    <input type="radio" class="btn-check" name="status" id="statusSAKIT" value="SAKIT" required>
+                    <label class="presence-select-card presence-card-sakit w-100" for="statusSAKIT">
+                      <span class="fs-4 mb-1">🏥</span>
+                      <span class="fw-bold small text-dark">Sakit</span>
+                      <span class="badge bg-danger bg-opacity-15 text-danger rounded-pill px-2 py-0 mt-1" style="font-size: 0.65rem;">Tidak Aktif</span>
+                    </label>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+
+            <!-- Keterangan / Alasan -->
+            <div class="mb-3">
+              <label for="notes" class="form-label fw-semibold small text-dark">Keterangan / Alasan <span class="text-muted fw-normal">(Opsional)</span></label>
+              <textarea
+                class="form-control rounded-3"
+                id="notes"
+                name="notes"
+                rows="2"
+                placeholder="Tambahkan catatan jika diperlukan (misal: kendala, alasan Izin / Sakit — surat dokter bersifat opsional)..."
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 rounded-3 fw-semibold py-2">
+              <i class="bi bi-check-circle-fill me-2"></i>Simpan Presensi Hari Ini
+            </button>
+          </form>
+        <% } else { %>
+          <!-- Kondisi: Sudah Presensi Hari Ini -->
+          <div class="text-center py-3">
+            <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center p-3 mb-2" style="width: 56px; height: 56px;">
+              <i class="bi bi-check-circle-fill fs-2"></i>
+            </div>
+            <h6 class="fw-bold mb-1 text-success">Presensi Hari Ini Sudah Tercatat</h6>
+            <p class="text-muted small mb-3">
+              Tanggal: <strong><%= new Date(todayPresence.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %></strong>
+            </p>
+
+            <div class="mb-3">
+              <% if (todayPresence.status === 'WFO') { %>
+                <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill fs-6 px-4 py-2">
+                  🏢 WFO (Work From Office) — <span class="fw-normal">Hari Aktif</span>
+                </span>
+              <% } else if (todayPresence.status === 'WFH') { %>
+                <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill fs-6 px-4 py-2">
+                  🏠 WFH (Work From Home) — <span class="fw-normal">Hari Aktif</span>
+                </span>
+              <% } else if (todayPresence.status === 'IZIN') { %>
+                <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill fs-6 px-4 py-2">
+                  📋 Izin — <span class="fw-normal">Bukan Hari Aktif</span>
+                </span>
+              <% } else if (todayPresence.status === 'SAKIT') { %>
+                <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill fs-6 px-4 py-2">
+                  🏥 Sakit — <span class="fw-normal">Bukan Hari Aktif</span>
+                </span>
+              <% } %>
+            </div>
+
+            <% if (todayPresence.notes) { %>
+              <div class="p-3 bg-light border rounded-3 text-start small mb-0 mt-3">
+                <strong class="text-dark"><i class="bi bi-chat-left-text me-1 text-primary"></i>Keterangan:</strong>
+                <p class="mb-0 mt-1 text-secondary"><%= todayPresence.notes %></p>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Info Ketentuan & Gamification Micro-Hint -->
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 shadow-sm rounded-4 h-100" style="border: 1px solid #e2e8f0 !important;">
+      <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-between">
+        <div>
+          <h6 class="fw-bold mb-3 text-dark">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i>Ketentuan Presensi
+          </h6>
+          <ul class="list-unstyled small mb-0">
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill text-success mt-1"></i>
+              <div><strong>WFO & WFH:</strong> Dihitung sebagai <strong>Hari Aktif</strong> kehadiran magang.</div>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-info-circle-fill text-primary mt-1"></i>
+              <div><strong>Kebijakan WFH:</strong> WFH hanya diperuntukkan bagi <strong>Mahasiswa Kuliah</strong>. Siswa <strong>PKL SMK</strong> tidak diperkenankan WFH dan wajib hadir WFO.</div>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-dash-circle-fill text-warning mt-1"></i>
+              <div><strong>Izin & Sakit:</strong> <strong>Bukan Hari Aktif</strong>. Jika siswa SMK/Mahasiswa ada kendala atau sakit, silakan pilih opsi ini (keterangan & surat dokter bersifat <strong>opsional</strong>).</div>
+            </li>
+            <li class="mb-2 d-flex align-items-start gap-2">
+              <i class="bi bi-shield-check text-primary mt-1"></i>
+              <div>Setiap peserta hanya dapat mengisi <strong>1 kali presensi per hari</strong>.</div>
+            </li>
+            <li class="mb-0 d-flex align-items-start gap-2">
+              <i class="bi bi-calendar-event text-secondary mt-1"></i>
+              <div>Presensi berlaku pada hari kerja resmi (Senin s.d. Sabtu).</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Subtle Gamification Hint -->
+        <div class="p-2 px-3 mt-3 rounded-3" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.2);">
+          <small class="fw-semibold d-block" style="color: #d97706; font-size: 0.775rem;">
+            💡 <strong>Tips Keaktifan:</strong> Kehadiran tepat waktu di kantor / WFH (khusus mahasiswa) menjaga konsistensi dan performa magang Anda.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Riwayat Presensi -->
+<div class="card border-0 shadow-sm rounded-4" style="border: 1px solid #e2e8f0 !important;">
+  <div class="card-header bg-transparent py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <h6 class="fw-bold mb-0 text-dark">
+      <i class="bi bi-clock-history me-2 text-primary"></i>Riwayat Presensi
+    </h6>
+
+    <!-- Filter Pills (Scrollable on mobile) -->
+    <div class="history-filter-scroll">
+      <a href="/intern/presensi?filter=today" class="btn btn-sm rounded-pill px-3 <%= currentFilter === 'today' ? 'btn-primary' : 'btn-outline-secondary' %>" style="font-size: 0.775rem;">
+        Hari Ini
+      </a>
+      <a href="/intern/presensi?filter=week" class="btn btn-sm rounded-pill px-3 <%= currentFilter === 'week' ? 'btn-primary' : 'btn-outline-secondary' %>" style="font-size: 0.775rem;">
+        Minggu Ini
+      </a>
+      <a href="/intern/presensi?filter=month" class="btn btn-sm rounded-pill px-3 <%= currentFilter === 'month' ? 'btn-primary' : 'btn-outline-secondary' %>" style="font-size: 0.775rem;">
+        Bulan Ini
+      </a>
+      <a href="/intern/presensi?filter=all" class="btn btn-sm rounded-pill px-3 <%= currentFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary' %>" style="font-size: 0.775rem;">
+        Semua
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <% if (history.length === 0) { %>
+      <div class="text-center py-5">
+        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center p-3 mb-2" style="width: 56px; height: 56px;">
+          <i class="bi bi-inbox text-muted fs-3"></i>
+        </div>
+        <p class="text-muted small mt-1 mb-0">Belum ada data riwayat presensi untuk periode ini.</p>
+      </div>
+    <% } else { %>
+      <!-- Desktop: Modern Table -->
+      <div class="d-none d-md-block">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4 text-muted small fw-bold">Tanggal</th>
+                <th class="text-muted small fw-bold">Status Presensi</th>
+                <th class="text-muted small fw-bold">Kategori Hari</th>
+                <th class="pe-4 text-muted small fw-bold">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% history.forEach(p => { %>
+                <tr>
+                  <td class="ps-4 fw-semibold text-dark">
+                    <%= new Date(p.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }) %>
+                  </td>
+                  <td>
+                    <% if (p.status === 'WFO') { %>
+                      <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">🏢 WFO</span>
+                    <% } else if (p.status === 'WFH') { %>
+                      <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-3 py-1">🏠 WFH</span>
+                    <% } else if (p.status === 'IZIN') { %>
+                      <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1">📋 Izin</span>
+                    <% } else if (p.status === 'SAKIT') { %>
+                      <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-1">🏥 Sakit</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (p.status === 'WFO' || p.status === 'WFH') { %>
+                      <span class="badge bg-success text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">Hari Aktif</span>
+                    <% } else { %>
+                      <span class="badge bg-secondary text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">Bukan Hari Aktif</span>
+                    <% } %>
+                  </td>
+                  <td class="pe-4 text-muted small">
+                    <%= p.notes || '-' %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mobile: Responsive Card Layout -->
+      <div class="d-md-none p-3">
+        <% history.forEach(p => { %>
+          <div class="card border mb-2 rounded-3" style="background: #fbfcfe;">
+            <div class="card-body p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong class="small text-dark">
+                  <%= new Date(p.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) %>
+                </strong>
+                <div>
+                  <% if (p.status === 'WFO') { %>
+                    <span class="badge bg-success bg-opacity-15 text-success rounded-pill px-2 py-1">🏢 WFO</span>
+                  <% } else if (p.status === 'WFH') { %>
+                    <span class="badge bg-info bg-opacity-15 text-info rounded-pill px-2 py-1">🏠 WFH</span>
+                  <% } else if (p.status === 'IZIN') { %>
+                    <span class="badge bg-warning bg-opacity-15 text-warning rounded-pill px-2 py-1">📋 Izin</span>
+                  <% } else if (p.status === 'SAKIT') { %>
+                    <span class="badge bg-danger bg-opacity-15 text-danger rounded-pill px-2 py-1">🏥 Sakit</span>
+                  <% } %>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center small text-muted">
+                <span>
+                  <i class="bi bi-tag me-1"></i><%= (p.status === 'WFO' || p.status === 'WFH') ? 'Hari Aktif' : 'Bukan Hari Aktif' %>
+                </span>
+                <% if (p.notes) { %>
+                  <span class="text-truncate ms-2" style="max-width: 140px;" title="<%= p.notes %>">
+                    <i class="bi bi-chat-left-text me-1"></i><%= p.notes %>
+                  </span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+</div>

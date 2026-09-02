@@ -1,0 +1,419 @@
+<!-- Mentor Kalender Magang Page (Compact Viewport-Friendly Design) -->
+<div class="card border-0 shadow-sm rounded-4 mb-3">
+  <div class="card-body p-3">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+      <!-- Title & Participant Selector -->
+      <div class="d-flex flex-wrap align-items-center gap-3 flex-grow-1">
+        <div>
+          <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
+            <i class="bi bi-calendar3 me-2 text-primary"></i>Kalender Magang
+          </h5>
+        </div>
+        <% if (participants.length > 0) { %>
+          <div style="min-width: 260px; max-width: 360px;" class="flex-grow-1">
+            <select
+              class="form-select form-select-sm rounded-3 shadow-none border-primary border-opacity-25"
+              onchange="window.location.href='/mentor/kalender?userId=' + this.value + '&year=<%= calendarData ? calendarData.year : '' %>&month=<%= calendarData ? calendarData.month : '' %>'"
+            >
+              <% participants.forEach(p => { %>
+                <option value="<%= p.id %>" <%= p.id === selectedUserId ? 'selected' : '' %>>
+                  <%= p.fullName %> (<%= p.participantType === 'UNIVERSITY' ? (p.university || 'Mahasiswa') : (p.schoolName || 'SMK') %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Month Navigation Controls -->
+      <% if (calendarData) { %>
+        <div class="d-flex align-items-center gap-2 align-self-stretch align-self-lg-auto justify-content-between justify-content-lg-end">
+          <div class="btn-group rounded-3 shadow-none" role="group">
+            <a href="/mentor/kalender?userId=<%= selectedUserId %>&year=<%= calendarData.navigation.prevYear %>&month=<%= calendarData.navigation.prevMonth %>" class="btn btn-outline-primary btn-sm px-2 py-1" title="Bulan Sebelumnya">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+            <span class="btn btn-outline-primary btn-sm fw-bold px-3 py-1 disabled text-dark opacity-100 bg-light">
+              <%= calendarData.monthName %> <%= calendarData.year %>
+            </span>
+            <a href="/mentor/kalender?userId=<%= selectedUserId %>&year=<%= calendarData.navigation.nextYear %>&month=<%= calendarData.navigation.nextMonth %>" class="btn btn-outline-primary btn-sm px-2 py-1" title="Bulan Berikutnya">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </div>
+          <a href="/mentor/kalender?userId=<%= selectedUserId %>&year=<%= calendarData.navigation.currentYear %>&month=<%= calendarData.navigation.currentMonth %>" class="btn btn-primary btn-sm rounded-3 px-2 py-1">
+            <i class="bi bi-calendar-event me-1"></i>Bulan Ini
+          </a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<% if (calendarData) { %>
+  <!-- Main Unified Calendar Card -->
+  <div class="card border-0 shadow-sm rounded-4 mb-3">
+    <!-- Header: Period & Quick KPI Pills -->
+    <div class="card-header bg-transparent py-2 px-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div class="small text-muted d-flex align-items-center gap-1">
+        <i class="bi bi-person-badge text-primary"></i>
+        <span>Periode:</span>
+        <% if (calendarData.hasStructuredDates) { %>
+          <strong class="text-dark">
+            <%= new Date(calendarData.startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) %> – <%= new Date(calendarData.endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+          </strong>
+        <% } else { %>
+          <span class="badge bg-light text-dark border small"><%= calendarData.user.internshipPeriod %></span>
+        <% } %>
+      </div>
+
+      <!-- Compact Stats Ribbon -->
+      <div class="d-flex flex-wrap align-items-center gap-1">
+        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 rounded-pill px-2 py-1" style="font-size: 0.725rem;">
+          🏢 WFO: <strong><%= calendarData.stats.wfoCount %></strong>
+        </span>
+        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 rounded-pill px-2 py-1" style="font-size: 0.725rem;">
+          🏠 WFH: <strong><%= calendarData.stats.wfhCount %></strong>
+        </span>
+        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-20 rounded-pill px-2 py-1" style="font-size: 0.725rem;">
+          📋 Izin/Skt: <strong><%= calendarData.stats.izinCount + calendarData.stats.sakitCount %></strong>
+        </span>
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 rounded-pill px-2 py-1" style="font-size: 0.725rem;">
+          📝 Logbook: <strong><%= calendarData.stats.logbookCount %></strong>
+        </span>
+      </div>
+    </div>
+
+    <!-- Calendar Body (Compact Grid) -->
+    <div class="card-body p-2 p-md-3">
+      <div class="calendar-wrapper">
+        <!-- 7 Kolom Header: Senin s.d. Minggu -->
+        <div class="calendar-header-row">
+          <div class="calendar-header-cell"><span class="day-name-full">Senin</span><span class="day-name-short">Sen</span></div>
+          <div class="calendar-header-cell"><span class="day-name-full">Selasa</span><span class="day-name-short">Sel</span></div>
+          <div class="calendar-header-cell"><span class="day-name-full">Rabu</span><span class="day-name-short">Rab</span></div>
+          <div class="calendar-header-cell"><span class="day-name-full">Kamis</span><span class="day-name-short">Kam</span></div>
+          <div class="calendar-header-cell"><span class="day-name-full">Jumat</span><span class="day-name-short">Jum</span></div>
+          <div class="calendar-header-cell"><span class="day-name-full">Sabtu</span><span class="day-name-short">Sab</span></div>
+          <div class="calendar-header-cell text-danger"><span class="day-name-full">Minggu (Libur)</span><span class="day-name-short">Min</span></div>
+        </div>
+
+        <!-- Grid Cells -->
+        <div class="calendar-grid">
+          <!-- Leading Blank Cells -->
+          <% for (let i = 0; i < calendarData.leadingBlanks; i++) { %>
+            <div class="calendar-cell blank-cell"></div>
+          <% } %>
+
+          <!-- Active Month Days -->
+          <% calendarData.days.forEach(d => { %>
+            <div
+              class="calendar-cell <%= d.isToday ? 'today-cell' : '' %> <%= d.isSunday ? 'sunday-cell' : '' %> <%= d.isHoliday ? 'holiday-cell' : '' %> <%= !d.inPeriod ? 'out-period-cell' : '' %>"
+              data-date-str="<%= d.dateStr %>"
+              onclick="showDayDetail('<%= d.dateStr %>')"
+              role="button"
+              tabindex="0"
+              aria-label="Detail tanggal <%= d.dateFormatted %>"
+            >
+              <div class="d-flex justify-content-between align-items-start">
+                <span class="day-number <%= d.isToday ? 'badge bg-primary text-white rounded-circle shadow-sm' : '' %> <%= (d.isSunday || d.isHoliday) ? 'text-danger' : '' %>">
+                  <%= d.day %>
+                </span>
+                <% if (d.hasLogbook) { %>
+                  <span class="logbook-indicator" title="Ada catatan logbook">📝</span>
+                <% } %>
+              </div>
+
+              <!-- Status Indicator -->
+              <div class="day-status-box">
+                <% if (!d.inPeriod) { %>
+                  <span class="day-status-badge badge-status-out">
+                    <span class="status-text-full">Di luar periode</span>
+                    <span class="status-text-short">-</span>
+                  </span>
+                <% } else if (d.isSunday) { %>
+                  <span class="day-status-badge badge-status-libur">
+                    <span class="status-text-full">Libur</span>
+                    <span class="status-text-short">Libur</span>
+                  </span>
+                <% } else if (d.isHoliday && d.status === 'HOLIDAY') { %>
+                  <span class="day-status-badge badge-status-holiday" title="<%= d.holidayName %>">
+                    <span class="status-text-full">🚩 <%= d.holidayName %></span>
+                    <span class="status-text-short">Libur</span>
+                  </span>
+                <% } else if (d.status === 'WFO') { %>
+                  <span class="day-status-badge badge-status-wfo">
+                    <span class="status-text-full">🏢 WFO</span>
+                    <span class="status-text-short">WFO</span>
+                  </span>
+                <% } else if (d.status === 'WFH') { %>
+                  <span class="day-status-badge badge-status-wfh">
+                    <span class="status-text-full">🏠 WFH</span>
+                    <span class="status-text-short">WFH</span>
+                  </span>
+                <% } else if (d.status === 'IZIN') { %>
+                  <span class="day-status-badge badge-status-izin">
+                    <span class="status-text-full">📋 Izin</span>
+                    <span class="status-text-short">Izin</span>
+                  </span>
+                <% } else if (d.status === 'SAKIT') { %>
+                  <span class="day-status-badge badge-status-sakit">
+                    <span class="status-text-full">🏥 Sakit</span>
+                    <span class="status-text-short">Sakit</span>
+                  </span>
+                <% } else if (d.isPastOrToday) { %>
+                  <span class="day-status-badge badge-status-unmarked">
+                    <span class="status-text-full">⚪ Belum Absen</span>
+                    <span class="status-text-short">⚪</span>
+                  </span>
+                <% } else { %>
+                  <span class="day-status-badge badge-status-out">-</span>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integrated Footer Legend -->
+    <div class="card-footer bg-light bg-opacity-50 py-2 px-3 border-top">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 text-muted" style="font-size: 0.725rem;">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <span class="fw-semibold text-dark"><i class="bi bi-info-circle me-1 text-primary"></i>Keterangan:</span>
+          <span><span class="badge bg-success bg-opacity-15 text-success border px-1 py-0">WFO</span> Hadir Kantor</span>
+          <span><span class="badge bg-info bg-opacity-15 text-info border px-1 py-0">WFH</span> Hadir Rumah</span>
+          <span><span class="badge bg-warning bg-opacity-15 text-dark border px-1 py-0">Izin/Sakit</span> Non-Aktif</span>
+          <span><span class="badge bg-danger bg-opacity-15 text-danger border px-1 py-0">🚩 Libur</span> Libur Nasional</span>
+          <span><span class="badge bg-secondary bg-opacity-10 text-secondary px-1 py-0">Minggu</span> Libur Akhir Pekan</span>
+          <span><span class="badge bg-light text-muted border px-1 py-0">⚪</span> Belum Absen</span>
+          <span>📝 Logbook Terisi</span>
+        </div>
+        <span class="text-secondary fst-italic">Klik tanggal untuk melihat detail</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Tanggal (Mentor View) -->
+  <div class="modal fade" id="dayDetailModal" tabindex="-1" aria-labelledby="dayDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow rounded-4">
+        <div class="modal-header border-0 pb-0">
+          <h6 class="modal-title fw-bold" id="modalDateTitle">Detail Tanggal</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Presensi Section -->
+          <div class="mb-4">
+            <label class="small text-muted fw-semibold mb-2 d-block">Status Presensi Peserta</label>
+            <div id="modalPresenceBox" class="p-3 bg-light rounded-3">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span id="modalPresenceBadge" class="badge fs-6 px-3 py-1"></span>
+                <span id="modalActiveDayBadge" class="badge rounded-pill"></span>
+              </div>
+              <div id="modalPresenceNotesWrapper" class="small text-muted mt-2" style="display: none;">
+                <strong>Keterangan:</strong> <span id="modalPresenceNotes"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logbook Section -->
+          <div class="mb-3">
+            <label class="small text-muted fw-semibold mb-2 d-block">Aktivitas Logbook Harian</label>
+            <div id="modalLogbookBox" class="p-3 bg-light rounded-3">
+              <div id="modalLogbookEmpty" class="text-muted small">
+                <i class="bi bi-journal-x me-1"></i>Peserta belum mengisi logbook untuk tanggal ini.
+              </div>
+              <div id="modalLogbookContent" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold small text-primary"><i class="bi bi-list-check me-1"></i>Aktivitas:</span>
+                  <span id="modalLogbookStatusBadge" class="badge rounded-pill"></span>
+                </div>
+                <p id="modalLogbookActivity" class="small mb-2 bg-white p-2 rounded border"></p>
+
+                <div id="modalLogbookObstacleWrapper" style="display: none;" class="mb-2">
+                  <span class="fw-bold small text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Kendala:</span>
+                  <p id="modalLogbookObstacle" class="small mb-0 bg-white p-2 rounded border text-secondary"></p>
+                </div>
+
+                <div id="modalLogbookNextPlanWrapper" style="display: none;" class="mb-2">
+                  <span class="fw-bold small text-info"><i class="bi bi-calendar-range me-1"></i>Rencana Besok:</span>
+                  <p id="modalLogbookNextPlan" class="small mb-0 bg-white p-2 rounded border text-secondary"></p>
+                </div>
+
+                <div id="modalLogbookCommentWrapper" style="display: none;">
+                  <span class="fw-bold small text-success"><i class="bi bi-chat-quote me-1"></i>Komentar Mentor:</span>
+                  <p id="modalLogbookComment" class="small mb-0 bg-success bg-opacity-10 p-2 rounded border text-dark"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button type="button" class="btn btn-secondary btn-sm rounded-3" data-bs-dismiss="modal">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Embedded Calendar Days Data (Safe JSON) -->
+  <script id="calendarDaysData" type="application/json">
+    <%- JSON.stringify(calendarData.days) %>
+  </script>
+
+  <script>
+    let daysMap = {};
+    try {
+      const raw = document.getElementById('calendarDaysData').textContent;
+      const daysArr = JSON.parse(raw);
+      daysArr.forEach(d => {
+        daysMap[d.dateStr] = d;
+      });
+    } catch (e) {
+      console.error('Failed to parse calendar data:', e);
+    }
+
+    function showDayDetail(dateStr) {
+      const d = daysMap[dateStr];
+      if (!d) return;
+
+      document.getElementById('modalDateTitle').textContent = d.dateFormatted;
+
+      const pBadge = document.getElementById('modalPresenceBadge');
+      const aBadge = document.getElementById('modalActiveDayBadge');
+      const pNotesWrap = document.getElementById('modalPresenceNotesWrapper');
+      const pNotes = document.getElementById('modalPresenceNotes');
+
+      pBadge.className = 'badge fs-6 px-3 py-1';
+      aBadge.style.display = 'none';
+      pNotesWrap.style.display = 'none';
+
+      if (!d.inPeriod) {
+        pBadge.className += ' bg-secondary bg-opacity-25 text-secondary';
+        pBadge.textContent = 'Di luar periode magang';
+      } else if (d.isSunday) {
+        pBadge.className += ' bg-secondary bg-opacity-25 text-secondary';
+        pBadge.textContent = '💤 Minggu (Hari Libur)';
+      } else if (d.isHoliday && (!d.hasPresence || d.status === 'HOLIDAY')) {
+        pBadge.className += ' bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25';
+        pBadge.textContent = `🚩 Libur Nasional: ${d.holidayName}`;
+        aBadge.className = 'badge bg-secondary rounded-pill';
+        aBadge.textContent = 'Libur Nasional';
+        aBadge.style.display = 'inline-block';
+      } else if (d.status === 'WFO') {
+        pBadge.className += ' bg-success bg-opacity-25 text-success';
+        pBadge.textContent = d.isHoliday ? `🏢 WFO (Hari Libur: ${d.holidayName})` : '🏢 WFO (Work From Office)';
+        aBadge.className = 'badge bg-success rounded-pill';
+        aBadge.textContent = 'Hari Aktif';
+        aBadge.style.display = 'inline-block';
+      } else if (d.status === 'WFH') {
+        pBadge.className += ' bg-info bg-opacity-25 text-info';
+        pBadge.textContent = d.isHoliday ? `🏠 WFH (Hari Libur: ${d.holidayName})` : '🏠 WFH (Work From Home)';
+        aBadge.className = 'badge bg-info rounded-pill';
+        aBadge.textContent = 'Hari Aktif';
+        aBadge.style.display = 'inline-block';
+      } else if (d.status === 'IZIN') {
+        pBadge.className += ' bg-warning bg-opacity-25 text-warning';
+        pBadge.textContent = d.isHoliday ? `📋 Izin (${d.holidayName})` : '📋 Izin';
+        aBadge.className = 'badge bg-secondary rounded-pill';
+        aBadge.textContent = 'Bukan Hari Aktif';
+        aBadge.style.display = 'inline-block';
+      } else if (d.status === 'SAKIT') {
+        pBadge.className += ' bg-danger bg-opacity-25 text-danger';
+        pBadge.textContent = d.isHoliday ? `🏥 Sakit (${d.holidayName})` : '🏥 Sakit';
+        aBadge.className = 'badge bg-secondary rounded-pill';
+        aBadge.textContent = 'Bukan Hari Aktif';
+        aBadge.style.display = 'inline-block';
+      } else if (d.isPastOrToday) {
+        pBadge.className += ' bg-light text-muted border';
+        pBadge.textContent = '⚪ Belum ada presensi';
+      } else {
+        pBadge.className += ' bg-light text-muted';
+        pBadge.textContent = 'Akan datang';
+      }
+
+      if (d.presenceNotes) {
+        pNotes.textContent = d.presenceNotes;
+        pNotesWrap.style.display = 'block';
+      }
+
+      const lEmpty = document.getElementById('modalLogbookEmpty');
+      const lContent = document.getElementById('modalLogbookContent');
+      const lStatusBadge = document.getElementById('modalLogbookStatusBadge');
+      const lAct = document.getElementById('modalLogbookActivity');
+      const lObsWrap = document.getElementById('modalLogbookObstacleWrapper');
+      const lObs = document.getElementById('modalLogbookObstacle');
+      const lNextWrap = document.getElementById('modalLogbookNextPlanWrapper');
+      const lNext = document.getElementById('modalLogbookNextPlan');
+      const lComWrap = document.getElementById('modalLogbookCommentWrapper');
+      const lCom = document.getElementById('modalLogbookComment');
+
+      if (d.hasLogbook && d.logbook) {
+        lEmpty.style.display = 'none';
+        lContent.style.display = 'block';
+
+        if (d.logbook.status === 'REVIEWED') {
+          lStatusBadge.className = 'badge bg-success rounded-pill';
+          lStatusBadge.textContent = '✅ Direview';
+        } else {
+          lStatusBadge.className = 'badge bg-warning text-dark rounded-pill';
+          lStatusBadge.textContent = '⏳ Menunggu Review';
+        }
+
+        lAct.textContent = d.logbook.activity || '-';
+
+        if (d.logbook.obstacle) {
+          lObs.textContent = d.logbook.obstacle;
+          lObsWrap.style.display = 'block';
+        } else {
+          lObsWrap.style.display = 'none';
+        }
+
+        if (d.logbook.nextPlan) {
+          lNext.textContent = d.logbook.nextPlan;
+          lNextWrap.style.display = 'block';
+        } else {
+          lNextWrap.style.display = 'none';
+        }
+
+        if (d.logbook.mentorComment) {
+          lCom.textContent = d.logbook.mentorComment;
+          lComWrap.style.display = 'block';
+        } else {
+          lComWrap.style.display = 'none';
+        }
+      } else {
+        lEmpty.style.display = 'block';
+        lContent.style.display = 'none';
+      }
+
+      const modalEl = document.getElementById('dayDetailModal');
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarCells = document.querySelectorAll('.calendar-cell[data-date-str]');
+      calendarCells.forEach(cell => {
+        cell.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const dateStr = this.getAttribute('data-date-str');
+            if (dateStr) {
+              showDayDetail(dateStr);
+            }
+          }
+        });
+      });
+    });
+  </script>
+<% } %>

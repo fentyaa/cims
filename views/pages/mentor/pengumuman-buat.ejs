@@ -1,0 +1,158 @@
+<!-- Mentor: Buat Pengumuman -->
+<div class="mb-4">
+  <a href="/mentor/pengumuman" class="btn btn-outline-secondary btn-sm rounded-3 mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Kembali
+  </a>
+  <h5 class="fw-bold mb-1">
+    <i class="bi bi-plus-circle me-2 text-primary"></i>Buat Pengumuman
+  </h5>
+  <p class="text-muted small mb-0">Buat pengumuman baru untuk peserta magang</p>
+</div>
+
+<!-- Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <ul class="mb-0 ps-3 small">
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <form action="/mentor/pengumuman/buat" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <!-- Judul -->
+      <div class="mb-3">
+        <label for="title" class="form-label fw-semibold small">Judul <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          class="form-control form-control-lg bg-light"
+          id="title"
+          name="title"
+          placeholder="Judul pengumuman"
+          value="<%= typeof formData !== 'undefined' && formData.title ? formData.title : '' %>"
+          required
+          minlength="3"
+        />
+        <div class="invalid-feedback">Judul pengumuman minimal 3 karakter.</div>
+      </div>
+
+      <!-- Isi Pengumuman -->
+      <div class="mb-3">
+        <label for="content" class="form-label fw-semibold small">Isi Pengumuman <span class="text-danger">*</span></label>
+        <textarea
+          class="form-control bg-light"
+          id="content"
+          name="content"
+          rows="6"
+          placeholder="Tulis isi pengumuman di sini..."
+          required
+          minlength="10"
+        ><%= typeof formData !== 'undefined' && formData.content ? formData.content : '' %></textarea>
+        <div class="invalid-feedback">Isi pengumuman minimal 10 karakter.</div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Kategori -->
+        <div class="col-12 col-md-4">
+          <label for="category" class="form-label fw-semibold small">Kategori <span class="text-danger">*</span></label>
+          <select class="form-select form-select-lg bg-light" id="category" name="category" required>
+            <option value="">Pilih Kategori</option>
+            <option value="INFORMASI" <%= typeof formData !== 'undefined' && formData.category === 'INFORMASI' ? 'selected' : '' %>>Informasi</option>
+            <option value="JADWAL" <%= typeof formData !== 'undefined' && formData.category === 'JADWAL' ? 'selected' : '' %>>Jadwal</option>
+            <option value="TUGAS" <%= typeof formData !== 'undefined' && formData.category === 'TUGAS' ? 'selected' : '' %>>Tugas</option>
+            <option value="LIBUR" <%= typeof formData !== 'undefined' && formData.category === 'LIBUR' ? 'selected' : '' %>>Libur</option>
+            <option value="PENTING" <%= typeof formData !== 'undefined' && formData.category === 'PENTING' ? 'selected' : '' %>>Penting</option>
+            <option value="LAINNYA" <%= typeof formData !== 'undefined' && formData.category === 'LAINNYA' ? 'selected' : '' %>>Lainnya</option>
+          </select>
+          <div class="invalid-feedback">Pilih kategori pengumuman.</div>
+        </div>
+
+        <!-- Target Peserta -->
+        <div class="col-12 col-md-4">
+          <label for="targetType" class="form-label fw-semibold small">Target Peserta <span class="text-danger">*</span></label>
+          <select class="form-select form-select-lg bg-light" id="targetType" name="targetType" required>
+            <option value="">Pilih Target</option>
+            <option value="ALL" <%= typeof formData !== 'undefined' && formData.targetType === 'ALL' ? 'selected' : '' %>>Semua Peserta</option>
+            <option value="UNIVERSITY" <%= typeof formData !== 'undefined' && formData.targetType === 'UNIVERSITY' ? 'selected' : '' %>>Mahasiswa</option>
+            <option value="SMK" <%= typeof formData !== 'undefined' && formData.targetType === 'SMK' ? 'selected' : '' %>>PKL SMK</option>
+          </select>
+          <div class="invalid-feedback">Pilih target peserta.</div>
+        </div>
+
+        <!-- Status -->
+        <div class="col-12 col-md-4">
+          <label for="status" class="form-label fw-semibold small">Status</label>
+          <select class="form-select form-select-lg bg-light" id="status" name="status">
+            <option value="DRAFT" <%= typeof formData !== 'undefined' && formData.status === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+            <option value="PUBLISHED" <%= typeof formData !== 'undefined' && formData.status === 'PUBLISHED' ? 'selected' : '' %>>Published</option>
+          </select>
+          <div class="form-text small">
+            <i class="bi bi-info-circle me-1"></i>Draft tidak tampil ke peserta.
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <!-- Tanggal Publikasi -->
+        <div class="col-12 col-md-4">
+          <label for="publishDate" class="form-label fw-semibold small">Tanggal Publikasi <span class="text-danger">*</span></label>
+          <input
+            type="date"
+            class="form-control form-control-lg bg-light"
+            id="publishDate"
+            name="publishDate"
+            value="<%= typeof formData !== 'undefined' && formData.publishDate ? formData.publishDate : '' %>"
+            required
+          />
+          <div class="invalid-feedback">Tanggal publikasi harus diisi.</div>
+        </div>
+
+        <!-- Tanggal Berakhir (Opsional) -->
+        <div class="col-12 col-md-4">
+          <label for="expireDate" class="form-label fw-semibold small">Tanggal Berakhir <span class="text-muted">(Opsional)</span></label>
+          <input
+            type="date"
+            class="form-control form-control-lg bg-light"
+            id="expireDate"
+            name="expireDate"
+            value="<%= typeof formData !== 'undefined' && formData.expireDate ? formData.expireDate : '' %>"
+          />
+          <div class="form-text small">
+            <i class="bi bi-info-circle me-1"></i>Kosongkan jika tidak ada batas waktu.
+          </div>
+        </div>
+
+        <!-- Lampiran (Opsional) -->
+        <div class="col-12 col-md-4">
+          <label for="attachment" class="form-label fw-semibold small">Lampiran <span class="text-muted">(Opsional)</span></label>
+          <input
+            type="file"
+            class="form-control form-control-lg bg-light"
+            id="attachment"
+            name="attachment"
+            accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
+          />
+          <div class="form-text small">
+            <i class="bi bi-info-circle me-1"></i>PDF, DOCX, XLSX, PNG, JPG. Maks 10 MB.
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-semibold">
+          <i class="bi bi-send me-2"></i>Simpan Pengumuman
+        </button>
+        <a href="/mentor/pengumuman" class="btn btn-outline-secondary btn-lg rounded-3">
+          Batal
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

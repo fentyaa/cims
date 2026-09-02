@@ -1,0 +1,212 @@
+<!-- Detail Penilaian -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <a href="/mentor/penilaian" class="btn btn-outline-primary btn-sm rounded-3">
+        <i class="bi bi-arrow-left me-1"></i>Kembali
+      </a>
+      <div>
+        <h5 class="fw-bold text-primary mb-0">
+          <i class="bi bi-file-text me-2"></i>Detail Penilaian
+        </h5>
+        <p class="text-muted small mb-0">
+          <strong><%= typeof evaluation !== 'undefined' ? evaluation.user.fullName : '-' %></strong>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if (typeof evaluation !== 'undefined') { %>
+  <!-- Status & Actions -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <div class="d-flex align-items-center gap-2">
+      <span class="badge bg-<%= evaluation.status === 'PUBLISHED' ? 'success' : evaluation.status === 'DRAFT' ? 'warning' : 'secondary' %> rounded-pill fs-6">
+        <i class="bi bi-<%= evaluation.status === 'PUBLISHED' ? 'check-circle' : evaluation.status === 'DRAFT' ? 'pencil' : 'archive' %> me-1"></i>
+        <%= evaluation.status === 'PUBLISHED' ? 'Published' : evaluation.status === 'DRAFT' ? 'Draft' : 'Archived' %>
+      </span>
+      <% if (evaluation.status === 'DRAFT') { %>
+        <form action="/mentor/penilaian/<%= evaluation.id %>/publish" method="POST" class="d-inline" onsubmit="return confirm('Publikasikan penilaian ini? Peserta akan bisa melihat nilainya.');">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-success btn-sm rounded-3">
+            <i class="bi bi-send me-1"></i>Publikasikan
+          </button>
+        </form>
+        <form action="/mentor/penilaian/<%= evaluation.id %>/archive" method="POST" class="d-inline" onsubmit="return confirm('Arsipkan penilaian ini?');">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-outline-secondary btn-sm rounded-3">
+            <i class="bi bi-archive me-1"></i>Arsipkan
+          </button>
+        </form>
+      <% } %>
+    </div>
+    <div>
+      <small class="text-muted">
+        Dibuat: <%= evaluation.createdAt ? new Date(evaluation.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-' %>
+        <% if (evaluation.publishedAt) { %>
+          | Dipublikasikan: <%= new Date(evaluation.publishedAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %>
+        <% } %>
+      </small>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Participant Info -->
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="bi bi-person me-2 text-primary"></i>Informasi Peserta</h6>
+          <div class="d-flex align-items-center mb-3">
+            <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 56px; height: 56px;">
+              <i class="bi bi-person text-primary fs-3"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-0"><%= evaluation.user.fullName %></h6>
+              <small class="text-muted"><%= evaluation.user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %></small>
+            </div>
+          </div>
+          <div class="small">
+            <div class="mb-2">
+              <i class="bi bi-envelope text-muted me-1"></i><%= evaluation.user.email %>
+            </div>
+            <div class="mb-2">
+              <i class="bi bi-calendar text-muted me-1"></i><%= evaluation.user.internshipPeriod %>
+            </div>
+            <% if (evaluation.user.participantType === 'UNIVERSITY') { %>
+              <div class="mb-2">
+                <i class="bi bi-mortarboard text-muted me-1"></i><%= evaluation.user.university || '-' %>
+              </div>
+              <div class="mb-2">
+                <i class="bi bi-book text-muted me-1"></i><%= evaluation.user.studyProgram || '-' %> - <%= evaluation.user.studentId || '-' %>
+              </div>
+            <% } else { %>
+              <div class="mb-2">
+                <i class="bi bi-building text-muted me-1"></i><%= evaluation.user.schoolName || '-' %>
+              </div>
+              <div class="mb-2">
+                <i class="bi bi-book text-muted me-1"></i><%= evaluation.user.major || '-' %> - <%= evaluation.user.classGrade || '-' %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Details -->
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2 text-primary"></i>Detail Nilai</h6>
+
+          <!-- Score Bars -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Kedisiplinan</small>
+                <small class="fw-bold"><%= evaluation.discipline %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar" role="progressbar" style="width: <%= evaluation.discipline %>%" aria-valuenow="<%= evaluation.discipline %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Tanggung Jawab</small>
+                <small class="fw-bold"><%= evaluation.responsibility %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-success" role="progressbar" style="width: <%= evaluation.responsibility %>%" aria-valuenow="<%= evaluation.responsibility %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Komunikasi</small>
+                <small class="fw-bold"><%= evaluation.communication %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-info" role="progressbar" style="width: <%= evaluation.communication %>%" aria-valuenow="<%= evaluation.communication %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Kerjasama Tim</small>
+                <small class="fw-bold"><%= evaluation.teamwork %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: <%= evaluation.teamwork %>%" aria-valuenow="<%= evaluation.teamwork %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Inisiatif</small>
+                <small class="fw-bold"><%= evaluation.initiative %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar" role="progressbar" style="width: <%= evaluation.initiative %>%" aria-valuenow="<%= evaluation.initiative %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="d-flex justify-content-between mb-1">
+                <small class="fw-semibold">Keterampilan Teknis</small>
+                <small class="fw-bold"><%= evaluation.technicalSkill %></small>
+              </div>
+              <div class="progress" style="height: 8px;">
+                <div class="progress-bar bg-danger" role="progressbar" style="width: <%= evaluation.technicalSkill %>%" aria-valuenow="<%= evaluation.technicalSkill %>" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Final Score -->
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 bg-primary bg-opacity-10 rounded-3">
+                <h3 class="fw-bold text-primary mb-0"><%= evaluation.finalScore %></h3>
+                <small class="text-muted">Final Score</small>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 bg-<%= evaluation.grade === 'A' ? 'success' : evaluation.grade === 'B' ? 'primary' : evaluation.grade === 'C' ? 'warning' : evaluation.grade === 'D' ? 'danger' : 'secondary' %> bg-opacity-10 rounded-3">
+                <h3 class="fw-bold text-<%= evaluation.grade === 'A' ? 'success' : evaluation.grade === 'B' ? 'primary' : evaluation.grade === 'C' ? 'warning' : evaluation.grade === 'D' ? 'danger' : 'secondary' %> mb-0"><%= evaluation.grade %></h3>
+                <small class="text-muted">Grade</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentor Notes -->
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3"><i class="bi bi-chat-dots me-2 text-primary"></i>Catatan Mentor</h6>
+
+          <% if (evaluation.mentorComment) { %>
+            <div class="p-3 bg-light rounded-3 mb-3">
+              <p class="mb-1"><%= evaluation.mentorComment %></p>
+              <% if (evaluation.mentor) { %>
+                <small class="text-muted">— <%= evaluation.mentor.fullName %></small>
+              <% } %>
+            </div>
+          <% } else { %>
+            <p class="text-muted small mb-3"><i>Tidak ada komentar.</i></p>
+          <% } %>
+
+          <% if (evaluation.recommendation) { %>
+            <h6 class="fw-bold small mb-2">Rekomendasi</h6>
+            <div class="p-3 bg-info bg-opacity-10 rounded-3">
+              <p class="mb-1"><%= evaluation.recommendation %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="text-center py-5">
+    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+    <h6 class="fw-bold mt-3">Penilaian Tidak Ditemukan</h6>
+    <a href="/mentor/penilaian" class="btn btn-primary rounded-3 btn-sm mt-2">
+      <i class="bi bi-arrow-left me-1"></i>Kembali
+    </a>
+  </div>
+<% } %>
+

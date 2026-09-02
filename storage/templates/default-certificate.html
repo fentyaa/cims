@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificate - {{NAMA_PESERTA}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Great+Vibes&family=Montserrat:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f1f5f9;
+      color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    }
+    .print-bar {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      display: flex;
+      gap: 10px;
+      z-index: 999;
+    }
+    .btn-print {
+      background: #1e3a8a;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(30,58,138,0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: sans-serif;
+    }
+    .btn-print:hover { background: #172554; }
+
+    /* A4 Landscape Container */
+    .cert-container {
+      width: 1060px;
+      height: 748px;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 70px 40px;
+    }
+
+    /* Outer Gold Thin Border */
+    .cert-border {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      border: 1.5px solid #d99b26;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* Background Geometric Vector Layers */
+    .bg-graphics {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Top Left Company Logo & Text */
+    .company-brand {
+      position: absolute;
+      top: 30px;
+      left: 35px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+    }
+    .company-logo-svg {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+    }
+    .company-text {
+      color: #ffffff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* Top Right Gold Ribbon Badge */
+    .ribbon-badge {
+      position: absolute;
+      top: 24px;
+      right: 50px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .badge-starburst {
+      width: 66px;
+      height: 66px;
+      background: radial-gradient(circle, #fcd34d 0%, #e5a823 60%, #b47b16 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2), inset 0 0 0 2px #fef08a, inset 0 0 0 4px #b47b16;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .badge-star {
+      color: #ffffff;
+      font-size: 16px;
+      margin-bottom: -1px;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+    }
+    .badge-text {
+      color: #ffffff;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 7.5px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+    }
+    .ribbon-tails {
+      display: flex;
+      gap: 4px;
+      margin-top: -12px;
+      z-index: 1;
+    }
+    .ribbon-tail {
+      width: 18px;
+      height: 28px;
+      background: linear-gradient(180deg, #d99b26 0%, #b47b16 100%);
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Main Certificate Content */
+    .cert-content {
+      position: relative;
+      z-index: 15;
+      text-align: center;
+      width: 100%;
+      max-width: 820px;
+      margin-top: 15px;
+    }
+
+    .cert-main-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 44px;
+      font-weight: 800;
+      color: #0284c7;
+      letter-spacing: 4px;
+      line-height: 1;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .cert-sub-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0369a1;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .cert-presented-to {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #0369a1;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* Recipient Name in Elegant Calligraphy */
+    .cert-recipient-name {
+      font-family: 'Great Vibes', 'Alex Brush', cursive;
+      font-size: 50px;
+      color: #0f172a;
+      line-height: 1.25;
+      padding: 0 30px;
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .recipient-divider {
+      width: 280px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #94a3b8, transparent);
+      margin: 0 auto 16px;
+    }
+
+    /* Body Description (Exact wording from Cikara) */
+    .cert-body-desc {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12.5px;
+      color: #0369a1;
+      line-height: 1.65;
+      max-width: 760px;
+      margin: 0 auto 28px;
+    }
+    .cert-body-desc p {
+      margin-bottom: 3px;
+    }
+    .cert-body-desc strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Signature & Date Footer */
+    .cert-footer-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .footer-col {
+      text-align: center;
+      width: 260px;
+    }
+    .footer-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .footer-line {
+      width: 100%;
+      height: 2px;
+      background: #38bdf8;
+      margin-bottom: 8px;
+    }
+    .footer-label {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #0369a1;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    @media print {
+      body { background: transparent; padding: 0; }
+      .print-bar { display: none !important; }
+      .cert-container { box-shadow: none; width: 100vw; height: 100vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="print-bar">
+    <button class="btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+  </div>
+
+  <div class="cert-container">
+    <!-- Thin Gold Frame Border -->
+    <div class="cert-border"></div>
+
+    <!-- Background Geometric Vector Layers (Top & Bottom Corners) -->
+    <svg class="bg-graphics" viewBox="0 0 1060 748" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <!-- TOP LEFT CORNER GEOMETRY -->
+      <!-- 1. Grey Accent Slice -->
+      <polygon points="0,0 480,0 260,260 0,180" fill="#cbd5e1" opacity="0.6"/>
+      <!-- 2. Yellow/Gold Slice -->
+      <polygon points="0,0 450,0 210,250 0,225" fill="#d99b26"/>
+      <!-- 3. Royal Blue Mid Layer -->
+      <polygon points="0,0 420,0 180,240 0,140" fill="#2572ca"/>
+      <!-- 4. Dark Navy Base Layer with Curve -->
+      <polygon points="0,0 350,0 0,150" fill="#132b50"/>
+
+      <!-- TOP RIGHT CORNER GEOMETRY -->
+      <polygon points="620,0 1060,0 1060,85 700,45" fill="#2572ca"/>
+      <polygon points="760,0 1060,0 1060,50" fill="#132b50"/>
+
+      <!-- BOTTOM LEFT CORNER GEOMETRY -->
+      <polygon points="0,620 480,700 0,748" fill="#2572ca"/>
+      <polygon points="0,675 320,748 0,748" fill="#132b50"/>
+
+      <!-- BOTTOM RIGHT CORNER GEOMETRY -->
+      <!-- 1. Grey Accent Slice -->
+      <polygon points="600,748 1060,530 1060,748" fill="#cbd5e1" opacity="0.5"/>
+      <!-- 2. Royal Blue Layer -->
+      <polygon points="660,748 1060,560 1060,748" fill="#2572ca"/>
+      <!-- 3. Gold/Yellow Slice -->
+      <polygon points="700,748 1060,600 1060,748" fill="#d99b26"/>
+      <!-- 4. Dark Navy Base Corner -->
+      <polygon points="780,748 1060,670 1060,748" fill="#132b50"/>
+    </svg>
+
+    <!-- Top Left Brand (Logo & Company Name) -->
+    <div class="company-brand">
+      <div class="company-logo-svg">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 6C25.7 6 6 25.7 6 50C6 74.3 25.7 94 50 94C63.8 94 76.1 87.7 84.1 77.8L50 50L84.1 22.2C76.1 12.3 63.8 6 50 6Z" fill="#ffffff"/>
+          <circle cx="50" cy="50" r="14" fill="#132b50"/>
+        </svg>
+      </div>
+      <div class="company-text">
+        PT. CIKARA<br>BAKTI NUSANTARA
+      </div>
+    </div>
+
+    <!-- Top Right Gold Scallop Badge with Ribbon -->
+    <div class="ribbon-badge">
+      <div class="badge-starburst">
+        <span class="badge-star">★</span>
+        <span class="badge-text">INTERNSHIP</span>
+      </div>
+      <div class="ribbon-tails">
+        <div class="ribbon-tail"></div>
+        <div class="ribbon-tail"></div>
+      </div>
+    </div>
+
+    <!-- Certificate Typography & Content -->
+    <div class="cert-content">
+      <h1 class="cert-main-title">CERTIFICATE</h1>
+      <h2 class="cert-sub-title">OF APPRECIATION</h2>
+      
+      <p class="cert-presented-to">IS PROUDLY PRESENTED TO</p>
+
+      <!-- Recipient Name -->
+      <div class="cert-recipient-name">{{NAMA_PESERTA}}</div>
+      <div class="recipient-divider"></div>
+
+      <!-- Tidy & Polished Description Paragraphs (Exact Match with Cikara Official Certificate) -->
+      <div class="cert-body-desc">
+        <p>
+          Has participated in the Vocational Apprenticeship Program in the field of <strong>{{BIDANG_MAGANG}}</strong> at <strong>PT. Cikara Bakti Nusantara</strong>.
+        </p>
+        <p>
+          The apprenticeship program was conducted from <strong>{{TANGGAL_MULAI_EN}}</strong> to <strong>{{TANGGAL_SELESAI_EN}}</strong>.
+        </p>
+        <p>
+          During the program, the participant has been declared competent as a Junior Game Developer in accordance with the competency standards of Cikara.
+        </p>
+      </div>
+
+      <!-- Footer Signatures & Date -->
+      <div class="cert-footer-row">
+        <div class="footer-col">
+          <div class="footer-value">{{TANGGAL_SELESAI_DOT}}</div>
+          <div class="footer-line"></div>
+          <div class="footer-label">DATE</div>
+        </div>
+
+        <div class="footer-col">
+          <div class="footer-value">{{NAMA_CHIEF}}</div>
+          <div class="footer-line"></div>
+          <div class="footer-label">{{JABATAN_CHIEF}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

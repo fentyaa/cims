@@ -1,0 +1,281 @@
+<%
+  // Determine current role
+  const role = currentUser ? currentUser.role : 'INTERN';
+  const pagePath = typeof currentPath !== 'undefined' ? currentPath : '';
+  const isMobile = typeof mobile !== 'undefined' && mobile;
+%>
+
+<% if (isMobile) { %>
+  <!-- Mobile Offcanvas Sidebar Inner -->
+  <div class="mobile-sidebar-inner d-flex flex-column justify-content-between h-100">
+    <nav class="sidebar-nav">
+      <ul>
+        <!-- Common Section -->
+        <li class="sidebar-section-title">Umum</li>
+        <li>
+          <a href="/" class="<%= pagePath === '/' ? 'active' : '' %>">
+            <i class="bi bi-house-door"></i>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li>
+          <a href="/<%= role.toLowerCase() %>/dashboard" class="<%= pagePath.includes('dashboard') ? 'active' : '' %>">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <% if (role === 'MENTOR') { %>
+          <!-- Mentor Section -->
+          <li class="sidebar-section-title">Manajemen</li>
+          <li>
+            <a href="/mentor/peserta" class="<%= pagePath.includes('/peserta') ? 'active' : '' %>">
+              <i class="bi bi-people-fill"></i>
+              <span>Peserta</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/presensi" class="<%= pagePath.includes('/mentor/presensi') ? 'active' : '' %>">
+              <i class="bi bi-calendar-check-fill"></i>
+              <span>Presensi</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/kalender" class="<%= pagePath.includes('/mentor/kalender') ? 'active' : '' %>">
+              <i class="bi bi-calendar3"></i>
+              <span>Kalender</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/logbook" class="<%= pagePath.includes('logbook') ? 'active' : '' %>">
+              <i class="bi bi-journal-text"></i>
+              <span>Logbook</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/penilaian" class="<%= pagePath.includes('penilaian') ? 'active' : '' %>">
+              <i class="bi bi-star-fill"></i>
+              <span>Penilaian</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/arsip" class="<%= pagePath.includes('arsip') ? 'active' : '' %>">
+              <i class="bi bi-archive-fill"></i>
+              <span>Arsip</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auth/approval" class="<%= pagePath.includes('approval') ? 'active' : '' %>">
+              <i class="bi bi-person-check"></i>
+              <span>Persetujuan</span>
+            </a>
+          </li>
+
+          <li class="sidebar-section-title">Lainnya</li>
+          <li>
+            <a href="/mentor/pengumuman" class="<%= pagePath.includes('pengumuman') ? 'active' : '' %>">
+              <i class="bi bi-megaphone-fill"></i>
+              <span>Pengumuman</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/laporan" class="<%= pagePath.includes('laporan') ? 'active' : '' %>">
+              <i class="bi bi-file-earmark-bar-graph-fill"></i>
+              <span>Laporan</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>">
+              <i class="bi bi-person-circle"></i>
+              <span>Profil</span>
+            </a>
+          </li>
+        <% } %>
+
+        <% if (role === 'INTERN') { %>
+          <!-- Intern Section -->
+          <li class="sidebar-section-title">Aktivitas</li>
+          <li>
+            <a href="/intern/presensi" class="<%= pagePath.includes('/intern/presensi') ? 'active' : '' %>">
+              <i class="bi bi-calendar-check-fill"></i>
+              <span>Presensi</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/kalender" class="<%= pagePath.includes('/intern/kalender') ? 'active' : '' %>">
+              <i class="bi bi-calendar3"></i>
+              <span>Kalender</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/logbook" class="<%= pagePath.includes('logbook') ? 'active' : '' %>">
+              <i class="bi bi-journal-text"></i>
+              <span>Logbook</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/nilai" class="<%= pagePath.includes('nilai') ? 'active' : '' %>">
+              <i class="bi bi-star-fill"></i>
+              <span>Nilai</span>
+            </a>
+          </li>
+
+          <li class="sidebar-section-title">Lainnya</li>
+          <li>
+            <a href="/intern/pengumuman" class="<%= pagePath.includes('pengumuman') ? 'active' : '' %>">
+              <i class="bi bi-megaphone-fill"></i>
+              <span>Pengumuman</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>">
+              <i class="bi bi-person-circle"></i>
+              <span>Profil</span>
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+<% } else { %>
+  <!-- Desktop Fixed Sidebar -->
+  <aside class="dashboard-sidebar" id="dashboardSidebar">
+    <!-- Brand (Bersih tanpa tombol duplikat toggle) -->
+    <div class="sidebar-brand d-flex align-items-center">
+      <a href="/" class="brand-link text-decoration-none d-flex align-items-center gap-2">
+        <i class="bi bi-building-gear fs-4 text-primary"></i>
+        <span class="brand-text fw-bold">CIMS</span>
+      </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav flex-grow-1">
+      <ul>
+        <!-- Common Section -->
+        <li class="sidebar-section-title">Umum</li>
+        <li>
+          <a href="/" class="<%= pagePath === '/' ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Beranda">
+            <i class="bi bi-house-door"></i>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li>
+          <a href="/<%= role.toLowerCase() %>/dashboard" class="<%= pagePath.includes('dashboard') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Dashboard">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <% if (role === 'MENTOR') { %>
+          <!-- Mentor Section -->
+          <li class="sidebar-section-title">Manajemen</li>
+          <li>
+            <a href="/mentor/peserta" class="<%= pagePath.includes('/peserta') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Peserta">
+              <i class="bi bi-people-fill"></i>
+              <span>Peserta</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/presensi" class="<%= pagePath.includes('/mentor/presensi') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Presensi">
+              <i class="bi bi-calendar-check-fill"></i>
+              <span>Presensi</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/kalender" class="<%= pagePath.includes('/mentor/kalender') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Kalender">
+              <i class="bi bi-calendar3"></i>
+              <span>Kalender</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/logbook" class="<%= pagePath.includes('logbook') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Logbook">
+              <i class="bi bi-journal-text"></i>
+              <span>Logbook</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/penilaian" class="<%= pagePath.includes('penilaian') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Penilaian">
+              <i class="bi bi-star-fill"></i>
+              <span>Penilaian</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/arsip" class="<%= pagePath.includes('arsip') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Arsip">
+              <i class="bi bi-archive-fill"></i>
+              <span>Arsip</span>
+            </a>
+          </li>
+          <li>
+            <a href="/auth/approval" class="<%= pagePath.includes('approval') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Persetujuan">
+              <i class="bi bi-person-check"></i>
+              <span>Persetujuan</span>
+            </a>
+          </li>
+
+          <li class="sidebar-section-title">Lainnya</li>
+          <li>
+            <a href="/mentor/pengumuman" class="<%= pagePath.includes('pengumuman') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Pengumuman">
+              <i class="bi bi-megaphone-fill"></i>
+              <span>Pengumuman</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/laporan" class="<%= pagePath.includes('laporan') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Laporan">
+              <i class="bi bi-file-earmark-bar-graph-fill"></i>
+              <span>Laporan</span>
+            </a>
+          </li>
+          <li>
+            <a href="/mentor/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Profil">
+              <i class="bi bi-person-circle"></i>
+              <span>Profil</span>
+            </a>
+          </li>
+        <% } %>
+
+        <% if (role === 'INTERN') { %>
+          <!-- Intern Section -->
+          <li class="sidebar-section-title">Aktivitas</li>
+          <li>
+            <a href="/intern/presensi" class="<%= pagePath.includes('/intern/presensi') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Presensi">
+              <i class="bi bi-calendar-check-fill"></i>
+              <span>Presensi</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/kalender" class="<%= pagePath.includes('/intern/kalender') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Kalender">
+              <i class="bi bi-calendar3"></i>
+              <span>Kalender</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/logbook" class="<%= pagePath.includes('logbook') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Logbook">
+              <i class="bi bi-journal-text"></i>
+              <span>Logbook</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/nilai" class="<%= pagePath.includes('nilai') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Nilai">
+              <i class="bi bi-star-fill"></i>
+              <span>Nilai</span>
+            </a>
+          </li>
+
+          <li class="sidebar-section-title">Lainnya</li>
+          <li>
+            <a href="/intern/pengumuman" class="<%= pagePath.includes('pengumuman') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Pengumuman">
+              <i class="bi bi-megaphone-fill"></i>
+              <span>Pengumuman</span>
+            </a>
+          </li>
+          <li>
+            <a href="/intern/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Profil">
+              <i class="bi bi-person-circle"></i>
+              <span>Profil</span>
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </nav>
+  </aside>
+<% } %>

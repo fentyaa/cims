@@ -1,0 +1,63 @@
+<nav class="navbar dashboard-navbar d-flex align-items-center justify-content-between px-3 px-md-4">
+  <!-- Left Section: Single Sidebar Toggle Control Only -->
+  <div class="d-flex align-items-center gap-2">
+    <!-- Mobile Hamburger (Pojok Kiri Atas, touch target >= 44px) -->
+    <button class="btn btn-link text-dark p-0 d-lg-none hamburger-btn d-flex align-items-center justify-content-center" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Buka Menu Navigasi" style="width: 44px; height: 44px; flex-shrink: 0;">
+      <i class="bi bi-list fs-2 text-dark"></i>
+    </button>
+
+    <!-- Single Dedicated Desktop Sidebar Toggle Button (Kiri) -->
+    <button class="btn btn-link text-muted p-0 d-none d-lg-inline-flex align-items-center justify-content-center sidebar-toggle-btn" id="desktopSidebarNavbarToggle" type="button" title="Kecilkan / Perbesar Sidebar" aria-label="Toggle Sidebar" style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px;">
+      <i class="bi bi-layout-sidebar-inset fs-5"></i>
+    </button>
+  </div>
+
+  <!-- Right Section: Theme Toggle + Date + User Profile -->
+  <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
+    <!-- Dark Mode Theme Toggle Button -->
+    <button class="theme-toggle-btn" id="themeToggleBtn" type="button" title="Ganti Tema Terang / Gelap" aria-label="Toggle Dark/Light Mode">
+      <i class="bi bi-moon-stars fs-5" id="themeIcon"></i>
+    </button>
+
+    <!-- Date (desktop only) -->
+    <span class="text-muted small d-none d-xl-inline" id="currentDate"></span>
+
+    <!-- User Dropdown (Pusat Pengaturan Profil & Logout) -->
+    <div class="dropdown">
+      <button class="btn btn-link text-dark text-decoration-none dropdown-toggle d-flex align-items-center gap-2 p-1 rounded-3" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: 1px solid transparent;">
+        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center user-avatar shadow-sm" style="width: 34px; height: 34px; font-size: 14px; font-weight: 600;">
+          <%= (typeof userName !== 'undefined' && userName ? userName : 'U').charAt(0).toUpperCase() %>
+        </div>
+        <div class="d-none d-sm-flex flex-column text-start" style="line-height: 1.2;">
+          <span class="small fw-semibold text-dark">
+            <%= typeof userName !== 'undefined' && userName ? userName.split(' ')[0] : 'User' %>
+          </span>
+          <span class="text-muted" style="font-size: 11px;">
+            <%= typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'MENTOR' ? 'Mentor' : 'Intern' %>
+          </span>
+        </div>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end shadow rounded-3 border-0 mt-2 py-2" style="min-width: 210px;">
+        <li class="px-3 py-2 border-bottom mb-1">
+          <div class="fw-semibold text-dark small text-truncate"><%= typeof userName !== 'undefined' ? userName : 'Pengguna' %></div>
+          <div class="text-muted small" style="font-size: 11px;">
+            <%= typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'MENTOR' ? 'Pembimbing / Mentor' : (currentUser && currentUser.participantType === 'SMK' ? 'Siswa PKL SMK' : 'Mahasiswa Magang') %>
+          </div>
+        </li>
+        <li>
+          <a class="dropdown-item py-2 d-flex align-items-center gap-2 small" href="/<%= typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'MENTOR' ? 'mentor' : 'intern' %>/profil">
+            <i class="bi bi-person-gear text-primary"></i>
+            <span>Profil Saya</span>
+          </a>
+        </li>
+        <li><hr class="dropdown-divider my-1" /></li>
+        <li>
+          <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger small" href="/auth/logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="fw-medium">Keluar</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

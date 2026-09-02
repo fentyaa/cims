@@ -1,0 +1,143 @@
+<!-- Intern: Daftar Pengumuman -->
+<div class="mb-4">
+  <h5 class="fw-bold mb-1">
+    <i class="bi bi-megaphone-fill me-2 text-primary"></i>Pengumuman
+  </h5>
+  <p class="text-muted small mb-0">Pengumuman terbaru dari mentor</p>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Desktop: List -->
+<div class="d-none d-md-block">
+  <% if (typeof announcements !== 'undefined' && announcements.length > 0) { %>
+    <div class="row g-3">
+      <% announcements.forEach(item => { %>
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1 me-3">
+                  <div class="d-flex flex-wrap gap-1 mb-2">
+                    <span class="badge
+                      <%= item.category === 'INFORMASI' ? 'bg-info' : '' %>
+                      <%= item.category === 'JADWAL' ? 'bg-primary' : '' %>
+                      <%= item.category === 'TUGAS' ? 'bg-warning text-dark' : '' %>
+                      <%= item.category === 'LIBUR' ? 'bg-success' : '' %>
+                      <%= item.category === 'PENTING' ? 'bg-danger' : '' %>
+                      <%= item.category === 'LAINNYA' ? 'bg-secondary' : '' %>
+                    "><%= item.category %></span>
+                    <span class="badge bg-light text-dark border">
+                      <%= item.targetType === 'ALL' ? 'Semua' : item.targetType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+                    </span>
+                  </div>
+                  <a href="/intern/pengumuman/<%= item.id %>" class="text-decoration-none">
+                    <h6 class="fw-bold text-dark mb-1"><%= item.title %></h6>
+                  </a>
+                  <p class="text-muted small mb-2">
+                    <%= item.content.length > 200 ? item.content.substring(0, 200) + '...' : item.content %>
+                  </p>
+                  <div class="small text-muted">
+                    <i class="bi bi-person me-1"></i><%= item.createdBy.fullName %>
+                    <span class="mx-2">|</span>
+                    <i class="bi bi-calendar me-1"></i><%= new Date(item.publishDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    <% if (item.attachment) { %>
+                      <span class="mx-2">|</span>
+                      <i class="bi bi-paperclip me-1"></i>Ada lampiran
+                    <% } %>
+                  </div>
+                </div>
+                <a href="/intern/pengumuman/<%= item.id %>" class="btn btn-outline-primary btn-sm rounded-3 flex-shrink-0">
+                  <i class="bi bi-eye me-1"></i>Detail
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5">
+      <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+      <p class="text-muted mt-2">Belum ada pengumuman.</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- Mobile: Card Layout -->
+<div class="d-md-none">
+  <% if (typeof announcements !== 'undefined' && announcements.length > 0) { %>
+    <div class="row g-3">
+      <% announcements.forEach(item => { %>
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-1 mb-2">
+                <span class="badge
+                  <%= item.category === 'INFORMASI' ? 'bg-info' : '' %>
+                  <%= item.category === 'JADWAL' ? 'bg-primary' : '' %>
+                  <%= item.category === 'TUGAS' ? 'bg-warning text-dark' : '' %>
+                  <%= item.category === 'LIBUR' ? 'bg-success' : '' %>
+                  <%= item.category === 'PENTING' ? 'bg-danger' : '' %>
+                  <%= item.category === 'LAINNYA' ? 'bg-secondary' : '' %>
+                "><%= item.category %></span>
+                <span class="badge bg-light text-dark border">
+                  <%= item.targetType === 'ALL' ? 'Semua' : item.targetType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+                </span>
+              </div>
+              <a href="/intern/pengumuman/<%= item.id %>" class="text-decoration-none">
+                <h6 class="fw-bold text-dark mb-1"><%= item.title %></h6>
+              </a>
+              <p class="text-muted small mb-2">
+                <%= item.content.length > 100 ? item.content.substring(0, 100) + '...' : item.content %>
+              </p>
+              <div class="small text-muted">
+                <i class="bi bi-calendar me-1"></i><%= new Date(item.publishDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+              </div>
+              <a href="/intern/pengumuman/<%= item.id %>" class="btn btn-outline-primary btn-sm rounded-3 mt-2 w-100">
+                <i class="bi bi-eye me-1"></i>Baca Selengkapnya
+              </a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5">
+      <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+      <p class="text-muted mt-2">Belum ada pengumuman.</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- Pagination -->
+<% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
+  <nav class="mt-4">
+    <ul class="pagination pagination-sm justify-content-center">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      </li>
+      <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+        </li>
+      <% } %>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>

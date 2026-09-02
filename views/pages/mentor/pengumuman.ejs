@@ -1,0 +1,315 @@
+<!-- Mentor: Daftar Pengumuman -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1">
+      <i class="bi bi-megaphone-fill me-2 text-primary"></i>Pengumuman
+    </h5>
+    <p class="text-muted small mb-0">Kelola pengumuman untuk peserta magang</p>
+  </div>
+  <a href="/mentor/pengumuman/buat" class="btn btn-primary btn-sm rounded-3">
+    <i class="bi bi-plus-lg me-1"></i>Buat Pengumuman
+  </a>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : msg.type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Filters -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/mentor/pengumuman" class="row g-2">
+      <div class="col-12 col-md-4">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-0">
+            <i class="bi bi-search text-primary"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control form-control-sm bg-light"
+            name="search"
+            placeholder="Cari judul..."
+            value="<%= typeof filters !== 'undefined' && filters.search ? filters.search : '' %>"
+          />
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select form-select-sm bg-light" name="category">
+          <option value="">Semua Kategori</option>
+          <option value="INFORMASI" <%= typeof filters !== 'undefined' && filters.category === 'INFORMASI' ? 'selected' : '' %>>Informasi</option>
+          <option value="JADWAL" <%= typeof filters !== 'undefined' && filters.category === 'JADWAL' ? 'selected' : '' %>>Jadwal</option>
+          <option value="TUGAS" <%= typeof filters !== 'undefined' && filters.category === 'TUGAS' ? 'selected' : '' %>>Tugas</option>
+          <option value="LIBUR" <%= typeof filters !== 'undefined' && filters.category === 'LIBUR' ? 'selected' : '' %>>Libur</option>
+          <option value="PENTING" <%= typeof filters !== 'undefined' && filters.category === 'PENTING' ? 'selected' : '' %>>Penting</option>
+          <option value="LAINNYA" <%= typeof filters !== 'undefined' && filters.category === 'LAINNYA' ? 'selected' : '' %>>Lainnya</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select form-select-sm bg-light" name="status">
+          <option value="">Semua Status</option>
+          <option value="DRAFT" <%= typeof filters !== 'undefined' && filters.status === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+          <option value="PUBLISHED" <%= typeof filters !== 'undefined' && filters.status === 'PUBLISHED' ? 'selected' : '' %>>Published</option>
+          <option value="ARCHIVED" <%= typeof filters !== 'undefined' && filters.status === 'ARCHIVED' ? 'selected' : '' %>>Archived</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm w-100">
+          <i class="bi bi-funnel me-1"></i>Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Desktop: Table -->
+<div class="card border-0 shadow-sm d-none d-md-block">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3">Judul</th>
+            <th>Kategori</th>
+            <th>Target</th>
+            <th>Status</th>
+            <th>Tanggal Publikasi</th>
+            <th class="text-end pe-3">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (typeof announcements !== 'undefined' && announcements.length > 0) { %>
+            <% announcements.forEach(item => { %>
+              <tr>
+                <td class="ps-3">
+                  <div class="fw-semibold small"><%= item.title %></div>
+                  <small class="text-muted">oleh <%= item.createdBy.fullName %></small>
+                </td>
+                <td>
+                  <span class="badge
+                    <%= item.category === 'INFORMASI' ? 'bg-info' : '' %>
+                    <%= item.category === 'JADWAL' ? 'bg-primary' : '' %>
+                    <%= item.category === 'TUGAS' ? 'bg-warning text-dark' : '' %>
+                    <%= item.category === 'LIBUR' ? 'bg-success' : '' %>
+                    <%= item.category === 'PENTING' ? 'bg-danger' : '' %>
+                    <%= item.category === 'LAINNYA' ? 'bg-secondary' : '' %>
+                  ">
+                    <%= item.category %>
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border">
+                    <%= item.targetType === 'ALL' ? 'Semua' : item.targetType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+                  </span>
+                </td>
+                <td>
+                  <% if (item.status === 'DRAFT') { %>
+                    <span class="badge bg-secondary">Draft</span>
+                  <% } else if (item.status === 'PUBLISHED') { %>
+                    <span class="badge bg-success">Published</span>
+                  <% } else if (item.status === 'ARCHIVED') { %>
+                    <span class="badge bg-dark">Archived</span>
+                  <% } %>
+                </td>
+                <td class="small"><%= new Date(item.publishDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                <td class="text-end pe-3">
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary rounded-3" type="button" data-bs-toggle="dropdown">
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                      <li>
+                        <a class="dropdown-item small" href="/mentor/pengumuman/edit/<%= item.id %>">
+                          <i class="bi bi-pencil me-2"></i>Edit
+                        </a>
+                      </li>
+                      <% if (item.status === 'DRAFT') { %>
+                        <li>
+                          <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="status" value="PUBLISHED" />
+                            <button type="submit" class="dropdown-item small">
+                              <i class="bi bi-check-circle me-2"></i>Publikasikan
+                            </button>
+                          </form>
+                        </li>
+                      <% } %>
+                      <% if (item.status === 'PUBLISHED') { %>
+                        <li>
+                          <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="status" value="ARCHIVED" />
+                            <button type="submit" class="dropdown-item small">
+                              <i class="bi bi-archive me-2"></i>Arsipkan
+                            </button>
+                          </form>
+                        </li>
+                      <% } %>
+                      <% if (item.status === 'ARCHIVED') { %>
+                        <li>
+                          <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" name="status" value="PUBLISHED" />
+                            <button type="submit" class="dropdown-item small">
+                              <i class="bi bi-arrow-counterclockwise me-2"></i>Publikasikan Ulang
+                            </button>
+                          </form>
+                        </li>
+                      <% } %>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li>
+                        <form action="/mentor/pengumuman/<%= item.id %>/delete" method="POST" onsubmit="return confirm('Hapus pengumuman ini?')">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <button type="submit" class="dropdown-item text-danger small">
+                            <i class="bi bi-trash me-2"></i>Hapus
+                          </button>
+                        </form>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2 mb-0">Belum ada pengumuman.</p>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile: Card Layout -->
+<div class="d-md-none">
+  <% if (typeof announcements !== 'undefined' && announcements.length > 0) { %>
+    <div class="row g-3">
+      <% announcements.forEach(item => { %>
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="fw-semibold small"><%= item.title %></div>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary rounded-3 border-0" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li>
+                      <a class="dropdown-item small" href="/mentor/pengumuman/edit/<%= item.id %>">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                      </a>
+                    </li>
+                    <% if (item.status === 'DRAFT') { %>
+                      <li>
+                        <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="status" value="PUBLISHED" />
+                          <button type="submit" class="dropdown-item small">
+                            <i class="bi bi-check-circle me-2"></i>Publikasikan
+                          </button>
+                        </form>
+                      </li>
+                    <% } %>
+                    <% if (item.status === 'PUBLISHED') { %>
+                      <li>
+                        <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="status" value="ARCHIVED" />
+                          <button type="submit" class="dropdown-item small">
+                            <i class="bi bi-archive me-2"></i>Arsipkan
+                          </button>
+                        </form>
+                      </li>
+                    <% } %>
+                    <% if (item.status === 'ARCHIVED') { %>
+                      <li>
+                        <form action="/mentor/pengumuman/<%= item.id %>/status" method="POST">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <input type="hidden" name="status" value="PUBLISHED" />
+                          <button type="submit" class="dropdown-item small">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Publikasikan Ulang
+                          </button>
+                        </form>
+                      </li>
+                    <% } %>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <form action="/mentor/pengumuman/<%= item.id %>/delete" method="POST" onsubmit="return confirm('Hapus pengumuman ini?')">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <button type="submit" class="dropdown-item text-danger small">
+                          <i class="bi bi-trash me-2"></i>Hapus
+                        </button>
+                      </form>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-1 mb-2">
+                <span class="badge
+                  <%= item.category === 'INFORMASI' ? 'bg-info' : '' %>
+                  <%= item.category === 'JADWAL' ? 'bg-primary' : '' %>
+                  <%= item.category === 'TUGAS' ? 'bg-warning text-dark' : '' %>
+                  <%= item.category === 'LIBUR' ? 'bg-success' : '' %>
+                  <%= item.category === 'PENTING' ? 'bg-danger' : '' %>
+                  <%= item.category === 'LAINNYA' ? 'bg-secondary' : '' %>
+                "><%= item.category %></span>
+                <span class="badge bg-light text-dark border"><%= item.targetType === 'ALL' ? 'Semua' : item.targetType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %></span>
+                <% if (item.status === 'DRAFT') { %>
+                  <span class="badge bg-secondary">Draft</span>
+                <% } else if (item.status === 'PUBLISHED') { %>
+                  <span class="badge bg-success">Published</span>
+                <% } else if (item.status === 'ARCHIVED') { %>
+                  <span class="badge bg-dark">Archived</span>
+                <% } %>
+              </div>
+              <div class="small text-muted">
+                <i class="bi bi-person me-1"></i><%= item.createdBy.fullName %>
+                <br />
+                <i class="bi bi-calendar me-1"></i><%= new Date(item.publishDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-5">
+      <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+      <p class="text-muted mt-2">Belum ada pengumuman.</p>
+    </div>
+  <% } %>
+</div>
+
+<!-- Pagination -->
+<% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
+  <nav class="mt-4">
+    <ul class="pagination pagination-sm justify-content-center">
+      <li class="page-item <%= pagination.hasPrev ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page - 1 %>&search=<%= filters.search %>&category=<%= filters.category %>&status=<%= filters.status %>">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      </li>
+      <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+        <li class="page-item <%= pagination.page === i ? 'active' : '' %>">
+          <a class="page-link" href="?page=<%= i %>&search=<%= filters.search %>&category=<%= filters.category %>&status=<%= filters.status %>"><%= i %></a>
+        </li>
+      <% } %>
+      <li class="page-item <%= pagination.hasNext ? '' : 'disabled' %>">
+        <a class="page-link" href="?page=<%= pagination.page + 1 %>&search=<%= filters.search %>&category=<%= filters.category %>&status=<%= filters.status %>">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>

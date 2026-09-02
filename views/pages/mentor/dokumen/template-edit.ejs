@@ -1,0 +1,180 @@
+<!-- Edit Template Dokumen -->
+<div class="mb-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="d-flex align-items-center gap-2">
+      <a href="/mentor/dokumen/template" class="btn btn-sm btn-outline-secondary rounded-3">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <div>
+        <h5 class="fw-bold mb-0 text-dark">
+          <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Template Dokumen
+        </h5>
+        <p class="text-muted small mb-0">Ubah konfigurasi, placeholder, dan layout HTML template resmi</p>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/mentor/dokumen/template/preview/<%= template.id %>" target="_blank" class="btn btn-outline-primary btn-sm rounded-3">
+        <i class="bi bi-eye me-1"></i>Pratinjau Hasil
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Validation Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger border-0 rounded-3 small py-2 px-3 mb-3">
+    <ul class="mb-0 ps-3">
+      <% errors.forEach(e => { %>
+        <li><%= e %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="card-body p-4">
+    <form method="POST" action="/mentor/dokumen/template/edit/<%= template.id %>" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="row g-3">
+        <!-- Nama Template -->
+        <div class="col-12 col-md-5">
+          <label class="form-label fw-semibold small text-dark">Nama Template <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm rounded-3"
+            name="name"
+            placeholder="Contoh: Template Sertifikat Kelulusan 2026"
+            value="<%= template.name %>"
+            required
+          />
+        </div>
+
+        <!-- Jenis Dokumen -->
+        <div class="col-12 col-md-3">
+          <label class="form-label fw-semibold small text-dark">Jenis Dokumen <span class="text-danger">*</span></label>
+          <select class="form-select form-select-sm rounded-3" name="documentType" required>
+            <option value="CERTIFICATE" <%= template.documentType === 'CERTIFICATE' ? 'selected' : '' %>>Sertifikat Kelulusan</option>
+            <option value="LETTER" <%= template.documentType === 'LETTER' ? 'selected' : '' %>>Surat Keterangan Magang</option>
+          </select>
+        </div>
+
+        <!-- Versi -->
+        <div class="col-6 col-md-2">
+          <label class="form-label fw-semibold small text-dark">Versi <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control form-control-sm rounded-3"
+            name="version"
+            value="<%= template.version %>"
+            required
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="col-6 col-md-2">
+          <label class="form-label fw-semibold small text-dark">Status</label>
+          <select class="form-select form-select-sm rounded-3" name="status">
+            <option value="ACTIVE" <%= template.status === 'ACTIVE' ? 'selected' : '' %>>Aktif</option>
+            <option value="INACTIVE" <%= template.status === 'INACTIVE' ? 'selected' : '' %>>Nonaktif</option>
+          </select>
+        </div>
+
+        <!-- Placeholder Variable Inserter Chips -->
+        <div class="col-12 mt-3">
+          <div class="p-3 bg-light rounded-3 border">
+            <label class="form-label fw-bold text-dark small mb-1">
+              <i class="bi bi-tag-fill text-primary me-1"></i>Klik Variabel untuk Menyisipkan ke Editor HTML:
+            </label>
+            <div class="d-flex flex-wrap gap-1 mt-2" id="placeholderChips">
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NAMA_PESERTA}}">+ {{NAMA_PESERTA}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{INSTANSI}}">+ {{INSTANSI}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{JURUSAN}}">+ {{JURUSAN}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NIM_NIS}}">+ {{NIM_NIS}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{PERIODE_MAGANG}}">+ {{PERIODE_MAGANG}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NILAI_AKHIR}}">+ {{NILAI_AKHIR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{GRADE}}">+ {{GRADE}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{PREDIKAT}}">+ {{PREDIKAT}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{KOMENTAR_MENTOR}}">+ {{KOMENTAR_MENTOR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{REKOMENDASI}}">+ {{REKOMENDASI}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NAMA_MENTOR}}">+ {{NAMA_MENTOR}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{TANGGAL_CETAK}}">+ {{TANGGAL_CETAK}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{NOMOR_SURAT}}">+ {{NOMOR_SURAT}}</button>
+              <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 placeholder-chip" data-tag="{{KOTA_PENERBITAN}}">+ {{KOTA_PENERBITAN}}</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template HTML Content Editor -->
+        <div class="col-12 mt-3">
+          <label class="form-label fw-semibold small text-dark d-flex justify-content-between">
+            <span>Kode Template HTML Dokumen (Print-Ready)</span>
+            <small class="text-muted">Edit struktur layout dan CSS dokumen sesuai kebutuhan.</small>
+          </label>
+          <textarea
+            class="form-control font-monospace rounded-3"
+            name="templateContent"
+            id="templateContentArea"
+            rows="16"
+            style="font-size: 0.85rem; background-color: #f8fafc;"
+          ><%= templateContent %></textarea>
+        </div>
+
+        <!-- Atau Upload File Pengganti -->
+        <div class="col-12 mt-3">
+          <label class="form-label fw-semibold small text-dark">Atau Upload File Template Pengganti (Opsional)</label>
+          <input
+            type="file"
+            class="form-control form-control-sm rounded-3"
+            name="templateFile"
+            accept=".html,.htm,.pdf,.docx,.doc"
+          />
+          <div class="form-text" style="font-size: 0.75rem;">Biarkan kosong jika tetap menggunakan editor HTML di atas. Format didukung: .HTML, .PDF, .DOCX (Maks: 10 MB).</div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="col-12 mt-4 pt-3 border-top">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm rounded-3 px-4 py-2 fw-semibold">
+              <i class="bi bi-save me-1"></i>Simpan Perubahan Template
+            </button>
+            <a href="/mentor/dokumen/template" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-2">Batal</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.getElementById('templateContentArea');
+    const chips = document.querySelectorAll('.placeholder-chip');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const tag = this.getAttribute('data-tag');
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+
+        textarea.value = text.substring(0, start) + tag + text.substring(end);
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+      });
+    });
+  });
+</script>

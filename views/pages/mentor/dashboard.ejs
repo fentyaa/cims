@@ -1,0 +1,590 @@
+<!-- Mentor Dashboard (Final Visual QA Fix) -->
+
+<%
+  const _totalInterns = typeof totalInterns !== 'undefined' ? totalInterns : 0;
+  const _activeInterns = typeof activeInterns !== 'undefined' ? activeInterns : 0;
+  const _pendingApprovals = typeof pendingApprovals !== 'undefined' ? pendingApprovals : 0;
+  const _archivedInterns = typeof archivedInterns !== 'undefined' ? archivedInterns : 0;
+
+  const _presensi = typeof presensiStats !== 'undefined' ? presensiStats : {
+    wfoCount: 0, wfhCount: 0, izinCount: 0, sakitCount: 0,
+    activeDaysCount: 0, inactiveDaysCount: 0, totalSubmitted: 0,
+    totalActiveInterns: 0, belumAbsen: 0
+  };
+
+  const _logbook = typeof logbookStats !== 'undefined' ? logbookStats : {
+    total: 0, pending: 0, reviewed: 0, today: 0
+  };
+
+  const _eval = typeof evalStats !== 'undefined' ? evalStats : {
+    total: 0, draft: 0, published: 0, archived: 0, unevaluated: 0, totalInterns: 0
+  };
+
+  const pendingAttentionTotal = _pendingApprovals + _logbook.pending;
+
+  const presencePercent = _presensi.totalActiveInterns > 0
+    ? Math.min(100, Math.round((_presensi.totalSubmitted / _presensi.totalActiveInterns) * 100))
+    : 0;
+
+  const logbookPercent = _logbook.total > 0
+    ? Math.min(100, Math.round((_logbook.reviewed / _logbook.total) * 100))
+    : (_logbook.pending === 0 ? 100 : 0);
+
+  const evalPercent = _eval.totalInterns > 0
+    ? Math.min(100, Math.round((_eval.published / _eval.totalInterns) * 100))
+    : 0;
+%>
+
+<!-- 1. HERO WELCOME & WORKLOAD PULSE -->
+<div class="card mentor-hero-card border shadow-sm mb-4">
+  <div class="card-body p-3 p-md-4">
+    <div class="row align-items-center g-3">
+      <!-- Welcome Message & Role Info -->
+      <div class="col-12 col-lg-7">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+          <h4 class="fw-bold mb-0 text-dark">
+            Selamat Datang, <%= typeof userName !== 'undefined' && userName ? userName.split(' ')[0] : 'Mentor' %> 👋
+          </h4>
+          <span class="mentor-badge-role">
+            <i class="bi bi-person-badge me-1"></i>Mentor Pembimbing
+          </span>
+        </div>
+        <p class="text-muted small mb-0 d-flex flex-wrap align-items-center gap-3">
+          <span>
+            <i class="bi bi-calendar3 me-1 text-primary"></i>
+            <span id="mentorHeroDate">Memuat tanggal...</span>
+          </span>
+          <span class="d-none d-sm-inline text-secondary">•</span>
+          <span>
+            <i class="bi bi-people me-1 text-primary"></i>
+            <strong><%= _activeInterns %></strong> Peserta Magang Aktif
+          </span>
+        </p>
+      </div>
+
+      <!-- Pulse Status & Primary Action CTA -->
+      <div class="col-12 col-lg-5 text-lg-end">
+        <div class="d-flex flex-column flex-sm-row justify-content-lg-end align-items-stretch align-items-sm-center gap-2">
+          <% if (pendingAttentionTotal > 0) { %>
+            <div class="mentor-pulse-badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 justify-content-center">
+              <span class="mentor-pulse-dot pulse-active text-warning"></span>
+              <span><strong><%= pendingAttentionTotal %></strong> Tugas Menunggu</span>
+            </div>
+          <% } else { %>
+            <div class="mentor-pulse-badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 justify-content-center">
+              <span class="mentor-pulse-dot text-success"></span>
+              <span>Semua Review Selesai ✨</span>
+            </div>
+          <% } %>
+
+          <a href="/auth/approval" class="btn btn-primary btn-sm rounded-3 px-3 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm">
+            <i class="bi bi-person-check-fill"></i>
+            <span>Persetujuan Akun</span>
+            <% if (_pendingApprovals > 0) { %>
+              <span class="badge bg-white text-primary rounded-pill px-2"><%= _pendingApprovals %></span>
+            <% } %>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. FOCUS & ACTION QUEUE (FOKUS & TINDAKAN HARI INI) -->
+<div class="mb-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+        <i class="bi bi-lightning-charge-fill text-warning"></i>
+        <span>Fokus & Tindakan Hari Ini</span>
+      </h6>
+      <small class="text-muted">Aktivitas dan antrean yang membutuhkan perhatian mentor</small>
+    </div>
+    <% if (pendingAttentionTotal === 0 && _presensi.belumAbsen === 0) { %>
+      <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-20 rounded-pill small px-2 py-1">
+        <i class="bi bi-check2-all me-1"></i>Kondisi Prima
+      </span>
+    <% } %>
+  </div>
+
+  <div class="row g-3">
+    <!-- Queue 1: Review Logbook -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="mentor-action-item h-100 d-flex flex-column justify-content-between <%= _logbook.pending > 0 ? 'item-pending' : 'item-completed' %>">
+        <div>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="mentor-action-icon <%= _logbook.pending > 0 ? 'bg-warning bg-opacity-15 text-warning-emphasis' : 'bg-success bg-opacity-10 text-success' %>">
+              <i class="bi bi-journal-text fs-5"></i>
+            </div>
+            <% if (_logbook.pending > 0) { %>
+              <span class="badge bg-warning bg-opacity-20 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2 py-1 small">
+                <%= _logbook.pending %> Menunggu
+              </span>
+            <% } else { %>
+              <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                <i class="bi bi-check2 me-1"></i>Selesai
+              </span>
+            <% } %>
+          </div>
+          <h6 class="fw-bold text-dark mb-1">Review Logbook</h6>
+          <p class="text-muted small mb-3">
+            <% if (_logbook.pending > 0) { %>
+              <strong><%= _logbook.pending %></strong> logbook perlu diperiksa & diberi catatan.
+            <% } else { %>
+              Semua logbook peserta sudah direview.
+            <% } %>
+          </p>
+        </div>
+        <div>
+          <a href="/mentor/logbook" class="btn <%= _logbook.pending > 0 ? 'btn-primary' : 'btn-outline-secondary' %> btn-sm rounded-3 w-100 fw-semibold">
+            <span><%= _logbook.pending > 0 ? 'Review Sekarang' : 'Buka Logbook' %></span>
+            <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue 2: Persetujuan Pendaftaran -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="mentor-action-item h-100 d-flex flex-column justify-content-between <%= _pendingApprovals > 0 ? 'item-pending' : 'item-completed' %>">
+        <div>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="mentor-action-icon <%= _pendingApprovals > 0 ? 'bg-warning bg-opacity-15 text-warning-emphasis' : 'bg-success bg-opacity-10 text-success' %>">
+              <i class="bi bi-person-plus-fill fs-5"></i>
+            </div>
+            <% if (_pendingApprovals > 0) { %>
+              <span class="badge bg-warning bg-opacity-20 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2 py-1 small">
+                <%= _pendingApprovals %> Baru
+              </span>
+            <% } else { %>
+              <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                <i class="bi bi-check2 me-1"></i>Up to Date
+              </span>
+            <% } %>
+          </div>
+          <h6 class="fw-bold text-dark mb-1">Persetujuan Akun</h6>
+          <p class="text-muted small mb-3">
+            <% if (_pendingApprovals > 0) { %>
+              <strong><%= _pendingApprovals %></strong> pendaftar magang menunggu persetujuan akun.
+            <% } else { %>
+              Tidak ada antrean pendaftaran baru.
+            <% } %>
+          </p>
+        </div>
+        <div>
+          <a href="/auth/approval" class="btn <%= _pendingApprovals > 0 ? 'btn-primary' : 'btn-outline-secondary' %> btn-sm rounded-3 w-100 fw-semibold">
+            <span><%= _pendingApprovals > 0 ? 'Verifikasi Akun' : 'Daftar Akun' %></span>
+            <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue 3: Kehadiran Hari Ini -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="mentor-action-item h-100 d-flex flex-column justify-content-between <%= _presensi.belumAbsen > 0 ? 'item-pending' : 'item-completed' %>">
+        <div>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="mentor-action-icon <%= _presensi.belumAbsen > 0 ? 'bg-primary bg-opacity-10 text-primary' : 'bg-success bg-opacity-10 text-success' %>">
+              <i class="bi bi-calendar-check-fill fs-5"></i>
+            </div>
+            <% if (_presensi.belumAbsen > 0) { %>
+              <span class="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-2 py-1 small">
+                <%= _presensi.belumAbsen %> Belum Check-in
+              </span>
+            <% } else { %>
+              <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                <i class="bi bi-check2 me-1"></i>100% Hadir
+              </span>
+            <% } %>
+          </div>
+          <h6 class="fw-bold text-dark mb-1">Presensi Hari Ini</h6>
+          <p class="text-muted small mb-3">
+            <strong><%= _presensi.totalSubmitted %></strong> dari <strong><%= _presensi.totalActiveInterns %></strong> peserta aktif telah presensi.
+          </p>
+        </div>
+        <div>
+          <a href="/mentor/presensi" class="btn btn-outline-secondary btn-sm rounded-3 w-100 fw-semibold">
+            <span>Lihat Rekap</span>
+            <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue 4: Penilaian Peserta -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="mentor-action-item h-100 d-flex flex-column justify-content-between <%= _eval.unevaluated > 0 ? 'item-pending' : 'item-completed' %>">
+        <div>
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="mentor-action-icon bg-info bg-opacity-10 text-info">
+              <i class="bi bi-award-fill fs-5"></i>
+            </div>
+            <% if (_eval.unevaluated > 0) { %>
+              <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 rounded-pill px-2 py-1 small">
+                <%= _eval.unevaluated %> Belum Dinilai
+              </span>
+            <% } else { %>
+              <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
+                <i class="bi bi-check2 me-1"></i>Lengkap
+              </span>
+            <% } %>
+          </div>
+          <h6 class="fw-bold text-dark mb-1">Penilaian Akhir</h6>
+          <p class="text-muted small mb-3">
+            <strong><%= _eval.published %></strong> dipublikasi, <strong><%= _eval.draft %></strong> draft penilaian.
+          </p>
+        </div>
+        <div>
+          <a href="/mentor/penilaian" class="btn btn-outline-secondary btn-sm rounded-3 w-100 fw-semibold">
+            <span>Kelola Nilai</span>
+            <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. KPI SUMMARY METRICS (4 CARDS GRID) -->
+<div class="row g-3 mb-4">
+  <!-- Card 1: Total & Aktif Interns -->
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card mentor-kpi-card h-100">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-muted small fw-semibold">Peserta Magang</span>
+          <div class="mentor-kpi-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-people-fill fs-5"></i>
+          </div>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <h3 class="fw-bold mb-0 text-dark"><%= _activeInterns %></h3>
+          <span class="text-muted small">/ <%= _totalInterns %> Total</span>
+        </div>
+        <div class="mentor-progress-track">
+          <div class="mentor-progress-bar bg-primary" style="width: <%= _totalInterns > 0 ? Math.round((_activeInterns / _totalInterns) * 100) : 0 %>%;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center small text-muted">
+          <span><i class="bi bi-check-circle-fill text-success me-1"></i><%= _activeInterns %> Aktif</span>
+          <span><%= _archivedInterns %> Alumni/Arsip</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Kehadiran Hari Ini -->
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card mentor-kpi-card h-100">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-muted small fw-semibold">Kehadiran Hari Ini</span>
+          <% if (_presensi.isRedDate) { %>
+            <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill px-2 py-0" style="font-size: 0.675rem;">
+              🚩 Libur
+            </span>
+          <% } else { %>
+            <div class="mentor-kpi-icon bg-success bg-opacity-10 text-success">
+              <i class="bi bi-calendar-check-fill fs-5"></i>
+            </div>
+          <% } %>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <h3 class="fw-bold mb-0 text-success"><%= _presensi.totalSubmitted %></h3>
+          <span class="text-muted small">/ <%= _presensi.totalActiveInterns %> Check-in (<%= presencePercent %>%)</span>
+        </div>
+        <div class="mentor-progress-track">
+          <div class="mentor-progress-bar bg-success" style="width: <%= presencePercent %>%;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center small text-muted">
+          <span><i class="bi bi-building me-1 text-primary"></i><%= _presensi.activeDaysCount %> WFO+WFH</span>
+          <% if (_presensi.isRedDate) { %>
+            <span class="text-danger fw-semibold">Hari Libur Resmi</span>
+          <% } else { %>
+            <span><%= _presensi.belumAbsen %> Belum Absen</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Logbook Review Progress -->
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card mentor-kpi-card h-100">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-muted small fw-semibold">Review Logbook</span>
+          <div class="mentor-kpi-icon bg-warning bg-opacity-10 text-warning-emphasis">
+            <i class="bi bi-journal-check fs-5"></i>
+          </div>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <h3 class="fw-bold mb-0 text-dark"><%= _logbook.reviewed %></h3>
+          <span class="text-muted small">/ <%= _logbook.total %> Direview (<%= logbookPercent %>%)</span>
+        </div>
+        <div class="mentor-progress-track">
+          <div class="mentor-progress-bar bg-warning" style="width: <%= logbookPercent %>%;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center small text-muted">
+          <span><i class="bi bi-clock-history text-warning me-1"></i><%= _logbook.pending %> Menunggu</span>
+          <span><%= _logbook.today %> Hari Ini</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 4: Penilaian Selesai -->
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card mentor-kpi-card h-100">
+      <div class="card-body p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="text-muted small fw-semibold">Status Penilaian</span>
+          <div class="mentor-kpi-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-star-fill fs-5"></i>
+          </div>
+        </div>
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <h3 class="fw-bold mb-0 text-dark"><%= _eval.published %></h3>
+          <span class="text-muted small">/ <%= _eval.totalInterns %> Selesai (<%= evalPercent %>%)</span>
+        </div>
+        <div class="mentor-progress-track">
+          <div class="mentor-progress-bar bg-info" style="width: <%= evalPercent %>%;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center small text-muted">
+          <span><i class="bi bi-file-earmark-text text-secondary me-1"></i><%= _eval.draft %> Draft</span>
+          <span><%= _eval.unevaluated %> Belum Dibuat</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. DUAL DEEP-DIVE OPERATIONS HUB -->
+<div class="row g-3 mb-4">
+  <!-- Left: Presensi Breakdown -->
+  <div class="col-12 col-lg-7">
+    <div class="card border shadow-sm rounded-4 h-100">
+      <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-bottom">
+        <div>
+          <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-pie-chart-fill text-primary"></i>
+            <span>Distribusi Presensi Hari Ini</span>
+          </h6>
+          <small class="text-muted">Rincian status kehadiran seluruh peserta magang aktif</small>
+        </div>
+        <a href="/mentor/presensi" class="btn btn-sm btn-outline-primary rounded-3">
+          <span>Rekap Detail</span>
+          <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+      <div class="card-body p-3 p-md-4">
+        <!-- 5 Status Breakdown Tiles -->
+        <div class="row g-2 mb-3">
+          <!-- WFO -->
+          <div class="col-6 col-sm-4 col-md-2 col-lg-4 col-xl-2 flex-grow-1">
+            <div class="presence-status-tile">
+              <div class="small text-muted mb-1"><i class="bi bi-building text-primary me-1"></i>WFO</div>
+              <h4 class="fw-bold text-primary mb-0"><%= _presensi.wfoCount %></h4>
+              <small class="text-muted" style="font-size: 0.7rem;">Kantor</small>
+            </div>
+          </div>
+          <!-- WFH -->
+          <div class="col-6 col-sm-4 col-md-2 col-lg-4 col-xl-2 flex-grow-1">
+            <div class="presence-status-tile">
+              <div class="small text-muted mb-1"><i class="bi bi-house-door text-info me-1"></i>WFH</div>
+              <h4 class="fw-bold text-info mb-0"><%= _presensi.wfhCount %></h4>
+              <small class="text-muted" style="font-size: 0.7rem;">Rumah</small>
+            </div>
+          </div>
+          <!-- Izin -->
+          <div class="col-6 col-sm-4 col-md-2 col-lg-4 col-xl-2 flex-grow-1">
+            <div class="presence-status-tile">
+              <div class="small text-muted mb-1"><i class="bi bi-file-text text-warning me-1"></i>Izin</div>
+              <h4 class="fw-bold text-warning mb-0"><%= _presensi.izinCount %></h4>
+              <small class="text-muted" style="font-size: 0.7rem;">Tercatat</small>
+            </div>
+          </div>
+          <!-- Sakit -->
+          <div class="col-6 col-sm-4 col-md-2 col-lg-4 col-xl-2 flex-grow-1">
+            <div class="presence-status-tile">
+              <div class="small text-muted mb-1"><i class="bi bi-heart-pulse text-danger me-1"></i>Sakit</div>
+              <h4 class="fw-bold text-danger mb-0"><%= _presensi.sakitCount %></h4>
+              <small class="text-muted" style="font-size: 0.7rem;">Surat/Ket</small>
+            </div>
+          </div>
+          <!-- Belum Absen -->
+          <div class="col-6 col-sm-4 col-md-2 col-lg-4 col-xl-2 flex-grow-1">
+            <div class="presence-status-tile">
+              <div class="small text-muted mb-1"><i class="bi bi-hourglass text-secondary me-1"></i>Belum</div>
+              <h4 class="fw-bold text-secondary mb-0"><%= _presensi.belumAbsen %></h4>
+              <small class="text-muted" style="font-size: 0.7rem;">Peserta</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Encouraging State Alert / Helper -->
+        <div class="p-3 rounded-3 border <%= _presensi.belumAbsen === 0 && _presensi.totalActiveInterns > 0 ? 'bg-success bg-opacity-10 border-success border-opacity-25' : 'bg-light border-light-subtle' %> d-flex align-items-center justify-content-between gap-3">
+          <div class="d-flex align-items-center gap-2 small">
+            <% if (_presensi.belumAbsen === 0 && _presensi.totalActiveInterns > 0) { %>
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+              <span class="text-success fw-medium">Luar biasa! Seluruh peserta magang aktif telah mengisi presensi kehadiran hari ini.</span>
+            <% } else if (_presensi.belumAbsen > 0) { %>
+              <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+              <span class="text-muted">Terdapat <strong><%= _presensi.belumAbsen %></strong> peserta aktif yang belum mengisi presensi hari ini.</span>
+            <% } else { %>
+              <i class="bi bi-info-circle text-muted fs-5"></i>
+              <span class="text-muted">Belum ada peserta magang aktif terdaftar.</span>
+            <% } %>
+          </div>
+          <div>
+            <a href="/mentor/presensi" class="btn btn-sm btn-link text-primary text-decoration-none fw-semibold p-0 text-nowrap" style="font-size: 0.8rem;">
+              Buka Presensi <i class="bi bi-chevron-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Logbook & Penilaian Summary Breakdown -->
+  <div class="col-12 col-lg-5">
+    <div class="card border shadow-sm rounded-4 h-100">
+      <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-bottom">
+        <div>
+          <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-clipboard-check-fill text-primary"></i>
+            <span>Logbook & Penilaian</span>
+          </h6>
+          <small class="text-muted">Status verifikasi laporan & evaluasi akhir</small>
+        </div>
+        <span class="badge bg-light text-muted border small">Ringkasan</span>
+      </div>
+      <div class="card-body p-3 p-md-4 d-flex flex-column justify-content-between gap-3">
+        <!-- Logbook Section Row -->
+        <div class="p-3 rounded-3 border bg-card-subtle">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="small fw-semibold text-dark d-flex align-items-center gap-2">
+              <i class="bi bi-journal-text text-primary"></i>
+              <span>Laporan Logbook Harian</span>
+            </span>
+            <span class="badge <%= _logbook.pending > 0 ? 'bg-warning bg-opacity-15 text-warning-emphasis border border-warning border-opacity-25' : 'bg-success bg-opacity-15 text-success border border-success border-opacity-25' %> rounded-pill small">
+              <%= _logbook.pending > 0 ? _logbook.pending + ' Perlu Review' : 'Semua Direview ✓' %>
+            </span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+            <span><strong><%= _logbook.reviewed %></strong> dari <strong><%= _logbook.total %></strong> diperiksa</span>
+            <span class="fw-semibold text-primary"><%= logbookPercent %>%</span>
+          </div>
+          <div class="mentor-progress-track mb-2">
+            <div class="mentor-progress-bar <%= _logbook.pending > 0 ? 'bg-warning' : 'bg-success' %>" style="width: <%= logbookPercent %>%;"></div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <a href="/mentor/logbook" class="btn btn-outline-primary btn-sm rounded-3 px-3 py-1 fw-semibold" style="font-size: 0.8rem;">
+              <i class="bi bi-pencil-square me-1"></i>Review Logbook
+            </a>
+          </div>
+        </div>
+
+        <!-- Evaluation Section Row -->
+        <div class="p-3 rounded-3 border bg-card-subtle">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="small fw-semibold text-dark d-flex align-items-center gap-2">
+              <i class="bi bi-star-fill text-warning"></i>
+              <span>Evaluasi & Nilai Akhir</span>
+            </span>
+            <span class="badge <%= _eval.unevaluated > 0 ? 'bg-info bg-opacity-15 text-info border border-info border-opacity-25' : 'bg-success bg-opacity-15 text-success border border-success border-opacity-25' %> rounded-pill small">
+              <%= _eval.published %> Published
+            </span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+            <span><strong><%= _eval.published %></strong> selesai • <strong><%= _eval.draft %></strong> draft</span>
+            <span class="fw-semibold text-info"><%= evalPercent %>%</span>
+          </div>
+          <div class="mentor-progress-track mb-2">
+            <div class="mentor-progress-bar bg-info" style="width: <%= evalPercent %>%;"></div>
+          </div>
+          <div class="d-flex justify-content-end">
+            <a href="/mentor/penilaian" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-1 fw-semibold" style="font-size: 0.8rem;">
+              <i class="bi bi-award me-1"></i>Kelola Nilai
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. COMPACT ACTION SHORTCUTS (AKSES CEPAT MODUL MENTOR) -->
+<div class="card border shadow-sm rounded-4">
+  <div class="card-header bg-transparent py-3 d-flex justify-content-between align-items-center border-bottom">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+        <i class="bi bi-grid-fill text-primary"></i>
+        <span>Akses Cepat Modul Mentor</span>
+      </h6>
+      <small class="text-muted">Navigasi langsung ke seluruh fungsi pengelolaan magang</small>
+    </div>
+    <span class="badge bg-light text-muted border small">7 Modul</span>
+  </div>
+  <div class="card-body p-3 p-md-4">
+    <div class="d-flex flex-wrap gap-2">
+      <!-- 1. Peserta -->
+      <a href="/mentor/peserta" class="compact-action-pill">
+        <i class="bi bi-people-fill"></i>
+        <span>Peserta Magang (<%= _activeInterns %>)</span>
+      </a>
+
+      <!-- 2. Presensi -->
+      <a href="/mentor/presensi" class="compact-action-pill">
+        <i class="bi bi-calendar-check-fill"></i>
+        <span>Presensi (<%= _presensi.totalSubmitted %> Hadir)</span>
+      </a>
+
+      <!-- 3. Kalender -->
+      <a href="/mentor/kalender" class="compact-action-pill">
+        <i class="bi bi-calendar3 text-info"></i>
+        <span>Kalender Jadwal</span>
+      </a>
+
+      <!-- 4. Logbook -->
+      <a href="/mentor/logbook" class="compact-action-pill">
+        <i class="bi bi-journal-text text-warning"></i>
+        <span>Logbook <% if (_logbook.pending > 0) { %><span class="badge bg-warning text-dark ms-1"><%= _logbook.pending %></span><% } %></span>
+      </a>
+
+      <!-- 5. Penilaian -->
+      <a href="/mentor/penilaian" class="compact-action-pill">
+        <i class="bi bi-star-fill text-danger"></i>
+        <span>Penilaian Nilai</span>
+      </a>
+
+      <!-- 6. Laporan & Arsip -->
+      <a href="/mentor/laporan" class="compact-action-pill">
+        <i class="bi bi-file-earmark-bar-graph-fill text-success"></i>
+        <span>Laporan & Arsip</span>
+      </a>
+
+      <!-- 7. Persetujuan -->
+      <a href="/auth/approval" class="compact-action-pill">
+        <i class="bi bi-person-check text-primary"></i>
+        <span>Persetujuan Akun <% if (_pendingApprovals > 0) { %><span class="badge bg-danger text-white ms-1"><%= _pendingApprovals %></span><% } %></span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT-SIDE DATE FORMATTER -->
+<script>
+  (function() {
+    const dateEl = document.getElementById('mentorHeroDate');
+    if (dateEl) {
+      try {
+        const today = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        dateEl.textContent = today.toLocaleDateString('id-ID', options);
+      } catch (e) {
+        dateEl.textContent = new Date().toDateString();
+      }
+    }
+  })();
+</script>

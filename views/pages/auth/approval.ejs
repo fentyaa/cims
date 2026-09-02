@@ -1,0 +1,190 @@
+<!-- Approval Page (Mentor Only) -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div class="d-flex align-items-center gap-3">
+    <a href="/mentor/dashboard" class="btn btn-outline-primary btn-sm rounded-3">
+      <i class="bi bi-arrow-left me-1"></i>Dashboard
+    </a>
+    <div>
+      <h5 class="fw-bold mb-1 text-dark">
+        <i class="bi bi-person-check me-2 text-primary"></i>Persetujuan Akun
+      </h5>
+      <p class="text-muted small mb-0">Kelola akun peserta magang yang mendaftar</p>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : msg.type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs nav-fill mb-4" id="approvalTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active fw-semibold" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+      <i class="bi bi-hourglass me-1"></i>Pending
+      <span class="badge bg-warning text-dark ms-1"><%= pendingUsers.length %></span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-semibold" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
+      <i class="bi bi-check-circle me-1"></i>Disetujui
+      <span class="badge bg-success ms-1"><%= approvedUsers.length %></span>
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link fw-semibold" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">
+      <i class="bi bi-x-circle me-1"></i>Ditolak
+      <span class="badge bg-danger ms-1"><%= rejectedUsers.length %></span>
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content" id="approvalTabsContent">
+  <!-- PENDING TAB -->
+  <div class="tab-pane fade show active" id="pending" role="tabpanel">
+    <% if (pendingUsers.length === 0) { %>
+      <div class="text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">Tidak ada akun yang menunggu persetujuan.</p>
+      </div>
+    <% } else { %>
+      <div class="row g-3">
+        <% pendingUsers.forEach(user => { %>
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                    <i class="bi bi-person text-primary fs-5"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0"><%= user.fullName %></h6>
+                    <small class="text-muted">
+                      <%= user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+                    </small>
+                  </div>
+                </div>
+                <div class="small text-muted mb-3">
+                  <div><i class="bi bi-envelope me-1"></i><%= user.email %></div>
+                  <div><i class="bi bi-phone me-1"></i><%= user.phoneNumber %></div>
+                  <div><i class="bi bi-calendar me-1"></i><%= user.internshipPeriod %></div>
+                </div>
+                <% if (user.participantType === 'UNIVERSITY') { %>
+                  <div class="small text-muted">
+                    <div><i class="bi bi-mortarboard me-1"></i><%= user.university %></div>
+                    <div><%= user.studyProgram %> - <%= user.studentId %></div>
+                  </div>
+                <% } else { %>
+                  <div class="small text-muted">
+                    <div><i class="bi bi-building me-1"></i><%= user.schoolName %></div>
+                    <div><%= user.major %> - <%= user.classGrade %></div>
+                  </div>
+                <% } %>
+                <div class="d-flex gap-2 mt-3">
+                  <form action="/auth/approve/<%= user.id %>" method="POST" class="d-inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-success btn-sm rounded-3">
+                      <i class="bi bi-check-lg me-1"></i>Setujui
+                    </button>
+                  </form>
+                  <form action="/auth/reject/<%= user.id %>" method="POST" class="d-inline">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">
+                      <i class="bi bi-x-lg me-1"></i>Tolak
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- APPROVED TAB -->
+  <div class="tab-pane fade" id="approved" role="tabpanel">
+    <% if (approvedUsers.length === 0) { %>
+      <div class="text-center py-5">
+        <i class="bi bi-check-all text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">Belum ada akun yang disetujui.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>Jenis</th>
+              <th>Periode</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% approvedUsers.forEach(user => { %>
+              <tr>
+                <td class="fw-semibold"><%= user.fullName %></td>
+                <td><%= user.email %></td>
+                <td>
+                  <span class="badge bg-info bg-opacity-10 text-info"><%= user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'SMK' %></span>
+                </td>
+                <td><%= user.internshipPeriod %></td>
+                <td>
+                  <span class="badge bg-success">Active</span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- REJECTED TAB -->
+  <div class="tab-pane fade" id="rejected" role="tabpanel">
+    <% if (rejectedUsers.length === 0) { %>
+      <div class="text-center py-5">
+        <i class="bi bi-x-octagon text-muted" style="font-size: 3rem;"></i>
+        <p class="text-muted mt-3">Belum ada akun yang ditolak.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>Jenis</th>
+              <th>Periode</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rejectedUsers.forEach(user => { %>
+              <tr>
+                <td class="fw-semibold"><%= user.fullName %></td>
+                <td><%= user.email %></td>
+                <td>
+                  <span class="badge bg-info bg-opacity-10 text-info"><%= user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'SMK' %></span>
+                </td>
+                <td><%= user.internshipPeriod %></td>
+                <td>
+                  <span class="badge bg-danger">Rejected</span>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+

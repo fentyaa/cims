@@ -1,0 +1,174 @@
+<!-- Mentor Logbook Detail Page -->
+<div class="mb-4">
+  <a href="/mentor/logbook" class="btn btn-outline-primary btn-sm rounded-3 mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Kembali ke Logbook
+  </a>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<% if (typeof logbook !== 'undefined') { %>
+  <div class="row g-4">
+    <!-- Logbook Detail -->
+    <div class="col-12 col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent py-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-journal-text me-2 text-primary"></i>Detail Logbook</h6>
+        </div>
+        <div class="card-body">
+          <!-- User Info -->
+          <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
+            <% if (logbook.user.profilePhoto) { %>
+              <img src="/uploads/<%= logbook.user.profilePhoto %>" alt="<%= logbook.user.fullName %>" class="rounded-circle" width="56" height="56" style="object-fit: cover;" />
+            <% } else { %>
+              <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                <i class="bi bi-person text-primary fs-3"></i>
+              </div>
+            <% } %>
+            <div>
+              <h6 class="fw-bold mb-1"><%= logbook.user.fullName %></h6>
+              <small class="text-muted">
+                <i class="bi bi-envelope me-1"></i><%= logbook.user.email %>
+              </small>
+              <br />
+              <small class="text-muted">
+                <% if (logbook.user.participantType === 'UNIVERSITY') { %>
+                  <i class="bi bi-mortarboard me-1"></i><%= logbook.user.university %> - <%= logbook.user.studyProgram %>
+                <% } else { %>
+                  <i class="bi bi-building me-1"></i><%= logbook.user.schoolName %> - <%= logbook.user.major %>
+                <% } %>
+              </small>
+            </div>
+          </div>
+
+          <!-- Date & Status -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <span class="text-muted small">
+                <i class="bi bi-calendar3 me-1"></i>
+                <%= new Date(logbook.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) %>
+              </span>
+            </div>
+            <div>
+              <% if (logbook.status === 'REVIEWED') { %>
+                <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle me-1"></i>Direview</span>
+              <% } else { %>
+                <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-hourglass me-1"></i>Menunggu Review</span>
+              <% } %>
+            </div>
+          </div>
+
+          <hr />
+
+          <!-- Activity -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-primary">
+              <i class="bi bi bi-list-check me-1"></i>Aktivitas Hari Ini
+            </label>
+            <p class="form-control-plaintext bg-light rounded-3 p-3"><%= logbook.activity %></p>
+          </div>
+
+          <!-- Obstacle -->
+          <% if (logbook.obstacle) { %>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-warning">
+                <i class="bi bi-exclamation-triangle me-1"></i>Kendala
+              </label>
+              <p class="form-control-plaintext bg-light rounded-3 p-3"><%= logbook.obstacle %></p>
+            </div>
+          <% } %>
+
+          <!-- Next Plan -->
+          <% if (logbook.nextPlan) { %>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-info">
+                <i class="bi bi-calendar-range me-1"></i>Rencana Besok
+              </label>
+              <p class="form-control-plaintext bg-light rounded-3 p-3"><%= logbook.nextPlan %></p>
+            </div>
+          <% } %>
+
+          <!-- Mentor Comment (if already reviewed) -->
+          <% if (logbook.mentorComment) { %>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small text-success">
+                <i class="bi bi-chat-quote me-1"></i>Komentar Mentor
+              </label>
+              <p class="form-control-plaintext bg-success bg-opacity-10 rounded-3 p-3"><%= logbook.mentorComment %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Review Form -->
+    <div class="col-12 col-lg-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-transparent py-3">
+          <h6 class="fw-bold mb-0"><i class="bi bi-chat-square-text me-2 text-primary"></i>Review Logbook</h6>
+        </div>
+        <div class="card-body">
+          <% if (logbook.status === 'REVIEWED') { %>
+            <div class="alert alert-success border-0 rounded-3" role="alert">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              Logbook ini sudah direview.
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold small">Komentar yang diberikan:</label>
+              <p class="form-control-plaintext bg-light rounded-3 p-3"><%= logbook.mentorComment %></p>
+            </div>
+          <% } else { %>
+            <!-- Local Errors -->
+            <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+              <div class="alert alert-danger border-0 rounded-3 py-2" role="alert">
+                <ul class="mb-0 ps-3 small">
+                  <% errors.forEach(err => { %>
+                    <li><%= err %></li>
+                  <% }) %>
+                </ul>
+              </div>
+            <% } %>
+
+            <form action="/mentor/logbook/<%= logbook.id %>/review" method="POST">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="mb-3">
+                <label for="mentorComment" class="form-label fw-semibold small">
+                  Komentar <span class="text-danger">*</span>
+                </label>
+                <textarea
+                  class="form-control bg-light"
+                  id="mentorComment"
+                  name="mentorComment"
+                  rows="4"
+                  placeholder="Berikan komentar atau masukan untuk peserta..."
+                  required
+                ></textarea>
+                <div class="form-text">
+                  <i class="bi bi-info-circle me-1"></i>Setelah memberikan komentar, logbook akan ditandai sebagai "Direview" dan tidak dapat diedit lagi oleh peserta.
+                </div>
+              </div>
+              <button type="submit" class="btn btn-success w-100 rounded-3">
+                <i class="bi bi-check-circle me-1"></i>Tandai sebagai Direview
+              </button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } else { %>
+  <div class="text-center py-5">
+    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+    <p class="text-muted mt-3">Logbook tidak ditemukan.</p>
+    <a href="/mentor/logbook" class="btn btn-primary rounded-3">Kembali</a>
+  </div>
+<% } %>

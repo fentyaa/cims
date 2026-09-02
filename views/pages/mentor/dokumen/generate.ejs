@@ -1,0 +1,399 @@
+<!-- Halaman Buat Dokumen Otomatis (Interactive Visual Studio & Review) -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="bi bi-magic me-2 text-primary"></i>Buat, Review & Terbitkan Dokumen Resmi
+    </h5>
+    <p class="text-muted small mb-0">Pilih dokumen dan peserta. Anda dapat mereview langsung tampilan dokumen dan menyesuaikan nomor surat atau detail sebelum diterbitkan ke dashboard peserta.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="/mentor/dokumen/template" class="btn btn-outline-primary btn-sm rounded-3">
+      <i class="bi bi-file-earmark-code me-1"></i>Kelola Template (<%= allTemplates.length %>)
+    </a>
+    <a href="/mentor/dokumen/riwayat" class="btn btn-outline-secondary btn-sm rounded-3">
+      <i class="bi bi-clock-history me-1"></i>Riwayat Dokumen
+    </a>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-4 shadow-sm" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Navigasi Cepat Modul Dokumen -->
+<ul class="nav nav-pills mb-4 bg-white p-2 rounded-3 shadow-sm border gap-2">
+  <li class="nav-item flex-fill">
+    <a class="nav-link text-center fw-semibold rounded-3 py-2 active shadow-sm" href="/mentor/dokumen/buat">
+      <i class="bi bi-lightning-charge-fill me-1"></i>Form Buat Dokumen
+    </a>
+  </li>
+  <li class="nav-item flex-fill">
+    <a class="nav-link text-center fw-semibold rounded-3 py-2 text-dark" href="/mentor/dokumen/template">
+      <i class="bi bi-file-earmark-code me-1"></i>Daftar Template
+    </a>
+  </li>
+  <li class="nav-item flex-fill">
+    <a class="nav-link text-center fw-semibold rounded-3 py-2 text-dark" href="/mentor/dokumen/sertifikat">
+      <i class="bi bi-patch-check me-1"></i>Sertifikat Magang
+    </a>
+  </li>
+  <li class="nav-item flex-fill">
+    <a class="nav-link text-center fw-semibold rounded-3 py-2 text-dark" href="/mentor/dokumen/surat">
+      <i class="bi bi-envelope-paper me-1"></i>Surat Keterangan
+    </a>
+  </li>
+  <li class="nav-item flex-fill">
+    <a class="nav-link text-center fw-semibold rounded-3 py-2 text-dark" href="/mentor/dokumen/riwayat">
+      <i class="bi bi-clock-history me-1"></i>Riwayat Terbit
+    </a>
+  </li>
+</ul>
+
+<div class="row g-4">
+  <!-- FORM GENERATE & REVIEW (LEFT COLUMN) -->
+  <div class="col-12 col-xl-5">
+    <form method="POST" action="/mentor/dokumen/buat" id="generateDocForm">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="templateId" id="hiddenTemplateId" value="<%= selectedTemplateId || (templates[0] ? templates[0].id : '') %>">
+
+      <!-- LANGKAH 1: PILIH JENIS DOKUMEN -->
+      <div class="card border-0 shadow-sm rounded-4 mb-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0 text-dark">
+            <span class="badge bg-primary rounded-circle px-2 py-1 me-2">1</span>Pilih Jenis Dokumen Resmi
+          </h6>
+          <span class="text-muted small">PT. Cikara Bakti Nusantara</span>
+        </div>
+        <div class="card-body p-3">
+          <div class="row g-2" id="docTypeCardGrid">
+            <% templates.forEach((tpl, idx) => { %>
+              <%
+                const isCert = tpl.documentType === 'CERTIFICATE';
+                const isBalasan = tpl.name.toLowerCase().includes('balasan');
+                const isKeterangan = tpl.name.toLowerCase().includes('keterangan');
+                const isSelected = selectedTemplateId ? (selectedTemplateId === tpl.id) : (idx === 0);
+              %>
+              <div class="col-12">
+                <div 
+                  class="card doc-select-card p-3 border rounded-3 cursor-pointer transition-all <%= isSelected ? 'border-primary bg-primary bg-opacity-10 shadow-sm selected-doc-card' : 'bg-white' %>"
+                  data-template-id="<%= tpl.id %>"
+                  data-doc-type="<%= tpl.documentType %>"
+                  data-tpl-name="<%= tpl.name %>"
+                  style="cursor: pointer;"
+                >
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="p-2 rounded-3 <%= isCert ? 'bg-warning bg-opacity-20 text-warning' : (isBalasan ? 'bg-info bg-opacity-20 text-info' : 'bg-primary bg-opacity-20 text-primary') %> fs-3">
+                      <i class="bi <%= isCert ? 'bi-patch-check-fill' : (isBalasan ? 'bi-envelope-check-fill' : 'bi-file-earmark-text-fill') %>"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <div class="fw-bold text-dark small mb-0"><%= tpl.name %></div>
+                      <small class="text-muted d-block" style="font-size: 0.72rem;">
+                        <%= isCert ? 'Sertifikat landscape resmi dengan tanda tangan Chief' : (isBalasan ? 'Surat balasan persetujuan magang kampus' : 'Surat keterangan selesai praktik kerja di Cikara') %>
+                      </small>
+                    </div>
+                    <div class="check-indicator text-primary <%= isSelected ? 'd-block' : 'd-none' %>">
+                      <i class="bi bi-check-circle-fill fs-5"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGKAH 2: PILIH PESERTA -->
+      <div class="card border-0 shadow-sm rounded-4 mb-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+          <h6 class="fw-bold mb-0 text-dark">
+            <span class="badge bg-primary rounded-circle px-2 py-1 me-2">2</span>Pilih Peserta Penerima
+          </h6>
+          <span class="badge bg-light text-dark border"><%= participants.length %> Peserta</span>
+        </div>
+        <div class="card-body p-3">
+          <div class="input-group input-group-sm mb-2">
+            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0" id="participantSearchInput" placeholder="Cari nama, instansi, atau NPM...">
+          </div>
+
+          <select class="form-select rounded-3 py-2 fw-semibold text-dark mb-2" name="participantId" id="participantSelect" required size="4" style="min-height: 120px;">
+            <% participants.forEach((p, pIdx) => { %>
+              <%
+                const instansi = p.participantType === 'UNIVERSITY' ? (p.university || '-') : (p.schoolName || '-');
+                const isSelected = selectedUserId ? (selectedUserId === p.id) : (pIdx === 0);
+              %>
+              <option
+                value="<%= p.id %>"
+                data-name="<%= p.fullName %>"
+                data-email="<%= p.email %>"
+                data-instansi="<%= instansi %>"
+                data-type="<%= p.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'Siswa PKL SMK' %>"
+                data-jurusan="<%= p.participantType === 'UNIVERSITY' ? (p.studyProgram || '-') : (p.major || '-') %>"
+                data-nim="<%= p.studentId || '-' %>"
+                data-period="<%= p.internshipPeriod || '-' %>"
+                data-score="<%= p.finalScore ? (p.finalScore + ' (' + p.grade + ')') : 'Nilai A' %>"
+                data-status="<%= p.status %>"
+                data-totaldocs="<%= p.totalDocuments || 0 %>"
+                <%= isSelected ? 'selected' : '' %>
+                class="py-2 px-2 border-bottom"
+              >
+                👤 <%= p.fullName %> — <%= instansi %> (<%= p.studentId || '-' %>)
+              </option>
+            <% }) %>
+          </select>
+
+          <!-- Detail Card Peserta Terpilih -->
+          <div class="p-3 bg-light rounded-3 border" id="participantQuickInfo">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 d-flex align-items-center justify-content-center fw-bold fs-4 flex-shrink-0" style="width: 44px; height: 44px;" id="infoAvatar">
+                F
+              </div>
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="fw-bold text-dark text-truncate small" id="infoName">-</div>
+                <div class="text-muted text-truncate" id="infoInstansi" style="font-size: 0.75rem;">-</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-success bg-opacity-15 text-success rounded-pill small" id="infoScore">Nilai A</span>
+                <small class="text-muted d-block mt-1" id="infoNim" style="font-size: 0.72rem;">NPM: -</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGKAH 3: REVIEW & KUSTOMISASI DETAIL (OPTIONAL COLLAPSE) -->
+      <div class="card border-0 shadow-sm rounded-4 mb-3">
+        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center cursor-pointer" data-bs-toggle="collapse" data-bs-target="#reviewDetailCollapse" style="cursor: pointer;">
+          <h6 class="fw-bold mb-0 text-dark">
+            <span class="badge bg-secondary rounded-circle px-2 py-1 me-2">3</span>Review & Edit Detail Surat
+          </h6>
+          <small class="text-primary fw-semibold"><i class="bi bi-pencil-square me-1"></i>Sesuaikan Field <i class="bi bi-chevron-down ms-1"></i></small>
+        </div>
+        <div class="collapse show" id="reviewDetailCollapse">
+          <div class="card-body p-3">
+            <div class="row g-2">
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold text-dark mb-1">Nomor Surat:</label>
+                <input type="text" class="form-control form-control-sm rounded-2 live-field" name="nomorSurat" id="inputNomorSurat" placeholder="31. 33127/CBN/VII/2026">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold text-dark mb-1">Bidang Magang / Praktek:</label>
+                <input type="text" class="form-control form-control-sm rounded-2 live-field" name="bidangMagang" id="inputBidangMagang" value="Game And Apps Development">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold text-dark mb-1">Tanggal Mulai:</label>
+                <input type="text" class="form-control form-control-sm rounded-2 live-field" name="tanggalMulai" id="inputTanggalMulai" placeholder="2 Juni 2026">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold text-dark mb-1">Tanggal Selesai:</label>
+                <input type="text" class="form-control form-control-sm rounded-2 live-field" name="tanggalSelesai" id="inputTanggalSelesai" placeholder="31 Juli 2026">
+              </div>
+            </div>
+            <div class="form-text mt-2" style="font-size: 0.72rem;">
+              <i class="bi bi-info-circle text-primary me-1"></i>Setiap perubahan teks pada field di atas akan langsung mengubah tampilan di pratinjau samping secara real-time.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LANGKAH 4: ACTION BUTTON -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <div class="fw-bold text-dark small">Sudah Selesai Mereview?</div>
+            <small class="text-muted" style="font-size: 0.72rem;">Dokumen akan langsung terbit dan dapat diunduh oleh peserta.</small>
+          </div>
+          <button type="submit" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold shadow-sm" id="btnSubmitGenerate">
+            <i class="bi bi-send-check-fill me-1"></i>Setujui & Terbitkan Sekarang
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- LIVE DOCUMENT PREVIEW & REVIEW (RIGHT COLUMN) -->
+  <div class="col-12 col-xl-7">
+    <div class="card border-0 shadow-sm rounded-4 h-100 d-flex flex-column sticky-top" style="top: 85px; z-index: 10;">
+      <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <span class="spinner-grow spinner-grow-sm text-primary" role="status" id="previewSpinner" style="display: none;"></span>
+          <h6 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-file-earmark-check-fill me-2 text-primary"></i>Live Review Dokumen Resmi
+          </h6>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-3 py-1 px-2" id="btnReloadPreview" title="Muat ulang preview">
+            <i class="bi bi-arrow-clockwise"></i> Review Ulang
+          </button>
+          <a href="#" target="_blank" class="btn btn-sm btn-outline-primary rounded-3 py-1 px-2" id="btnOpenNewTabPreview" title="Buka di tab baru">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Tab Baru
+          </a>
+        </div>
+      </div>
+
+      <div class="card-body p-2 flex-grow-1 bg-light d-flex flex-column" style="min-height: 580px;">
+        <!-- Container Iframe Live Preview -->
+        <div class="w-100 flex-grow-1 rounded-3 overflow-hidden border bg-white shadow-inner position-relative">
+          <iframe 
+            id="docLivePreviewIframe" 
+            src="/mentor/dokumen/live-preview" 
+            style="width: 100%; height: 100%; min-height: 560px; border: none;"
+          ></iframe>
+        </div>
+        <div class="text-center text-muted small py-2" style="font-size: 0.72rem;">
+          <i class="bi bi-shield-check text-success me-1"></i>Format resmi PT. Cikara Bakti Nusantara lengkap dengan stempel dan tanda tangan.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const docCards = document.querySelectorAll('.doc-select-card');
+    const hiddenTplInput = document.getElementById('hiddenTemplateId');
+    const partSelect = document.getElementById('participantSelect');
+    const searchInput = document.getElementById('participantSearchInput');
+    const iframe = document.getElementById('docLivePreviewIframe');
+    const spinner = document.getElementById('previewSpinner');
+    const btnReload = document.getElementById('btnReloadPreview');
+    const btnNewTab = document.getElementById('btnOpenNewTabPreview');
+
+    const inputNomorSurat = document.getElementById('inputNomorSurat');
+    const inputBidangMagang = document.getElementById('inputBidangMagang');
+    const inputTanggalMulai = document.getElementById('inputTanggalMulai');
+    const inputTanggalSelesai = document.getElementById('inputTanggalSelesai');
+    const liveFields = document.querySelectorAll('.live-field');
+
+    const infoName = document.getElementById('infoName');
+    const infoInstansi = document.getElementById('infoInstansi');
+    const infoScore = document.getElementById('infoScore');
+    const infoNim = document.getElementById('infoNim');
+    const infoAvatar = document.getElementById('infoAvatar');
+
+    // 1. Search Filter untuk Peserta
+    if (searchInput && partSelect) {
+      searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        let firstMatch = null;
+        for (let i = 0; i < partSelect.options.length; i++) {
+          const opt = partSelect.options[i];
+          const text = opt.text.toLowerCase();
+          const match = text.includes(query);
+          opt.style.display = match ? 'block' : 'none';
+          if (match && !firstMatch) firstMatch = opt;
+        }
+        if (firstMatch && query) {
+          partSelect.value = firstMatch.value;
+          updateParticipantInfo();
+          updateLivePreview();
+        }
+      });
+    }
+
+    // 2. Klik Kartu Jenis Dokumen
+    docCards.forEach(card => {
+      card.addEventListener('click', function() {
+        docCards.forEach(c => {
+          c.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10', 'shadow-sm', 'selected-doc-card');
+          c.classList.add('bg-white');
+          const check = c.querySelector('.check-indicator');
+          if (check) check.classList.add('d-none');
+        });
+
+        this.classList.add('border-primary', 'bg-primary', 'bg-opacity-10', 'shadow-sm', 'selected-doc-card');
+        this.classList.remove('bg-white');
+        const check = this.querySelector('.check-indicator');
+        if (check) check.classList.remove('d-none');
+
+        const tplId = this.getAttribute('data-template-id');
+        hiddenTplInput.value = tplId;
+        updateLivePreview();
+      });
+    });
+
+    // 3. Update Info Peserta Terpilih
+    function updateParticipantInfo() {
+      if (!partSelect) return;
+      const selected = partSelect.options[partSelect.selectedIndex];
+      if (!selected) return;
+
+      const name = selected.getAttribute('data-name') || '-';
+      const instansi = selected.getAttribute('data-instansi') || '-';
+      const type = selected.getAttribute('data-type') || '';
+      const nim = selected.getAttribute('data-nim') || '-';
+      const score = selected.getAttribute('data-score') || 'Nilai A';
+
+      infoName.textContent = name;
+      infoInstansi.textContent = `${instansi} (${type})`;
+      infoNim.textContent = `NPM: ${nim}`;
+      infoScore.textContent = score;
+      infoAvatar.textContent = name.charAt(0).toUpperCase();
+    }
+
+    // 4. Update Live Preview Iframe with Live Edits
+    let debounceTimer = null;
+    function updateLivePreview() {
+      const partId = partSelect ? partSelect.value : '';
+      const tplId = hiddenTplInput ? hiddenTplInput.value : '';
+
+      if (!partId || !tplId) return;
+
+      const nomor = inputNomorSurat ? inputNomorSurat.value.trim() : '';
+      const bidang = inputBidangMagang ? inputBidangMagang.value.trim() : '';
+      const tglM = inputTanggalMulai ? inputTanggalMulai.value.trim() : '';
+      const tglS = inputTanggalSelesai ? inputTanggalSelesai.value.trim() : '';
+
+      const queryParams = new URLSearchParams({
+        participantId: partId,
+        templateId: tplId,
+      });
+
+      if (nomor) queryParams.set('nomorSurat', nomor);
+      if (bidang) queryParams.set('bidangMagang', bidang);
+      if (tglM) queryParams.set('tanggalMulai', tglM);
+      if (tglS) queryParams.set('tanggalSelesai', tglS);
+
+      const previewUrl = `/mentor/dokumen/live-preview?${queryParams.toString()}`;
+
+      if (spinner) spinner.style.display = 'inline-block';
+      if (btnNewTab) btnNewTab.href = previewUrl;
+
+      if (iframe) {
+        iframe.src = previewUrl;
+        iframe.onload = function() {
+          if (spinner) spinner.style.display = 'none';
+        };
+      }
+    }
+
+    if (partSelect) {
+      partSelect.addEventListener('change', function() {
+        updateParticipantInfo();
+        updateLivePreview();
+      });
+    }
+
+    liveFields.forEach(f => {
+      f.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(updateLivePreview, 400);
+      });
+    });
+
+    if (btnReload) {
+      btnReload.addEventListener('click', updateLivePreview);
+    }
+
+    // Initial Trigger
+    updateParticipantInfo();
+    updateLivePreview();
+  });
+</script>

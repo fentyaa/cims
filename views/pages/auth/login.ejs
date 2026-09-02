@@ -1,0 +1,131 @@
+<!-- Login Page -->
+<div class="auth-page-wrapper">
+  <!-- Ambient background lighting -->
+  <div class="auth-bg-ambient">
+    <div class="auth-bg-blob-1"></div>
+    <div class="auth-bg-blob-2"></div>
+  </div>
+
+  <div class="container position-relative">
+    <div class="row justify-content-center">
+      <div class="col-11 col-sm-9 col-md-7 col-lg-5 col-xl-4">
+        <div class="auth-card">
+          <!-- Top Accent Stripe -->
+          <div class="auth-card-top-accent"></div>
+
+          <div class="auth-card-body">
+            <!-- Brand Badge & Header -->
+            <div class="text-center mb-4">
+              <div class="mb-3">
+                <span class="auth-brand-badge">
+                  <i class="bi bi-stars"></i> CIMS Portal Magang
+                </span>
+              </div>
+              <div class="auth-icon-avatar">
+                <i class="bi bi-person-lock"></i>
+              </div>
+              <h4 class="auth-heading">Selamat Datang</h4>
+              <p class="auth-subtitle">Masuk untuk mengelola presensi & logbook</p>
+            </div>
+
+            <!-- Flash Messages -->
+            <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+              <% messages.forEach(msg => { %>
+                <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+                  <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-1"></i>
+                  <%= msg.text %>
+                  <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% }) %>
+            <% } %>
+
+            <!-- Local Errors -->
+            <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+              <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <ul class="mb-0 ps-3">
+                  <% errors.forEach(err => { %>
+                    <li><%= err %></li>
+                  <% }) %>
+                </ul>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <% } %>
+
+            <!-- Login Form -->
+            <form action="/auth/login" method="POST" class="needs-validation" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+              <!-- Email -->
+              <div class="mb-3">
+                <label for="email" class="auth-label">Email</label>
+                <div class="auth-input-group">
+                  <span class="input-icon"><i class="bi bi-envelope"></i></span>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    name="email"
+                    placeholder="nama@email.com"
+                    value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+                    required
+                    autofocus
+                  />
+                </div>
+                <div class="invalid-feedback">Masukkan email yang valid.</div>
+              </div>
+
+              <!-- Password -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label for="password" class="auth-label mb-0">Password</label>
+                  <a href="/auth/forgot-password" class="auth-link small" style="font-size: 0.775rem;">
+                    Lupa Password?
+                  </a>
+                </div>
+                <div class="auth-input-group mt-1">
+                  <span class="input-icon"><i class="bi bi-lock"></i></span>
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    placeholder="Masukkan password"
+                    required
+                  />
+                  <button
+                    class="btn-toggle-pw toggle-password"
+                    type="button"
+                    data-target="password"
+                    aria-label="Toggle password visibility"
+                  >
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </div>
+                <div class="invalid-feedback">Password harus diisi.</div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="mt-4">
+                <button type="submit" class="btn-auth-primary" id="btnLogin">
+                  <i class="bi bi-box-arrow-in-right"></i>
+                  <span>Masuk ke Akun</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Register Link -->
+            <div class="text-center mt-4 pt-3 border-top">
+              <p class="auth-subtitle">
+                Belum punya akun?
+                <a href="/auth/register" class="auth-link ms-1">
+                  Daftar Sekarang
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

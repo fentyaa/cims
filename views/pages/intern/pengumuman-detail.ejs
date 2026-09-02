@@ -1,0 +1,72 @@
+<!-- Intern: Detail Pengumuman -->
+<div class="mb-4">
+  <a href="/intern/pengumuman" class="btn btn-outline-secondary btn-sm rounded-3 mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Kembali
+  </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4 p-md-5">
+    <!-- Badges -->
+    <div class="d-flex flex-wrap gap-2 mb-3">
+      <span class="badge
+        <%= announcement.category === 'INFORMASI' ? 'bg-info' : '' %>
+        <%= announcement.category === 'JADWAL' ? 'bg-primary' : '' %>
+        <%= announcement.category === 'TUGAS' ? 'bg-warning text-dark' : '' %>
+        <%= announcement.category === 'LIBUR' ? 'bg-success' : '' %>
+        <%= announcement.category === 'PENTING' ? 'bg-danger' : '' %>
+        <%= announcement.category === 'LAINNYA' ? 'bg-secondary' : '' %>
+      " style="font-size: 0.8rem;">
+        <%= announcement.category %>
+      </span>
+      <span class="badge bg-light text-dark border">
+        <%= announcement.targetType === 'ALL' ? 'Untuk Semua Peserta' : announcement.targetType === 'UNIVERSITY' ? 'Untuk Mahasiswa' : 'Untuk PKL SMK' %>
+      </span>
+    </div>
+
+    <!-- Title -->
+    <h4 class="fw-bold text-dark mb-3"><%= announcement.title %></h4>
+
+    <!-- Meta -->
+    <div class="d-flex flex-wrap gap-3 small text-muted mb-4">
+      <span>
+        <i class="bi bi-person me-1"></i><%= announcement.createdBy.fullName %>
+      </span>
+      <span>
+        <i class="bi bi-calendar me-1"></i>
+        Dipublikasikan: <%= new Date(announcement.publishDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+      </span>
+      <% if (announcement.expireDate) { %>
+        <span>
+          <i class="bi bi-clock me-1"></i>
+          Berakhir: <%= new Date(announcement.expireDate).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+        </span>
+      <% } %>
+    </div>
+
+    <hr />
+
+    <!-- Content -->
+    <div class="mt-4" style="white-space: pre-wrap; line-height: 1.8;">
+      <%= announcement.content %>
+    </div>
+
+    <!-- Attachment -->
+    <% if (announcement.attachment) { %>
+      <hr />
+      <div class="mt-4">
+        <h6 class="fw-bold mb-2">
+          <i class="bi bi-paperclip me-2 text-primary"></i>Lampiran
+        </h6>
+        <a
+          href="/uploads/<%= announcement.attachment %>"
+          class="btn btn-outline-primary btn-sm rounded-3"
+          download
+          target="_blank"
+        >
+          <i class="bi bi-download me-1"></i>Unduh Lampiran
+        </a>
+      </div>
+    <% } %>
+  </div>
+</div>

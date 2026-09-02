@@ -1,0 +1,271 @@
+<!-- Edit Peserta -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <a href="/mentor/peserta/<%= participant.id %>" class="btn btn-outline-primary btn-sm rounded-3">
+        <i class="bi bi-arrow-left me-1"></i>Kembali
+      </a>
+      <div>
+        <h4 class="fw-bold text-primary mb-0">
+          <i class="bi bi-pencil-square me-2"></i>Edit Peserta
+        </h4>
+        <p class="text-muted small mb-0">Mengubah data: <strong><%= participant.fullName %></strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Validation Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <ul class="mb-0 ps-3 small">
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="row justify-content-center">
+  <div class="col-12 col-lg-8">
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-body p-4 p-md-5">
+        <form action="/mentor/peserta/<%= participant.id %>/edit" method="POST" class="needs-validation" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <!-- Email (readonly) -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Email <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-envelope text-primary"></i>
+              </span>
+              <input type="email" class="form-control bg-light" value="<%= participant.email %>" disabled readonly />
+            </div>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>Email tidak dapat diubah.
+            </div>
+          </div>
+
+          <!-- Nama Lengkap -->
+          <div class="mb-3">
+            <label for="fullName" class="form-label fw-semibold small">Nama Lengkap <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-person text-primary"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="fullName"
+                name="fullName"
+                value="<%= participant.fullName %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Nama lengkap minimal 3 karakter.</div>
+            </div>
+          </div>
+
+          <!-- Nomor HP -->
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label fw-semibold small">Nomor HP <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-phone text-primary"></i>
+              </span>
+              <input
+                type="tel"
+                class="form-control form-control-lg bg-light"
+                id="phoneNumber"
+                name="phoneNumber"
+                value="<%= participant.phoneNumber %>"
+                required
+              />
+              <div class="invalid-feedback">Nomor HP tidak valid.</div>
+            </div>
+          </div>
+
+          <!-- Hidden participant type -->
+          <input type="hidden" name="participantType" value="<%= participant.participantType %>" />
+
+          <!-- Fields for UNIVERSITY -->
+          <% if (participant.participantType === 'UNIVERSITY') { %>
+            <div class="mb-3">
+              <label for="university" class="form-label fw-semibold small">Universitas <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="university"
+                name="university"
+                value="<%= participant.university || '' %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Nama universitas minimal 3 karakter.</div>
+            </div>
+            <div class="mb-3">
+              <label for="studyProgram" class="form-label fw-semibold small">Program Studi <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="studyProgram"
+                name="studyProgram"
+                value="<%= participant.studyProgram || '' %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Program studi minimal 3 karakter.</div>
+            </div>
+            <div class="mb-3">
+              <label for="studentId" class="form-label fw-semibold small">NIM <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="studentId"
+                name="studentId"
+                value="<%= participant.studentId || '' %>"
+                required
+                minlength="5"
+              />
+              <div class="invalid-feedback">NIM minimal 5 karakter.</div>
+            </div>
+          <% } %>
+
+          <!-- Fields for SMK -->
+          <% if (participant.participantType === 'SMK') { %>
+            <div class="mb-3">
+              <label for="schoolName" class="form-label fw-semibold small">Nama Sekolah <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="schoolName"
+                name="schoolName"
+                value="<%= participant.schoolName || '' %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Nama sekolah minimal 3 karakter.</div>
+            </div>
+            <div class="mb-3">
+              <label for="major" class="form-label fw-semibold small">Jurusan <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="major"
+                name="major"
+                value="<%= participant.major || '' %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Jurusan minimal 3 karakter.</div>
+            </div>
+            <div class="mb-3">
+              <label for="classGrade" class="form-label fw-semibold small">Kelas <span class="text-danger">*</span></label>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="classGrade"
+                name="classGrade"
+                value="<%= participant.classGrade || '' %>"
+                required
+              />
+              <div class="invalid-feedback">Kelas harus diisi.</div>
+            </div>
+          <% } %>
+
+          <!-- Periode Magang Terstruktur -->
+          <div class="row g-2 mb-3">
+            <div class="col-12 col-md-6">
+              <label for="internshipStartDate" class="form-label fw-semibold small">Tanggal Mulai Magang</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar-event text-primary"></i></span>
+                <input
+                  type="date"
+                  class="form-control form-control-lg bg-light"
+                  id="internshipStartDate"
+                  name="internshipStartDate"
+                  value="<%= participant.internshipStartDate ? new Date(participant.internshipStartDate).toISOString().split('T')[0] : '' %>"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <label for="internshipEndDate" class="form-label fw-semibold small">Tanggal Selesai Magang</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light"><i class="bi bi-calendar-check text-primary"></i></span>
+                <input
+                  type="date"
+                  class="form-control form-control-lg bg-light"
+                  id="internshipEndDate"
+                  name="internshipEndDate"
+                  value="<%= participant.internshipEndDate ? new Date(participant.internshipEndDate).toISOString().split('T')[0] : '' %>"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Periode Magang (Keterangan) -->
+          <div class="mb-3">
+            <label for="internshipPeriod" class="form-label fw-semibold small">Periode Magang (Keterangan) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-calendar-range text-primary"></i>
+              </span>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="internshipPeriod"
+                name="internshipPeriod"
+                value="<%= participant.internshipPeriod %>"
+                required
+              />
+              <div class="invalid-feedback">Periode magang harus diisi.</div>
+            </div>
+          </div>
+
+          <!-- Mentor -->
+          <div class="mb-4">
+            <label for="mentorId" class="form-label fw-semibold small">Mentor</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-person-badge text-primary"></i>
+              </span>
+              <select class="form-select form-select-lg bg-light" id="mentorId" name="mentorId">
+                <option value="">Pilih Mentor</option>
+                <% mentors.forEach(m => { %>
+                  <option value="<%= m.id %>" <%= participant.mentorId === m.id ? 'selected' : '' %>>
+                    <%= m.fullName %> (<%= m.email %>)
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <!-- Submit Button -->
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-lg flex-fill rounded-3">
+              <i class="bi bi-check-circle me-2"></i>Simpan Perubahan
+            </button>
+            <a href="/mentor/peserta/<%= participant.id %>" class="btn btn-outline-secondary btn-lg rounded-3">
+              Batal
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

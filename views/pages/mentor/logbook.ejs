@@ -1,0 +1,181 @@
+<!-- Mentor Logbook Page -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h5 class="fw-bold mb-1"><i class="bi bi-journal-text me-2 text-primary"></i>Review Logbook</h5>
+    <p class="text-muted small mb-0">Lihat dan review logbook harian peserta magang</p>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Filter & Search -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/mentor/logbook" class="row g-2 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label small fw-semibold">Filter Tanggal</label>
+        <div class="d-flex gap-2">
+          <a href="/mentor/logbook?filter=today<%= typeof filters !== 'undefined' && filters.search ? '&search=' + filters.search : '' %>" class="btn btn-sm <%= typeof filters !== 'undefined' && filters.filter === 'today' ? 'btn-primary' : 'btn-outline-primary' %> rounded-3 flex-fill">Hari Ini</a>
+          <a href="/mentor/logbook?filter=week<%= typeof filters !== 'undefined' && filters.search ? '&search=' + filters.search : '' %>" class="btn btn-sm <%= typeof filters !== 'undefined' && filters.filter === 'week' ? 'btn-primary' : 'btn-outline-primary' %> rounded-3 flex-fill">Minggu Ini</a>
+          <a href="/mentor/logbook?filter=month<%= typeof filters !== 'undefined' && filters.search ? '&search=' + filters.search : '' %>" class="btn btn-sm <%= typeof filters !== 'undefined' && filters.filter === 'month' ? 'btn-primary' : 'btn-outline-primary' %> rounded-3 flex-fill">Bulan Ini</a>
+          <a href="/mentor/logbook" class="btn btn-sm btn-outline-secondary rounded-3 flex-fill">Semua</a>
+        </div>
+      </div>
+      <div class="col-12 col-md-5">
+        <label for="search" class="form-label small fw-semibold">Cari</label>
+        <div class="input-group">
+          <input
+            type="text"
+            class="form-control bg-light"
+            id="search"
+            name="search"
+            placeholder="Cari nama, universitas, atau sekolah..."
+            value="<%= typeof filters !== 'undefined' && filters.search ? filters.search : '' %>"
+          />
+          <button class="btn btn-primary" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-12 col-md-3">
+        <label class="form-label small fw-semibold">&nbsp;</label>
+        <div>
+          <a href="/mentor/logbook" class="btn btn-outline-secondary w-100 rounded-3">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filter
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Logbook List -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <% if (typeof logbooks !== 'undefined' && logbooks.length > 0) { %>
+      <!-- Desktop Table -->
+      <div class="table-responsive d-none d-lg-block">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nama</th>
+              <th>Jenis Peserta</th>
+              <th>Tanggal</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% logbooks.forEach(log => { %>
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center gap-2">
+                    <% if (log.user.profilePhoto) { %>
+                      <img src="/uploads/<%= log.user.profilePhoto %>" alt="<%= log.user.fullName %>" class="rounded-circle" width="32" height="32" style="object-fit: cover;" />
+                    <% } else { %>
+                      <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                        <i class="bi bi-person text-primary"></i>
+                      </div>
+                    <% } %>
+                    <div>
+                      <span class="fw-semibold small"><%= log.user.fullName %></span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill">
+                    <%= log.user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'SMK' %>
+                  </span>
+                </td>
+                <td class="small">
+                  <%= new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                </td>
+                <td>
+                  <% if (log.status === 'REVIEWED') { %>
+                    <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle me-1"></i>Direview</span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-hourglass me-1"></i>Menunggu</span>
+                  <% } %>
+                </td>
+                <td>
+                  <a href="/mentor/logbook/<%= log.id %>" class="btn btn-sm btn-outline-primary rounded-3">
+                    <i class="bi bi-eye me-1"></i>Detail
+                  </a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards -->
+      <div class="d-lg-none p-3">
+        <% logbooks.forEach(log => { %>
+          <div class="card border-0 bg-light rounded-3 mb-2">
+            <div class="card-body py-3">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <% if (log.user.profilePhoto) { %>
+                  <img src="/uploads/<%= log.user.profilePhoto %>" alt="<%= log.user.fullName %>" class="rounded-circle" width="28" height="28" style="object-fit: cover;" />
+                <% } else { %>
+                  <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px;">
+                    <i class="bi bi-person text-primary small"></i>
+                  </div>
+                <% } %>
+                <div>
+                  <span class="fw-semibold small"><%= log.user.fullName %></span>
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill ms-1" style="font-size: 0.65rem;">
+                    <%= log.user.participantType === 'UNIVERSITY' ? 'Mhs' : 'SMK' %>
+                  </span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  <%= new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) %>
+                </small>
+                <% if (log.status === 'REVIEWED') { %>
+                  <span class="badge bg-success rounded-pill"><i class="bi bi-check-circle me-1"></i>Direview</span>
+                <% } else { %>
+                  <span class="badge bg-warning text-dark rounded-pill"><i class="bi bi-hourglass me-1"></i>Menunggu</span>
+                <% } %>
+              </div>
+              <a href="/mentor/logbook/<%= log.id %>" class="btn btn-sm btn-outline-primary rounded-3 w-100 mt-2">
+                <i class="bi bi-eye me-1"></i>Detail
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
+        <div class="p-3 border-top">
+          <nav>
+            <ul class="pagination pagination-sm justify-content-center mb-0">
+              <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+                <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
+                  <a class="page-link" href="/mentor/logbook?page=<%= p %><%= typeof filters !== 'undefined' && filters.filter ? '&filter=' + filters.filter : '' %><%= typeof filters !== 'undefined' && filters.search ? '&search=' + filters.search : '' %>"><%= p %></a>
+                </li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+      <% } %>
+    <% } else { %>
+      <div class="text-center py-5">
+        <i class="bi bi-journal-check text-muted" style="font-size: 3rem;"></i>
+        <h6 class="fw-bold text-dark mt-3 mb-1">Semua Review Selesai</h6>
+        <p class="text-muted small mb-0">Belum ada logbook baru yang perlu direview. Catatan harian peserta akan otomatis tampil di sini.</p>
+      </div>
+    <% } %>
+  </div>
+</div>

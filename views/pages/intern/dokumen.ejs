@@ -1,0 +1,208 @@
+<!-- Dokumen Resmi Saya - Intern -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="bi bi-folder-fill me-2 text-primary"></i>Dokumen Resmi Saya
+    </h5>
+    <p class="text-muted small mb-0">Lihat, cetak, dan unduh dokumen resmi Sertifikat dan Surat Magang yang diterbitkan oleh Mentor</p>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<% if (!hasDocuments) { %>
+  <div class="card border-0 shadow-sm rounded-3 p-5 text-center bg-white">
+    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center p-3 mb-3 mx-auto" style="width: 72px; height: 72px;">
+      <i class="bi bi-folder-plus text-primary fs-2"></i>
+    </div>
+    <h6 class="fw-bold mt-2 text-dark">Belum Ada Dokumen Diterbitkan</h6>
+    <p class="text-muted small mb-0" style="max-width: 450px; margin: 0 auto;">
+      Dokumen resmi seperti Surat Penerimaan Magang, Surat Keterangan Selesai Magang, dan Sertifikat Kelulusan akan otomatis muncul di sini begitu Mentor menerbitkannya.
+    </p>
+  </div>
+<% } else { %>
+  <!-- Sertifikat Kelulusan -->
+  <% if (certificates.length > 0) { %>
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+      <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0 text-dark">
+          <i class="bi bi-patch-check-fill me-2 text-success"></i>Sertifikat Kelulusan Magang
+        </h6>
+        <span class="badge bg-success bg-opacity-15 text-success rounded-pill"><%= certificates.length %> Sertifikat</span>
+      </div>
+      <div class="card-body p-0">
+        <!-- Desktop Table -->
+        <div class="d-none d-md-block">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Nama Dokumen</th>
+                  <th>Template</th>
+                  <th>Tanggal Diterbitkan</th>
+                  <th>Mentor Pembimbing</th>
+                  <th class="pe-4 text-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% certificates.forEach(doc => { %>
+                  <tr>
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                          <i class="bi bi-award-fill"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark">Sertifikat Kelulusan Resmi</div>
+                          <small class="text-muted">Format Print & PDF Terverifikasi</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td><small class="text-dark"><%= doc.template.name %> v<%= doc.template.version %></small></td>
+                    <td><small class="text-dark"><%= new Date(doc.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %></small></td>
+                    <td><small class="text-muted"><%= doc.generatedBy.fullName %></small></td>
+                    <td class="pe-4 text-end">
+                      <div class="d-inline-flex gap-2">
+                        <a href="/intern/dokumen/view/<%= doc.id %>" target="_blank" class="btn btn-sm btn-outline-primary rounded-3">
+                          <i class="bi bi-printer me-1"></i>Lihat & Cetak
+                        </a>
+                        <a href="/intern/dokumen/download/<%= doc.id %>" class="btn btn-sm btn-primary rounded-3">
+                          <i class="bi bi-download me-1"></i>Unduh
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="d-md-none p-3">
+          <div class="row g-3">
+            <% certificates.forEach(doc => { %>
+              <div class="col-12">
+                <div class="card border-0 bg-light rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-success bg-opacity-15 text-success rounded-pill">
+                      <i class="bi bi-patch-check-fill me-1"></i>Sertifikat
+                    </span>
+                    <small class="text-muted"><%= new Date(doc.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+                  </div>
+                  <h6 class="fw-bold mb-1 text-dark">Sertifikat Kelulusan Resmi</h6>
+                  <p class="small text-muted mb-3"><i class="bi bi-person me-1"></i>Diterbitkan oleh <%= doc.generatedBy.fullName %></p>
+                  <div class="d-flex gap-2">
+                    <a href="/intern/dokumen/view/<%= doc.id %>" target="_blank" class="btn btn-sm btn-outline-primary rounded-3 flex-grow-1 text-center">
+                      <i class="bi bi-printer me-1"></i>Cetak
+                    </a>
+                    <a href="/intern/dokumen/download/<%= doc.id %>" class="btn btn-sm btn-primary rounded-3 flex-grow-1 text-center">
+                      <i class="bi bi-download me-1"></i>Unduh
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Surat Keterangan & Penerimaan Magang -->
+  <% if (letters.length > 0) { %>
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-header bg-white border-0 pt-3 pb-2 d-flex align-items-center justify-content-between">
+        <h6 class="fw-bold mb-0 text-dark">
+          <i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Surat Keterangan Resmi
+        </h6>
+        <span class="badge bg-primary bg-opacity-15 text-primary rounded-pill"><%= letters.length %> Surat</span>
+      </div>
+      <div class="card-body p-0">
+        <!-- Desktop Table -->
+        <div class="d-none d-md-block">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Nama Dokumen</th>
+                  <th>Template</th>
+                  <th>Tanggal Diterbitkan</th>
+                  <th>Mentor Pembimbing</th>
+                  <th class="pe-4 text-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% letters.forEach(doc => { %>
+                  <tr>
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                          <i class="bi bi-file-text-fill"></i>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark"><%= doc.template.name %></div>
+                          <small class="text-muted">Surat Keterangan Magang Resmi</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td><small class="text-dark"><%= doc.template.name %> v<%= doc.template.version %></small></td>
+                    <td><small class="text-dark"><%= new Date(doc.createdAt).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) %></small></td>
+                    <td><small class="text-muted"><%= doc.generatedBy.fullName %></small></td>
+                    <td class="pe-4 text-end">
+                      <div class="d-inline-flex gap-2">
+                        <a href="/intern/dokumen/view/<%= doc.id %>" target="_blank" class="btn btn-sm btn-outline-primary rounded-3">
+                          <i class="bi bi-printer me-1"></i>Lihat & Cetak
+                        </a>
+                        <a href="/intern/dokumen/download/<%= doc.id %>" class="btn btn-sm btn-primary rounded-3">
+                          <i class="bi bi-download me-1"></i>Unduh
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="d-md-none p-3">
+          <div class="row g-3">
+            <% letters.forEach(doc => { %>
+              <div class="col-12">
+                <div class="card border-0 bg-light rounded-3 p-3">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="badge bg-primary bg-opacity-15 text-primary rounded-pill">
+                      <i class="bi bi-file-earmark-text me-1"></i>Surat
+                    </span>
+                    <small class="text-muted"><%= new Date(doc.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) %></small>
+                  </div>
+                  <h6 class="fw-bold mb-1 text-dark"><%= doc.template.name %></h6>
+                  <p class="small text-muted mb-3"><i class="bi bi-person me-1"></i>Diterbitkan oleh <%= doc.generatedBy.fullName %></p>
+                  <div class="d-flex gap-2">
+                    <a href="/intern/dokumen/view/<%= doc.id %>" target="_blank" class="btn btn-sm btn-outline-primary rounded-3 flex-grow-1 text-center">
+                      <i class="bi bi-printer me-1"></i>Cetak
+                    </a>
+                    <a href="/intern/dokumen/download/<%= doc.id %>" class="btn btn-sm btn-primary rounded-3 flex-grow-1 text-center">
+                      <i class="bi bi-download me-1"></i>Unduh
+                    </a>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+<% } %>

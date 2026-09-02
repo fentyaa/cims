@@ -1,0 +1,239 @@
+<!-- Profil Peserta -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="bi bi-person-circle me-2 text-primary"></i>Profil Saya
+    </h5>
+    <p class="text-muted small mb-0">Kelola informasi profil dan akun Anda</p>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Validation Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <ul class="mb-0 ps-3 small">
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="row g-4">
+  <!-- Profile Info Card -->
+  <div class="col-12 col-lg-4">
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-body text-center p-4">
+        <!-- Foto Profil -->
+        <div class="mb-3">
+          <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle border" style="width: 130px; height: 130px; overflow: hidden;">
+            <% if (user.profilePhoto) { %>
+              <img src="/uploads/<%= user.profilePhoto %>" alt="<%= user.fullName %>" id="currentPhoto" class="w-100 h-100" style="object-fit: cover;" />
+            <% } else { %>
+              <div id="currentPhoto">
+                <i class="bi bi-person-fill text-muted" style="font-size: 4rem;"></i>
+              </div>
+            <% } %>
+          </div>
+        </div>
+        <h5 class="fw-bold mb-1"><%= user.fullName %></h5>
+        <p class="text-muted small mb-2"><%= user.email %></p>
+        <div class="mb-2">
+          <span class="badge bg-info bg-opacity-10 text-info">
+            <%= user.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+          </span>
+          <% if (user.status === 'ACTIVE') { %>
+            <span class="badge bg-success ms-1">Active</span>
+          <% } else if (user.status === 'PENDING') { %>
+            <span class="badge bg-warning text-dark ms-1">Pending</span>
+          <% } else if (user.status === 'REJECTED') { %>
+            <span class="badge bg-danger ms-1">Rejected</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Form -->
+  <div class="col-12 col-lg-8">
+    <!-- Info Detail (read-only) -->
+    <div class="card border-0 shadow-sm rounded-3 mb-4">
+      <div class="card-header bg-transparent border-bottom-0 pt-3 px-4">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-info-circle me-2"></i>Informasi Akun
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <label class="small text-muted fw-semibold">Nama Lengkap</label>
+            <p class="fw-semibold mb-0"><%= user.fullName %></p>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="small text-muted fw-semibold">Email</label>
+            <p class="mb-0"><%= user.email %></p>
+          </div>
+          <% if (user.participantType === 'UNIVERSITY') { %>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Universitas</label>
+              <p class="mb-0"><%= user.university || '-' %></p>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Program Studi</label>
+              <p class="mb-0"><%= user.studyProgram || '-' %></p>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">NIM</label>
+              <p class="mb-0"><%= user.studentId || '-' %></p>
+            </div>
+          <% } else { %>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Sekolah</label>
+              <p class="mb-0"><%= user.schoolName || '-' %></p>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Jurusan</label>
+              <p class="mb-0"><%= user.major || '-' %></p>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Kelas</label>
+              <p class="mb-0"><%= user.classGrade || '-' %></p>
+            </div>
+          <% } %>
+          <div class="col-12 col-md-6">
+            <label class="small text-muted fw-semibold">Periode Magang</label>
+            <p class="mb-0"><%= user.internshipPeriod %></p>
+          </div>
+          <div class="col-12 col-md-6">
+            <label class="small text-muted fw-semibold">Mentor</label>
+            <p class="mb-0"><%= user.mentor ? user.mentor.fullName : '<span class="text-muted">Belum ditentukan</span>' %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Profil Form -->
+    <div class="card border-0 shadow-sm rounded-3">
+      <div class="card-header bg-transparent border-bottom-0 pt-3 px-4">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-pencil-square me-2"></i>Edit Profil
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <form action="/intern/profil" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <!-- Foto Profil -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Foto Profil</label>
+            <div class="d-flex align-items-center gap-3">
+              <div class="photo-preview rounded-circle bg-light d-flex align-items-center justify-content-center border" id="photoPreview" style="width: 80px; height: 80px; cursor: pointer; overflow: hidden;">
+                <i class="bi bi-camera text-muted" style="font-size: 1.5rem;"></i>
+              </div>
+              <div>
+                <label for="profilePhoto" class="btn btn-sm btn-outline-primary rounded-pill">
+                  <i class="bi bi-upload me-1"></i>Upload Foto
+                </label>
+                <input
+                  type="file"
+                  class="d-none"
+                  id="profilePhoto"
+                  name="profilePhoto"
+                  accept="image/jpeg,image/jpg,image/png"
+                />
+                <p class="text-muted small mt-1 mb-0">Maks 2 MB. Format: JPG, JPEG, PNG</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nomor HP -->
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label fw-semibold small">Nomor HP</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-phone text-primary"></i>
+              </span>
+              <input
+                type="tel"
+                class="form-control form-control-lg bg-light"
+                id="phoneNumber"
+                name="phoneNumber"
+                value="<%= user.phoneNumber %>"
+                required
+              />
+              <div class="invalid-feedback">Nomor HP tidak valid.</div>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+          <h6 class="fw-bold mb-3">
+            <i class="bi bi-shield-lock me-2"></i>Ubah Password
+          </h6>
+          <p class="text-muted small mb-3">Kosongkan jika tidak ingin mengubah password.</p>
+
+          <!-- Password Baru -->
+          <div class="mb-3">
+            <label for="password" class="form-label fw-semibold small">Password Baru</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-lock text-primary"></i>
+              </span>
+              <input
+                type="password"
+                class="form-control form-control-lg bg-light"
+                id="password"
+                name="password"
+                placeholder="Minimal 8 karakter"
+                minlength="8"
+              />
+              <button class="btn btn-outline-secondary border-0 bg-light toggle-password" type="button" data-target="password">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Konfirmasi Password -->
+          <div class="mb-4">
+            <label for="confirmPassword" class="form-label fw-semibold small">Konfirmasi Password Baru</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light">
+                <i class="bi bi-lock-fill text-primary"></i>
+              </span>
+              <input
+                type="password"
+                class="form-control form-control-lg bg-light"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Ulangi password baru"
+              />
+              <button class="btn btn-outline-secondary border-0 bg-light toggle-password" type="button" data-target="confirmPassword">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            <div class="form-text">
+              <i class="bi bi-check-circle me-1" id="passwordMatchIcon"></i>
+              <span id="passwordMatchText" class="text-muted">Masukkan ulang password yang sama.</span>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3">
+            <i class="bi bi-check-circle me-2"></i>Simpan Perubahan
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

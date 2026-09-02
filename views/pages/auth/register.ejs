@@ -1,0 +1,700 @@
+<!-- Register Page (Multi-Step UX Refinement) -->
+<div class="auth-page-wrapper">
+  <!-- Ambient background lighting -->
+  <div class="auth-bg-ambient">
+    <div class="auth-bg-blob-1"></div>
+    <div class="auth-bg-blob-2"></div>
+  </div>
+
+  <div class="container position-relative">
+    <div class="row justify-content-center">
+      <div class="col-11 col-sm-10 col-md-9 col-lg-7 col-xl-6">
+        <div class="auth-card">
+          <!-- Top Accent Stripe -->
+          <div class="auth-card-top-accent"></div>
+
+          <div class="auth-card-body">
+            <!-- Header -->
+            <div class="text-center mb-4">
+              <div class="mb-2">
+                <span class="auth-brand-badge">
+                  <i class="bi bi-rocket-takeoff-fill"></i> Pendaftaran Peserta
+                </span>
+              </div>
+              <h4 class="auth-heading">Daftar Akun Magang</h4>
+              <p class="auth-subtitle">Selesaikan 3 langkah mudah untuk mendaftarkan akun magang Anda</p>
+            </div>
+
+            <!-- Flash Messages -->
+            <% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+              <% messages.forEach(msg => { %>
+                <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+                  <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-1"></i>
+                  <%= msg.text %>
+                  <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% }) %>
+            <% } %>
+
+            <!-- Local Errors -->
+            <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+              <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                <ul class="mb-0 ps-3">
+                  <% errors.forEach(err => { %>
+                    <li><%= err %></li>
+                  <% }) %>
+                </ul>
+                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <% } %>
+
+            <!-- STEP INDICATOR -->
+            <div class="auth-stepper">
+              <div class="step-item active" id="stepIndicator1" onclick="handleStepIndicatorClick(1)">
+                <div class="step-number" id="stepNum1">01</div>
+                <div class="step-label">Data Pribadi</div>
+              </div>
+              <div class="step-line" id="stepLine1"></div>
+              <div class="step-item" id="stepIndicator2" onclick="handleStepIndicatorClick(2)">
+                <div class="step-number" id="stepNum2">02</div>
+                <div class="step-label">Data Magang</div>
+              </div>
+              <div class="step-line" id="stepLine2"></div>
+              <div class="step-item" id="stepIndicator3" onclick="handleStepIndicatorClick(3)">
+                <div class="step-number" id="stepNum3">03</div>
+                <div class="step-label">Keamanan Akun</div>
+              </div>
+            </div>
+
+            <!-- Single Register Form with 3 Steps -->
+            <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate enctype="multipart/form-data">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+              <!-- ==============================================
+                   STEP 1: INFORMASI PRIBADI
+                   ============================================== -->
+              <div class="auth-step-panel" id="stepPanel1">
+                <div class="auth-section">
+                  <div class="auth-section-title">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>1. Informasi Pribadi & Kontak</span>
+                  </div>
+
+                  <!-- Foto Profil (Opsional) -->
+                  <div class="mb-3 auth-photo-uploader">
+                    <div class="profile-photo-wrapper">
+                      <div class="auth-photo-circle" id="photoPreview" title="Klik untuk upload foto">
+                        <i class="bi bi-camera"></i>
+                      </div>
+                    </div>
+                    <div>
+                      <label for="profilePhoto" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 mb-1">
+                        <i class="bi bi-upload me-1"></i>Pilih Foto Profil
+                      </label>
+                      <input
+                        type="file"
+                        class="d-none"
+                        id="profilePhoto"
+                        name="profilePhoto"
+                        accept="image/*"
+                      />
+                      <div class="auth-helper-text">Opsional (Format: JPG, PNG, WebP)</div>
+                    </div>
+                  </div>
+
+                  <!-- Nama Lengkap -->
+                  <div class="mb-3">
+                    <label for="fullName" class="auth-label">Nama Lengkap <span class="text-danger">*</span></label>
+                    <div class="auth-input-group" id="groupFullName">
+                      <span class="input-icon"><i class="bi bi-person"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="fullName"
+                        name="fullName"
+                        placeholder="Masukkan nama lengkap"
+                        value="<%= typeof formData !== 'undefined' && formData.fullName ? formData.fullName : '' %>"
+                        required
+                        minlength="3"
+                      />
+                    </div>
+                    <div class="invalid-feedback" id="feedbackFullName">Nama lengkap minimal 3 karakter.</div>
+                  </div>
+
+                  <!-- Email & Nomor HP -->
+                  <div class="row g-2">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                      <label for="email" class="auth-label">Email <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupEmail">
+                        <span class="input-icon"><i class="bi bi-envelope"></i></span>
+                        <input
+                          type="email"
+                          class="form-control"
+                          id="email"
+                          name="email"
+                          placeholder="nama@email.com"
+                          value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+                          required
+                        />
+                      </div>
+                      <div class="invalid-feedback" id="feedbackEmail">Email harus valid (contoh@email.com).</div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label for="phoneNumber" class="auth-label">Nomor WhatsApp/HP <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupPhone">
+                        <span class="input-icon"><i class="bi bi-phone"></i></span>
+                        <input
+                          type="tel"
+                          class="form-control"
+                          id="phoneNumber"
+                          name="phoneNumber"
+                          placeholder="08xxxxxxxxxx"
+                          value="<%= typeof formData !== 'undefined' && formData.phoneNumber ? formData.phoneNumber : '' %>"
+                          required
+                        />
+                      </div>
+                      <div class="invalid-feedback" id="feedbackPhone">Nomor WhatsApp/HP wajib diisi.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 1 Navigation Action -->
+                <div class="mt-4">
+                  <button type="button" class="btn-auth-primary" onclick="nextToStep(2)">
+                    <span>Lanjut ke Data Magang</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ==============================================
+                   STEP 2: INSTANSI & PERIODE MAGANG
+                   ============================================== -->
+              <div class="auth-step-panel d-none" id="stepPanel2">
+                <div class="auth-section">
+                  <div class="auth-section-title">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>2. Instansi & Periode Magang</span>
+                  </div>
+
+                  <!-- Jenis Peserta (Segmented Cards) -->
+                  <div class="mb-3">
+                    <label class="auth-label">Jenis Peserta <span class="text-danger">*</span></label>
+                    <div class="auth-selection-grid">
+                      <label class="auth-selection-card <%= typeof formData !== 'undefined' && formData.participantType === 'UNIVERSITY' ? 'active' : '' %>" for="typeUniversity">
+                        <input
+                          type="radio"
+                          name="participantType"
+                          id="typeUniversity"
+                          value="UNIVERSITY"
+                          <%= typeof formData === 'undefined' || !formData.participantType || formData.participantType === 'UNIVERSITY' ? 'checked' : '' %>
+                          required
+                        />
+                        <div>
+                          <div class="card-text">Mahasiswa</div>
+                          <span class="card-subtext">Perguruan Tinggi / Universitas</span>
+                        </div>
+                      </label>
+
+                      <label class="auth-selection-card <%= typeof formData !== 'undefined' && formData.participantType === 'SMK' ? 'active' : '' %>" for="typeSMK">
+                        <input
+                          type="radio"
+                          name="participantType"
+                          id="typeSMK"
+                          value="SMK"
+                          <%= typeof formData !== 'undefined' && formData.participantType === 'SMK' ? 'checked' : '' %>
+                        />
+                        <div>
+                          <div class="card-text">Siswa SMK</div>
+                          <span class="card-subtext">Praktik Kerja Lapangan (PKL)</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Fields for UNIVERSITY (Mahasiswa) -->
+                  <div id="universityFields" class="participant-fields" style="display: <%= typeof formData !== 'undefined' && formData.participantType === 'SMK' ? 'none' : 'block' %>;">
+                    <div class="mb-3">
+                      <label for="university" class="auth-label">Nama Universitas <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupUniversity">
+                        <span class="input-icon"><i class="bi bi-building"></i></span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="university"
+                          name="university"
+                          placeholder="Contoh: Universitas Gadjah Mada"
+                          value="<%= typeof formData !== 'undefined' && formData.university ? formData.university : '' %>"
+                        />
+                      </div>
+                      <div class="invalid-feedback" id="feedbackUniversity">Nama universitas wajib diisi.</div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                      <div class="col-12 col-md-6 mb-2 mb-md-0">
+                        <label for="studyProgram" class="auth-label">Program Studi <span class="text-danger">*</span></label>
+                        <div class="auth-input-group" id="groupStudyProgram">
+                          <span class="input-icon"><i class="bi bi-book"></i></span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="studyProgram"
+                            name="studyProgram"
+                            placeholder="Teknik Informatika"
+                            value="<%= typeof formData !== 'undefined' && formData.studyProgram ? formData.studyProgram : '' %>"
+                          />
+                        </div>
+                        <div class="invalid-feedback" id="feedbackStudyProgram">Program studi wajib diisi.</div>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label for="studentId" class="auth-label">NIM <span class="text-danger">*</span></label>
+                        <div class="auth-input-group" id="groupStudentId">
+                          <span class="input-icon"><i class="bi bi-card-text"></i></span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="studentId"
+                            name="studentId"
+                            placeholder="Nomor Induk Mahasiswa"
+                            value="<%= typeof formData !== 'undefined' && formData.studentId ? formData.studentId : '' %>"
+                          />
+                        </div>
+                        <div class="invalid-feedback" id="feedbackStudentId">NIM wajib diisi.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Fields for SMK (PKL SMK) -->
+                  <div id="smkFields" class="participant-fields" style="display: <%= typeof formData !== 'undefined' && formData.participantType === 'SMK' ? 'block' : 'none' %>;">
+                    <div class="mb-3">
+                      <label for="schoolName" class="auth-label">Nama SMK <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupSchoolName">
+                        <span class="input-icon"><i class="bi bi-building"></i></span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="schoolName"
+                          name="schoolName"
+                          placeholder="Contoh: SMKN 1 Jakarta"
+                          value="<%= typeof formData !== 'undefined' && formData.schoolName ? formData.schoolName : '' %>"
+                        />
+                      </div>
+                      <div class="invalid-feedback" id="feedbackSchoolName">Nama SMK wajib diisi.</div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                      <div class="col-12 col-md-6 mb-2 mb-md-0">
+                        <label for="major" class="auth-label">Jurusan <span class="text-danger">*</span></label>
+                        <div class="auth-input-group" id="groupMajor">
+                          <span class="input-icon"><i class="bi bi-tools"></i></span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="major"
+                            name="major"
+                            placeholder="Rekayasa Perangkat Lunak"
+                            value="<%= typeof formData !== 'undefined' && formData.major ? formData.major : '' %>"
+                          />
+                        </div>
+                        <div class="invalid-feedback" id="feedbackMajor">Jurusan wajib diisi.</div>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <label for="classGrade" class="auth-label">Kelas <span class="text-danger">*</span></label>
+                        <div class="auth-input-group" id="groupClassGrade">
+                          <span class="input-icon"><i class="bi bi-tag"></i></span>
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="classGrade"
+                            name="classGrade"
+                            placeholder="XII RPL 1"
+                            value="<%= typeof formData !== 'undefined' && formData.classGrade ? formData.classGrade : '' %>"
+                          />
+                        </div>
+                        <div class="invalid-feedback" id="feedbackClassGrade">Kelas wajib diisi.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Tanggal Mulai & Tanggal Selesai Magang -->
+                  <div class="row g-2 mb-3">
+                    <div class="col-12 col-md-6 mb-2 mb-md-0">
+                      <label for="internshipStartDate" class="auth-label">Tanggal Mulai Magang</label>
+                      <div class="auth-input-group">
+                        <span class="input-icon"><i class="bi bi-calendar-event"></i></span>
+                        <input
+                          type="date"
+                          class="form-control"
+                          id="internshipStartDate"
+                          name="internshipStartDate"
+                          value="<%= typeof formData !== 'undefined' && formData.internshipStartDate ? formData.internshipStartDate : '' %>"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                      <label for="internshipEndDate" class="auth-label">Tanggal Selesai Magang</label>
+                      <div class="auth-input-group">
+                        <span class="input-icon"><i class="bi bi-calendar-check"></i></span>
+                        <input
+                          type="date"
+                          class="form-control"
+                          id="internshipEndDate"
+                          name="internshipEndDate"
+                          value="<%= typeof formData !== 'undefined' && formData.internshipEndDate ? formData.internshipEndDate : '' %>"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Periode Magang (Keterangan Teks) -->
+                  <div class="mb-1">
+                    <label for="internshipPeriod" class="auth-label">Keterangan Periode <span class="text-danger">*</span></label>
+                    <div class="auth-input-group" id="groupPeriod">
+                      <span class="input-icon"><i class="bi bi-calendar-range"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="internshipPeriod"
+                        name="internshipPeriod"
+                        placeholder="Contoh: Januari - Maret 2026 atau 01 Jan 2026 - 31 Mar 2026"
+                        value="<%= typeof formData !== 'undefined' && formData.internshipPeriod ? formData.internshipPeriod : '' %>"
+                        required
+                      />
+                    </div>
+                    <div class="invalid-feedback" id="feedbackPeriod">Keterangan periode magang wajib diisi.</div>
+                  </div>
+                </div>
+
+                <!-- Step 2 Navigation Actions -->
+                <div class="auth-step-actions">
+                  <button type="button" class="btn btn-outline-secondary btn-step-nav" onclick="prevToStep(1)">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Kembali</span>
+                  </button>
+                  <button type="button" class="btn-auth-primary flex-grow-1" onclick="nextToStep(3)">
+                    <span>Lanjut ke Keamanan Akun</span>
+                    <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ==============================================
+                   STEP 3: KEAMANAN AKUN & KONFIRMASI
+                   ============================================== -->
+              <div class="auth-step-panel d-none" id="stepPanel3">
+                <!-- Ringkasan Konfirmasi Data -->
+                <div class="auth-review-box">
+                  <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
+                    <span class="small fw-bold text-primary"><i class="bi bi-card-checklist me-1"></i>Ringkasan Pendaftaran:</span>
+                    <button type="button" class="btn btn-link btn-sm p-0 text-muted small text-decoration-none" onclick="goToStep(1)">Edit</button>
+                  </div>
+                  <div class="small text-muted d-flex flex-column gap-1">
+                    <div><strong>Nama:</strong> <span id="reviewName" class="text-dark">-</span></div>
+                    <div><strong>Email:</strong> <span id="reviewEmail" class="text-dark">-</span></div>
+                    <div><strong>Instansi:</strong> <span id="reviewInst" class="text-dark">-</span></div>
+                    <div><strong>Periode:</strong> <span id="reviewPeriod" class="text-dark">-</span></div>
+                  </div>
+                </div>
+
+                <div class="auth-section">
+                  <div class="auth-section-title">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span>3. Keamanan Akun</span>
+                  </div>
+
+                  <!-- Password -->
+                  <div class="mb-3">
+                    <label for="password" class="auth-label">Password <span class="text-danger">*</span></label>
+                    <div class="auth-input-group" id="groupPassword">
+                      <span class="input-icon"><i class="bi bi-lock"></i></span>
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="password"
+                        name="password"
+                        placeholder="Minimal 8 karakter"
+                        required
+                        minlength="8"
+                      />
+                      <button
+                        class="btn-toggle-pw toggle-password"
+                        type="button"
+                        data-target="password"
+                        aria-label="Toggle password visibility"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                    <div class="auth-helper-text">
+                      <i class="bi bi-info-circle me-1"></i>Minimal 8 karakter.
+                    </div>
+                    <div class="invalid-feedback" id="feedbackPassword">Password minimal 8 karakter.</div>
+                  </div>
+
+                  <!-- Konfirmasi Password -->
+                  <div class="mb-1">
+                    <label for="confirmPassword" class="auth-label">Konfirmasi Password <span class="text-danger">*</span></label>
+                    <div class="auth-input-group" id="groupConfirmPassword">
+                      <span class="input-icon"><i class="bi bi-lock-fill"></i></span>
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Ulangi password di atas"
+                        required
+                      />
+                      <button
+                        class="btn-toggle-pw toggle-password"
+                        type="button"
+                        data-target="confirmPassword"
+                        aria-label="Toggle password visibility"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                    <div class="auth-helper-text mt-1">
+                      <i class="bi bi-info-circle me-1" id="passwordMatchIcon"></i>
+                      <span id="passwordMatchText" class="text-muted">Masukkan ulang password yang sama.</span>
+                    </div>
+                    <div class="invalid-feedback" id="feedbackConfirmPassword">Konfirmasi password harus sama dengan password.</div>
+                  </div>
+                </div>
+
+                <!-- Step 3 Navigation Actions -->
+                <div class="auth-step-actions">
+                  <button type="button" class="btn btn-outline-secondary btn-step-nav" onclick="prevToStep(2)">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Kembali</span>
+                  </button>
+                  <button type="submit" class="btn-auth-primary flex-grow-1" id="btnRegister">
+                    <i class="bi bi-person-check-fill"></i>
+                    <span>Daftar Akun Magang</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Login Link -->
+            <div class="text-center mt-4 pt-3 border-top">
+              <p class="auth-subtitle">
+                Sudah punya akun?
+                <a href="/auth/login" class="auth-link ms-1">
+                  Masuk Sekarang
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT-SIDE MULTI-STEP LOGIC -->
+<script>
+  let currentStep = 1;
+
+  function updateStepperUI(targetStep) {
+    // Panels
+    document.querySelectorAll('.auth-step-panel').forEach((panel, idx) => {
+      if (idx + 1 === targetStep) {
+        panel.classList.remove('d-none');
+      } else {
+        panel.classList.add('d-none');
+      }
+    });
+
+    // Stepper Indicators
+    for (let i = 1; i <= 3; i++) {
+      const ind = document.getElementById('stepIndicator' + i);
+      const num = document.getElementById('stepNum' + i);
+      const line = document.getElementById('stepLine' + (i - 1));
+
+      if (i < targetStep) {
+        ind.className = 'step-item completed';
+        num.innerHTML = '<i class="bi bi-check2"></i>';
+      } else if (i === targetStep) {
+        ind.className = 'step-item active';
+        num.textContent = '0' + i;
+      } else {
+        ind.className = 'step-item';
+        num.textContent = '0' + i;
+      }
+
+      if (line) {
+        if (i <= targetStep) {
+          line.classList.add('completed');
+        } else {
+          line.classList.remove('completed');
+        }
+      }
+    }
+
+    // If entering Step 3, populate review box
+    if (targetStep === 3) {
+      populateReviewSummary();
+    }
+
+    // Scroll to top of card smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validateStep(step) {
+    let isValid = true;
+
+    if (step === 1) {
+      const fullName = document.getElementById('fullName');
+      const email = document.getElementById('email');
+      const phone = document.getElementById('phoneNumber');
+
+      // Validate Full Name
+      if (!fullName.value.trim() || fullName.value.trim().length < 3) {
+        setFieldValidity(fullName, 'groupFullName', false);
+        isValid = false;
+      } else {
+        setFieldValidity(fullName, 'groupFullName', true);
+      }
+
+      // Validate Email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email.value.trim() || !emailRegex.test(email.value.trim())) {
+        setFieldValidity(email, 'groupEmail', false);
+        isValid = false;
+      } else {
+        setFieldValidity(email, 'groupEmail', true);
+      }
+
+      // Validate Phone
+      if (!phone.value.trim()) {
+        setFieldValidity(phone, 'groupPhone', false);
+        isValid = false;
+      } else {
+        setFieldValidity(phone, 'groupPhone', true);
+      }
+    } else if (step === 2) {
+      const typeUniv = document.getElementById('typeUniversity');
+      const isUniv = typeUniv.checked;
+
+      if (isUniv) {
+        const univ = document.getElementById('university');
+        const study = document.getElementById('studyProgram');
+        const studentId = document.getElementById('studentId');
+
+        if (!univ.value.trim()) { setFieldValidity(univ, 'groupUniversity', false); isValid = false; }
+        else { setFieldValidity(univ, 'groupUniversity', true); }
+
+        if (!study.value.trim()) { setFieldValidity(study, 'groupStudyProgram', false); isValid = false; }
+        else { setFieldValidity(study, 'groupStudyProgram', true); }
+
+        if (!studentId.value.trim()) { setFieldValidity(studentId, 'groupStudentId', false); isValid = false; }
+        else { setFieldValidity(studentId, 'groupStudentId', true); }
+      } else {
+        const school = document.getElementById('schoolName');
+        const major = document.getElementById('major');
+        const classGrade = document.getElementById('classGrade');
+
+        if (!school.value.trim()) { setFieldValidity(school, 'groupSchoolName', false); isValid = false; }
+        else { setFieldValidity(school, 'groupSchoolName', true); }
+
+        if (!major.value.trim()) { setFieldValidity(major, 'groupMajor', false); isValid = false; }
+        else { setFieldValidity(major, 'groupMajor', true); }
+
+        if (!classGrade.value.trim()) { setFieldValidity(classGrade, 'groupClassGrade', false); isValid = false; }
+        else { setFieldValidity(classGrade, 'groupClassGrade', true); }
+      }
+
+      const period = document.getElementById('internshipPeriod');
+      if (!period.value.trim()) {
+        setFieldValidity(period, 'groupPeriod', false);
+        isValid = false;
+      } else {
+        setFieldValidity(period, 'groupPeriod', true);
+      }
+    }
+
+    return isValid;
+  }
+
+  function setFieldValidity(inputEl, groupId, isValid) {
+    const group = document.getElementById(groupId);
+    if (!isValid) {
+      inputEl.classList.add('is-invalid');
+      if (group) group.classList.add('is-invalid');
+    } else {
+      inputEl.classList.remove('is-invalid');
+      if (group) group.classList.remove('is-invalid');
+    }
+  }
+
+  function nextToStep(step) {
+    if (validateStep(currentStep)) {
+      currentStep = step;
+      updateStepperUI(currentStep);
+    }
+  }
+
+  function prevToStep(step) {
+    currentStep = step;
+    updateStepperUI(currentStep);
+  }
+
+  function goToStep(step) {
+    if (step < currentStep || validateStep(currentStep)) {
+      currentStep = step;
+      updateStepperUI(currentStep);
+    }
+  }
+
+  function handleStepIndicatorClick(targetStep) {
+    if (targetStep < currentStep) {
+      goToStep(targetStep);
+    } else if (targetStep > currentStep) {
+      if (validateStep(currentStep)) {
+        if (targetStep === 3 && !validateStep(2)) return;
+        goToStep(targetStep);
+      }
+    }
+  }
+
+  function populateReviewSummary() {
+    const name = document.getElementById('fullName').value.trim() || '-';
+    const email = document.getElementById('email').value.trim() || '-';
+    const typeUniv = document.getElementById('typeUniversity').checked;
+    const inst = typeUniv
+      ? (document.getElementById('university').value.trim() || 'Perguruan Tinggi')
+      : (document.getElementById('schoolName').value.trim() || 'SMK');
+    const period = document.getElementById('internshipPeriod').value.trim() || '-';
+
+    document.getElementById('reviewName').textContent = name;
+    document.getElementById('reviewEmail').textContent = email;
+    document.getElementById('reviewInst').textContent = inst + (typeUniv ? ' (Mahasiswa)' : ' (Siswa SMK)');
+    document.getElementById('reviewPeriod').textContent = period;
+  }
+
+  // Form submit handler on final step
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const pw = document.getElementById('password');
+    const cpw = document.getElementById('confirmPassword');
+    let valid = true;
+
+    if (!pw.value || pw.value.length < 8) {
+      setFieldValidity(pw, 'groupPassword', false);
+      valid = false;
+    } else {
+      setFieldValidity(pw, 'groupPassword', true);
+    }
+
+    if (!cpw.value || cpw.value !== pw.value) {
+      setFieldValidity(cpw, 'groupConfirmPassword', false);
+      valid = false;
+    } else {
+      setFieldValidity(cpw, 'groupConfirmPassword', true);
+    }
+
+    if (!valid) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    }
+  });
+</script>

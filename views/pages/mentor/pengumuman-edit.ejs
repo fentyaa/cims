@@ -1,0 +1,164 @@
+<!-- Mentor: Edit Pengumuman -->
+<div class="mb-4">
+  <a href="/mentor/pengumuman" class="btn btn-outline-secondary btn-sm rounded-3 mb-3">
+    <i class="bi bi-arrow-left me-1"></i>Kembali
+  </a>
+  <h5 class="fw-bold mb-1">
+    <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Pengumuman
+  </h5>
+  <p class="text-muted small mb-0">Edit pengumuman yang sudah dibuat</p>
+</div>
+
+<!-- Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <ul class="mb-0 ps-3 small">
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-4">
+    <form action="/mentor/pengumuman/edit/<%= announcement.id %>" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <!-- Judul -->
+      <div class="mb-3">
+        <label for="title" class="form-label fw-semibold small">Judul <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          class="form-control form-control-lg bg-light"
+          id="title"
+          name="title"
+          placeholder="Judul pengumuman"
+          value="<%= announcement.title %>"
+          required
+          minlength="3"
+        />
+        <div class="invalid-feedback">Judul pengumuman minimal 3 karakter.</div>
+      </div>
+
+      <!-- Isi Pengumuman -->
+      <div class="mb-3">
+        <label for="content" class="form-label fw-semibold small">Isi Pengumuman <span class="text-danger">*</span></label>
+        <textarea
+          class="form-control bg-light"
+          id="content"
+          name="content"
+          rows="6"
+          placeholder="Tulis isi pengumuman di sini..."
+          required
+          minlength="10"
+        ><%= announcement.content %></textarea>
+        <div class="invalid-feedback">Isi pengumuman minimal 10 karakter.</div>
+      </div>
+
+      <div class="row g-3">
+        <!-- Kategori -->
+        <div class="col-12 col-md-4">
+          <label for="category" class="form-label fw-semibold small">Kategori <span class="text-danger">*</span></label>
+          <select class="form-select form-select-lg bg-light" id="category" name="category" required>
+            <option value="">Pilih Kategori</option>
+            <option value="INFORMASI" <%= announcement.category === 'INFORMASI' ? 'selected' : '' %>>Informasi</option>
+            <option value="JADWAL" <%= announcement.category === 'JADWAL' ? 'selected' : '' %>>Jadwal</option>
+            <option value="TUGAS" <%= announcement.category === 'TUGAS' ? 'selected' : '' %>>Tugas</option>
+            <option value="LIBUR" <%= announcement.category === 'LIBUR' ? 'selected' : '' %>>Libur</option>
+            <option value="PENTING" <%= announcement.category === 'PENTING' ? 'selected' : '' %>>Penting</option>
+            <option value="LAINNYA" <%= announcement.category === 'LAINNYA' ? 'selected' : '' %>>Lainnya</option>
+          </select>
+          <div class="invalid-feedback">Pilih kategori pengumuman.</div>
+        </div>
+
+        <!-- Target Peserta -->
+        <div class="col-12 col-md-4">
+          <label for="targetType" class="form-label fw-semibold small">Target Peserta <span class="text-danger">*</span></label>
+          <select class="form-select form-select-lg bg-light" id="targetType" name="targetType" required>
+            <option value="">Pilih Target</option>
+            <option value="ALL" <%= announcement.targetType === 'ALL' ? 'selected' : '' %>>Semua Peserta</option>
+            <option value="UNIVERSITY" <%= announcement.targetType === 'UNIVERSITY' ? 'selected' : '' %>>Mahasiswa</option>
+            <option value="SMK" <%= announcement.targetType === 'SMK' ? 'selected' : '' %>>PKL SMK</option>
+          </select>
+          <div class="invalid-feedback">Pilih target peserta.</div>
+        </div>
+
+        <!-- Status -->
+        <div class="col-12 col-md-4">
+          <label for="status" class="form-label fw-semibold small">Status</label>
+          <select class="form-select form-select-lg bg-light" id="status" name="status">
+            <option value="DRAFT" <%= announcement.status === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+            <option value="PUBLISHED" <%= announcement.status === 'PUBLISHED' ? 'selected' : '' %>>Published</option>
+            <option value="ARCHIVED" <%= announcement.status === 'ARCHIVED' ? 'selected' : '' %>>Archived</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <!-- Tanggal Publikasi -->
+        <div class="col-12 col-md-4">
+          <label for="publishDate" class="form-label fw-semibold small">Tanggal Publikasi <span class="text-danger">*</span></label>
+          <input
+            type="date"
+            class="form-control form-control-lg bg-light"
+            id="publishDate"
+            name="publishDate"
+            value="<%= new Date(announcement.publishDate).toISOString().split('T')[0] %>"
+            required
+          />
+          <div class="invalid-feedback">Tanggal publikasi harus diisi.</div>
+        </div>
+
+        <!-- Tanggal Berakhir (Opsional) -->
+        <div class="col-12 col-md-4">
+          <label for="expireDate" class="form-label fw-semibold small">Tanggal Berakhir <span class="text-muted">(Opsional)</span></label>
+          <input
+            type="date"
+            class="form-control form-control-lg bg-light"
+            id="expireDate"
+            name="expireDate"
+            value="<%= announcement.expireDate ? new Date(announcement.expireDate).toISOString().split('T')[0] : '' %>"
+          />
+          <div class="form-text small">
+            <i class="bi bi-info-circle me-1"></i>Kosongkan jika tidak ada batas waktu.
+          </div>
+        </div>
+
+        <!-- Lampiran -->
+        <div class="col-12 col-md-4">
+          <label for="attachment" class="form-label fw-semibold small">Lampiran <span class="text-muted">(Opsional)</span></label>
+          <input
+            type="file"
+            class="form-control form-control-lg bg-light"
+            id="attachment"
+            name="attachment"
+            accept=".pdf,.docx,.xlsx,.png,.jpg,.jpeg"
+          />
+          <div class="form-text small">
+            <i class="bi bi-info-circle me-1"></i>PDF, DOCX, XLSX, PNG, JPG. Maks 10 MB.
+          </div>
+          <% if (announcement.attachment) { %>
+            <div class="mt-2">
+              <span class="badge bg-light text-dark border">
+                <i class="bi bi-paperclip me-1"></i><%= announcement.attachment %>
+              </span>
+              <small class="text-muted ms-1">(Upload baru untuk mengganti)</small>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-semibold">
+          <i class="bi bi-save me-2"></i>Simpan Perubahan
+        </button>
+        <a href="/mentor/pengumuman" class="btn btn-outline-secondary btn-lg rounded-3">
+          Batal
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

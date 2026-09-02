@@ -1,0 +1,165 @@
+<!-- Penilaian Peserta - Mentor List -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h5 class="fw-bold mb-1"><i class="bi bi-star-fill me-2 text-primary"></i>Penilaian Peserta</h5>
+    <p class="text-muted small mb-0">Kelola penilaian kinerja peserta magang</p>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : msg.type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Filter & Search -->
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form method="GET" action="/mentor/penilaian" class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-0">
+            <i class="bi bi-search text-primary"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control bg-light border-0"
+            name="search"
+            placeholder="Cari nama, email..."
+            value="<%= typeof filters !== 'undefined' && filters.search ? filters.search : '' %>"
+          />
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select bg-light border-0" name="type">
+          <option value="">Semua Jenis</option>
+          <option value="UNIVERSITY" <%= typeof filters !== 'undefined' && filters.type === 'UNIVERSITY' ? 'selected' : '' %>>Mahasiswa</option>
+          <option value="SMK" <%= typeof filters !== 'undefined' && filters.type === 'SMK' ? 'selected' : '' %>>PKL SMK</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select class="form-select bg-light border-0" name="status">
+          <option value="">Semua Status</option>
+          <option value="UNEVALUATED" <%= typeof filters !== 'undefined' && filters.status === 'UNEVALUATED' ? 'selected' : '' %>>Belum Dinilai</option>
+          <option value="DRAFT" <%= typeof filters !== 'undefined' && filters.status === 'DRAFT' ? 'selected' : '' %>>Draft</option>
+          <option value="PUBLISHED" <%= typeof filters !== 'undefined' && filters.status === 'PUBLISHED' ? 'selected' : '' %>>Published</option>
+          <option value="ARCHIVED" <%= typeof filters !== 'undefined' && filters.status === 'ARCHIVED' ? 'selected' : '' %>>Archived</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2">
+        <button type="submit" class="btn btn-primary w-100 rounded-3">
+          <i class="bi bi-funnel me-1"></i>Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Evaluations List -->
+<% if (typeof evaluations !== 'undefined' && evaluations.length > 0) { %>
+  <div class="row g-3">
+    <% evaluations.forEach(item => { %>
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-3">
+              <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                <i class="bi bi-person text-primary fs-5"></i>
+              </div>
+              <div class="min-w-0">
+                <h6 class="fw-bold mb-0 text-truncate"><%= item.fullName %></h6>
+                <small class="text-muted">
+                  <%= item.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'PKL SMK' %>
+                  <% if (item.participantType === 'UNIVERSITY') { %>
+                    - <%= item.university || '' %>
+                  <% } else { %>
+                    - <%= item.schoolName || '' %>
+                  <% } %>
+                </small>
+              </div>
+            </div>
+
+            <div class="small text-muted mb-3">
+              <div><i class="bi bi-envelope me-1"></i><%= item.email %></div>
+              <div><i class="bi bi-calendar me-1"></i><%= item.internshipPeriod %></div>
+            </div>
+
+            <% if (item.evaluation) { %>
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge bg-<%= item.evaluation.status === 'PUBLISHED' ? 'success' : item.evaluation.status === 'DRAFT' ? 'warning' : 'secondary' %> bg-opacity-10 text-<%= item.evaluation.status === 'PUBLISHED' ? 'success' : item.evaluation.status === 'DRAFT' ? 'warning' : 'secondary' %> rounded-pill">
+                  <%= item.evaluation.status === 'PUBLISHED' ? 'Published' : item.evaluation.status === 'DRAFT' ? 'Draft' : 'Archived' %>
+                </span>
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">
+                  <i class="bi bi-star me-1"></i><%= item.evaluation.grade %>
+                </span>
+                <span class="badge bg-info bg-opacity-10 text-info rounded-pill">
+                  <%= item.evaluation.finalScore %>
+                </span>
+              </div>
+
+              <div class="d-flex gap-2">
+                <a href="/mentor/penilaian/<%= item.evaluation.id %>" class="btn btn-sm btn-outline-primary rounded-3">
+                  <i class="bi bi-eye me-1"></i>Detail
+                </a>
+                <% if (item.evaluation.status === 'DRAFT') { %>
+                  <a href="/mentor/penilaian/edit/<%= item.evaluation.id %>" class="btn btn-sm btn-outline-warning rounded-3">
+                    <i class="bi bi-pencil me-1"></i>Edit
+                  </a>
+                <% } %>
+              </div>
+            <% } else { %>
+              <div class="text-center py-3">
+                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill mb-2">
+                  <i class="bi bi-clock me-1"></i>Belum Dinilai
+                </span>
+              </div>
+              <div class="d-grid">
+                <a href="/mentor/penilaian/buat/<%= item.id %>" class="btn btn-sm btn-primary rounded-3">
+                  <i class="bi bi-plus-circle me-1"></i>Buat Penilaian
+                </a>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Pagination -->
+  <% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item <%= !pagination.hasPrev ? 'disabled' : '' %>">
+          <a class="page-link" href="?page=<%= pagination.page - 1 %>&search=<%= filters.search %>&type=<%= filters.type %>&status=<%= filters.status %>">
+            <i class="bi bi-chevron-left"></i>
+          </a>
+        </li>
+        <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+          <li class="page-item <%= p === pagination.page ? 'active' : '' %>">
+            <a class="page-link" href="?page=<%= p %>&search=<%= filters.search %>&type=<%= filters.type %>&status=<%= filters.status %>"><%= p %></a>
+          </li>
+        <% } %>
+        <li class="page-item <%= !pagination.hasNext ? 'disabled' : '' %>">
+          <a class="page-link" href="?page=<%= pagination.page + 1 %>&search=<%= filters.search %>&type=<%= filters.type %>&status=<%= filters.status %>">
+            <i class="bi bi-chevron-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  <% } %>
+<% } else { %>
+  <div class="text-center py-5">
+    <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+    <h6 class="fw-bold mt-3">Tidak Ada Data Penilaian</h6>
+    <p class="text-muted small">Belum ada peserta yang perlu dinilai atau filter terlalu ketat.</p>
+    <a href="/mentor/peserta" class="btn btn-primary rounded-3 btn-sm">
+      <i class="bi bi-people me-1"></i>Lihat Daftar Peserta
+    </a>
+  </div>
+<% } %>
+
