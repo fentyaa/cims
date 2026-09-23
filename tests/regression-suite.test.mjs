@@ -2,7 +2,7 @@
  * Unified Regression Test Suite for CIMS (Part 1, 2B, 3A, 4)
  */
 
-import { generateToken, csrfProtection, regenerateCsrfToken } from "./middlewares/csrf.js";
+import { generateToken, csrfProtection, regenerateCsrfToken } from "../middlewares/csrf.js";
 import {
   escapeHtml,
   generateSafeDocumentFilename,
@@ -11,14 +11,14 @@ import {
   formatDateIndonesian,
   preparePlaceholderData,
   replacePlaceholders,
-} from "./services/documentService.js";
-import { isValidPassword, validateRegister, validateResetPassword, validateLogin, validateLogbook, validateInternshipDates } from "./utils/validators.js";
-import { formatInternshipPeriod } from "./utils/helpers.js";
-import { checkRedDate } from "./utils/holidayHelper.js";
-import { createWebRateLimiter, profileUpdateLimiter, bulkCertificateLimiter, bulkLetterLimiter } from "./middlewares/rateLimiter.js";
-import { VALID_STATUSES, ACTIVE_STATUSES, INACTIVE_STATUSES, isActiveDay } from "./services/presenceService.js";
-import { sanitizeYearMonth } from "./services/calendarService.js";
-import { calculateWorkDaysBetween, calculateInternshipProgress, calculateActiveDaysAndStreaks } from "./services/gamificationService.js";
+} from "../services/documentService.js";
+import { isValidPassword, validateRegister, validateResetPassword, validateLogin, validateLogbook, validateInternshipDates } from "../utils/validators.js";
+import { formatInternshipPeriod } from "../utils/helpers.js";
+import { checkRedDate } from "../utils/holidayHelper.js";
+import { createWebRateLimiter, profileUpdateLimiter, bulkCertificateLimiter, bulkLetterLimiter } from "../middlewares/rateLimiter.js";
+import { VALID_STATUSES, ACTIVE_STATUSES, INACTIVE_STATUSES, isActiveDay } from "../services/presenceService.js";
+import { sanitizeYearMonth } from "../services/calendarService.js";
+import { calculateWorkDaysBetween, calculateInternshipProgress, calculateActiveDaysAndStreaks } from "../services/gamificationService.js";
 
 let totalPassed = 0;
 let totalFailed = 0;

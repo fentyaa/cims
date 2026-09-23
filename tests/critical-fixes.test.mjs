@@ -2,9 +2,9 @@
  * Automated Verification Script for Critical Security Fixes
  */
 
-import { generateToken, csrfProtection } from "./middlewares/csrf.js";
-import { upload, uploadAttachment, uploadTemplate } from "./middlewares/upload.js";
-import { escapeHtml, generateSafeDocumentFilename } from "./services/documentService.js";
+import { generateToken, csrfProtection } from "../middlewares/csrf.js";
+import { upload, uploadAttachment, uploadTemplate } from "../middlewares/upload.js";
+import { escapeHtml, generateSafeDocumentFilename } from "../services/documentService.js";
 import path from "path";
 
 let passedCount = 0;
@@ -46,6 +46,7 @@ const mockReqNoToken = {
   get: () => "/login"
 };
 const mockResRedirect = {
+  status() { return this; },
   redirect: (url) => { rejectedMissing = true; }
 };
 csrfProtection(mockReqNoToken, mockResRedirect, () => {});
@@ -63,6 +64,7 @@ const mockReqQueryToken = {
   get: () => "/login"
 };
 csrfProtection(mockReqQueryToken, {
+  status() { return this; },
   redirect: () => { rejectedQueryToken = true; }
 }, () => {});
 assert(rejectedQueryToken, "CSRF token in query string is strictly rejected");
@@ -102,6 +104,7 @@ const mockReqMismatch = {
   get: () => "/login"
 };
 csrfProtection(mockReqMismatch, {
+  status() { return this; },
   redirect: () => { rejectedMismatch = true; }
 }, () => {});
 assert(rejectedMismatch, "Mismatched CSRF token is rejected");
@@ -207,7 +210,7 @@ assert(/^[a-zA-Z0-9_.-]+$/.test(fnNormal), "Filename contains only allowed safe 
 const maliciousName1 = "../../../etc/passwd";
 const fnMalicious1 = generateSafeDocumentFilename("LETTER", maliciousName1, "2026-08-23");
 assert(!fnMalicious1.includes("..") && !fnMalicious1.includes("/"), "Path traversal ../ eliminated from filename");
-assert(fnMalicious1.startsWith("surat-etcpasswd-"), "Malicious path characters stripped cleanly");
+assert(fnMalicious1.startsWith("surat-doc-etcpasswd-"), "Malicious path characters stripped cleanly");
 
 const maliciousName2 = "..\\..\\windows\\system32\\cmd";
 const fnMalicious2 = generateSafeDocumentFilename("CERTIFICATE", maliciousName2, "2026-08-23");
