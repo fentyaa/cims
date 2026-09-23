@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1240" height="660" viewBox="0 0 1240 660" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif">
+  <defs>
+    <!-- Soft Shadows -->
+    <filter id="cardShadow" x="-10%" y="-10%" width="125%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.07" />
+    </filter>
+    <filter id="nodeShadow" x="-10%" y="-10%" width="125%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.05" />
+    </filter>
+
+    <!-- Gradients for Steps -->
+    <linearGradient id="step1Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0f7ff" />
+    </linearGradient>
+
+    <linearGradient id="step2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fffdf5" />
+    </linearGradient>
+
+    <linearGradient id="step3Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f2fcf5" />
+    </linearGradient>
+
+    <linearGradient id="step4Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fdf2f4" />
+    </linearGradient>
+
+    <linearGradient id="step5Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0fdfa" />
+    </linearGradient>
+
+    <linearGradient id="step6Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f5f7fa" />
+    </linearGradient>
+
+    <linearGradient id="decisionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ff" />
+      <stop offset="100%" stop-color="#f3e8ff" />
+    </linearGradient>
+
+    <linearGradient id="pillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#e2e8f0" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#475569" />
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a" />
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1240" height="660" fill="#ffffff" rx="16" />
+  <rect x="2" y="2" width="1236" height="656" fill="none" stroke="#f1f5f9" stroke-width="2" rx="15" />
+
+  <!-- Title Header -->
+  <g transform="translate(620, 48)">
+    <text text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a" letter-spacing="0.3">Alur Kerja Pelaksanaan Magang</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- ROW 1: START -> STEP 1 -> STEP 2 -> STEP 3 -> STEP 4 -> STEP 5 -->
+  <!-- ============================================================ -->
+
+  <!-- START NODE: Mulai -->
+  <g transform="translate(45, 125)">
+    <rect x="0" y="0" width="84" height="120" rx="42" fill="url(#pillGrad)" stroke="#cbd5e1" stroke-width="1.5" filter="url(#nodeShadow)" />
+    <!-- Flag Icon -->
+    <g transform="translate(32, 34)">
+      <path d="M2 2v18M2 3h14l-3 5 3 5H2" fill="#3b82f6" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+    <text x="42" y="88" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">Mulai</text>
+  </g>
+
+  <!-- Arrow Start -> Step 1 -->
+  <line x1="130" y1="185" x2="152" y2="185" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STEP 1: Menerima arahan dan tugas dari pembimbing lapangan -->
+  <g transform="translate(155, 115)">
+    <rect x="0" y="0" width="180" height="140" rx="14" fill="url(#step1Grad)" stroke="#93c5fd" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="180" height="5" rx="2" fill="#2563eb" />
+    <!-- Icon: Person with speech -->
+    <g transform="translate(76, 18)">
+      <circle cx="14" cy="8" r="6" fill="#bfdbfe" stroke="#2563eb" stroke-width="1.6" />
+      <path d="M4 25c0-5 4-8 10-8s10 3 10 8" fill="none" stroke="#2563eb" stroke-width="1.6" stroke-linecap="round" />
+      <path d="M22 6h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2l-3 3v-3h-1" fill="#60a5fa" opacity="0.4" />
+      <path d="M22 6h6a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2l-3 3v-3h-1z" fill="none" stroke="#2563eb" stroke-width="1.4" />
+    </g>
+    <text x="90" y="70" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e3a8a">1. Menerima arahan</text>
+    <text x="90" y="90" text-anchor="middle" font-size="12" font-weight="500" fill="#1e40af">dan tugas dari</text>
+    <text x="90" y="110" text-anchor="middle" font-size="12" font-weight="500" fill="#1e40af">pembimbing lapangan</text>
+  </g>
+
+  <!-- Arrow Step 1 -> Step 2 -->
+  <line x1="336" y1="185" x2="358" y2="185" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STEP 2: Mempelajari kebutuhan atau materi pekerjaan -->
+  <g transform="translate(362, 115)">
+    <rect x="0" y="0" width="180" height="140" rx="14" fill="url(#step2Grad)" stroke="#fcd34d" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="180" height="5" rx="2" fill="#d97706" />
+    <!-- Icon: Laptop -->
+    <g transform="translate(76, 20)">
+      <rect x="4" y="2" width="20" height="14" rx="2" fill="#fef3c7" stroke="#d97706" stroke-width="1.6" />
+      <line x1="1" y1="19" x2="27" y2="19" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" />
+    </g>
+    <text x="90" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#78350f">2. Mempelajari</text>
+    <text x="90" y="86" text-anchor="middle" font-size="11.5" font-weight="500" fill="#92400e">kebutuhan atau materi</text>
+    <text x="90" y="104" text-anchor="middle" font-size="11.5" font-weight="500" fill="#92400e">pekerjaan</text>
+    <text x="90" y="122" text-anchor="middle" font-size="10.5" font-weight="400" fill="#b45309">(termasuk tools yang digunakan)</text>
+  </g>
+
+  <!-- Arrow Step 2 -> Step 3 -->
+  <line x1="543" y1="185" x2="565" y2="185" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STEP 3: Mengerjakan tugas sesuai arahan -->
+  <g transform="translate(569, 115)">
+    <rect x="0" y="0" width="180" height="140" rx="14" fill="url(#step3Grad)" stroke="#86efac" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="180" height="5" rx="2" fill="#16a34a" />
+    <!-- Icon: Cog / Gear -->
+    <g transform="translate(76, 20)">
+      <circle cx="14" cy="11" r="5" fill="#dcfce7" stroke="#16a34a" stroke-width="1.6" />
+      <path d="M14 2v3m0 12v3m9-9h-3M5 11H2m15.5-6.5l-2.1 2.1m-8.8 8.8l-2.1 2.1m13-2.1l-2.1-2.1M6.5 6.5L4.4 4.4" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round" />
+    </g>
+    <text x="90" y="74" text-anchor="middle" font-size="12.5" font-weight="700" fill="#14532d">3. Mengerjakan tugas</text>
+    <text x="90" y="96" text-anchor="middle" font-size="12" font-weight="500" fill="#15803d">sesuai arahan</text>
+  </g>
+
+  <!-- Arrow Step 3 -> Step 4 -->
+  <line x1="750" y1="185" x2="772" y2="185" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STEP 4: Melakukan diskusi dan penyesuaian dengan pembimbing lapangan -->
+  <g id="step4Node" transform="translate(776, 115)">
+    <rect x="0" y="0" width="180" height="140" rx="14" fill="url(#step4Grad)" stroke="#fda4af" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="180" height="5" rx="2" fill="#e11d48" />
+    <!-- Icon: Group / Meeting -->
+    <g transform="translate(72, 20)">
+      <circle cx="18" cy="8" r="5" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5" />
+      <circle cx="9" cy="10" r="4" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5" />
+      <circle cx="27" cy="10" r="4" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5" />
+      <path d="M9 22c0-3 3-5 9-5s9 2 9 5" fill="none" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+    <text x="90" y="68" text-anchor="middle" font-size="12.5" font-weight="700" fill="#881337">4. Melakukan diskusi</text>
+    <text x="90" y="88" text-anchor="middle" font-size="12" font-weight="500" fill="#9f1239">dan penyesuaian</text>
+    <text x="90" y="108" text-anchor="middle" font-size="12" font-weight="500" fill="#9f1239">dengan pembimbing</text>
+    <text x="90" y="126" text-anchor="middle" font-size="12" font-weight="500" fill="#9f1239">lapangan</text>
+  </g>
+
+  <!-- Arrow Step 4 -> Step 5 -->
+  <line x1="957" y1="185" x2="979" y2="185" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- STEP 5: Memeriksa hasil pekerjaan (apakah sudah sesuai) -->
+  <g transform="translate(983, 115)">
+    <rect x="0" y="0" width="200" height="140" rx="14" fill="url(#step5Grad)" stroke="#5eead4" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="200" height="5" rx="2" fill="#0d9488" />
+    <!-- Icon: Search / Magnifier -->
+    <g transform="translate(86, 20)">
+      <circle cx="12" cy="10" r="7" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.8" />
+      <line x1="17" y1="15" x2="25" y2="23" stroke="#0d9488" stroke-width="2.2" stroke-linecap="round" />
+    </g>
+    <text x="100" y="70" text-anchor="middle" font-size="12.5" font-weight="700" fill="#134e4a">5. Memeriksa hasil</text>
+    <text x="100" y="90" text-anchor="middle" font-size="12.5" font-weight="700" fill="#134e4a">pekerjaan</text>
+    <text x="100" y="112" text-anchor="middle" font-size="11.5" font-weight="400" fill="#0f766e">(apakah sudah sesuai)</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- DECISION NODE & FEEDBACK LOOP                                -->
+  <!-- ============================================================ -->
+
+  <!-- Vertical Arrow Step 5 -> Decision -->
+  <line x1="1083" y1="256" x2="1083" y2="295" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- Decision Diamond: Hasil sesuai kebutuhan? -->
+  <g transform="translate(1083, 355)">
+    <polygon points="0,-50 85,0 0,50 -85,0" fill="url(#decisionGrad)" stroke="#c084fc" stroke-width="2" filter="url(#cardShadow)" />
+    <text x="0" y="-8" text-anchor="middle" font-size="12.5" font-weight="700" fill="#581c87">Hasil sesuai</text>
+    <text x="0" y="12" text-anchor="middle" font-size="12.5" font-weight="700" fill="#581c87">kebutuhan?</text>
+  </g>
+
+  <!-- Branch "Tidak" (Loop Back to Step 4) -->
+  <!-- Line goes from Left vertex of Diamond (-85, 355) = (998, 355) -->
+  <!-- Moves Left to x=866 (middle of Step 4) -->
+  <!-- Moves Up to y=256 (bottom of Step 4) -->
+  <path d="M 997 355 L 866 355 L 866 261" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowRed)" />
+  <!-- Badge: Tidak -->
+  <g transform="translate(945, 338)">
+    <rect x="-24" y="-12" width="48" height="22" rx="6" fill="#fef2f2" stroke="#fca5a5" stroke-width="1" />
+    <text x="0" y="3" text-anchor="middle" font-size="11" font-weight="700" fill="#b91c1c">Tidak</text>
+  </g>
+
+  <!-- Branch "Ya" (Goes to Step 6) -->
+  <!-- From bottom of Diamond (1083, 405) down to y=520, then left to Step 6 -->
+  <!-- Wait! Let's position Step 6 and Selesai cleanly at the bottom! -->
+
+  <!-- ============================================================ -->
+  <!-- ROW 2: CALLOUT NOTE (LEFT) & STEP 6 -> SELESAI (RIGHT)       -->
+  <!-- ============================================================ -->
+
+  <!-- Note / Callout Box (Bottom Left) -->
+  <g transform="translate(45, 480)">
+    <rect x="0" y="0" width="600" height="110" rx="14" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" filter="url(#cardShadow)" />
+    <!-- Blue Accent Bar -->
+    <rect x="18" y="24" width="4" height="62" rx="2" fill="#3b82f6" />
+    <!-- Icon: Clipboard Checklist -->
+    <g transform="translate(36, 38)">
+      <rect x="0" y="0" width="26" height="34" rx="3" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.8" />
+      <rect x="7" y="-3" width="12" height="6" rx="2" fill="#93c5fd" stroke="#2563eb" stroke-width="1.2" />
+      <line x1="6" y1="12" x2="20" y2="12" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="6" y1="18" x2="16" y2="18" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+      <line x1="6" y1="24" x2="18" y2="24" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" />
+    </g>
+    <text x="80" y="42" font-size="12" font-weight="500" fill="#334155">Alur kerja ini diterapkan pada berbagai kegiatan selama magang,</text>
+    <text x="80" y="64" font-size="12" font-weight="500" fill="#334155">seperti pengembangan game, pembuatan mockup produk, pembuatan aset</text>
+    <text x="80" y="86" font-size="12" font-weight="500" fill="#334155">dan map, serta pengembangan aplikasi berbasis web.</text>
+  </g>
+
+  <!-- STEP 6: Menyelesaikan atau mengumpulkan hasil pekerjaan -->
+  <g transform="translate(680, 485)">
+    <rect x="0" y="0" width="290" height="100" rx="14" fill="url(#step6Grad)" stroke="#94a3b8" stroke-width="1.5" filter="url(#cardShadow)" />
+    <rect x="0" y="0" width="290" height="4" rx="2" fill="#475569" />
+    <!-- Checkmark Icon -->
+    <g transform="translate(24, 34)">
+      <circle cx="16" cy="16" r="14" fill="#dcfce7" stroke="#16a34a" stroke-width="2" />
+      <path d="M10 16l4 4 8-8" fill="none" stroke="#16a34a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+    <text x="70" y="44" font-size="13" font-weight="700" fill="#0f172a">6. Menyelesaikan atau</text>
+    <text x="70" y="66" font-size="13" font-weight="600" fill="#334155">mengumpulkan hasil pekerjaan</text>
+  </g>
+
+  <!-- Arrow Decision (Ya) -> Step 6 -->
+  <!-- From bottom of Decision Diamond (1083, 405) down to y=535, then turns left into Step 6 right border (972, 535) -->
+  <path d="M 1083 406 L 1083 450 L 825 450 L 825 480" fill="none" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowGreen)" />
+  <!-- Badge: Ya -->
+  <g transform="translate(1083, 430)">
+    <rect x="-18" y="-11" width="36" height="22" rx="6" fill="#f0fdf4" stroke="#86efac" stroke-width="1" />
+    <text x="0" y="4" text-anchor="middle" font-size="11" font-weight="700" fill="#15803d">Ya</text>
+  </g>
+
+  <!-- Arrow Step 6 -> Selesai -->
+  <line x1="971" y1="535" x2="1010" y2="535" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- END NODE: Selesai -->
+  <g transform="translate(1015, 485)">
+    <rect x="0" y="0" width="140" height="100" rx="24" fill="url(#pillGrad)" stroke="#cbd5e1" stroke-width="1.5" filter="url(#cardShadow)" />
+    <!-- Chequered / Finish Flag Icon -->
+    <g transform="translate(56, 24)">
+      <path d="M4 4v20M4 6h16l-3 5 3 5H4" fill="#0f172a" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+      <!-- squares -->
+      <rect x="7" y="8" width="4" height="3" fill="#ffffff" />
+      <rect x="14" y="8" width="3" height="3" fill="#ffffff" />
+      <rect x="10" y="11" width="4" height="3" fill="#ffffff" />
+    </g>
+    <text x="70" y="76" text-anchor="middle" font-size="14" font-weight="800" fill="#0f172a">Selesai</text>
+  </g>
+</svg>

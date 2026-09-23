@@ -15,6 +15,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pgSession from "connect-pg-simple";
 import pg from "pg";
+import os from "os";
 import { csrfMiddleware, csrfProtection } from "./middlewares/csrf.js";
 
 // Load environment variables dari file .env
@@ -56,7 +57,7 @@ const isProduction = process.env.NODE_ENV === "production";
 
 app.use(
   express.static(path.join(__dirname, "public"), {
-    maxAge: isProduction ? "1d" : "1h",
+    maxAge: isProduction ? "1d" : 0,
     etag: true,
     lastModified: true,
   })
@@ -118,6 +119,7 @@ const PgStore = pgSession(session);
 // Gunakan DIRECT_URL (port 5432) untuk koneksi persisten session store,
 // karena DATABASE_URL (port 6543 / pgbouncer transaction mode) menutup koneksi idle.
 const sessionDbUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+const isLocalDb = sessionDbUrl.includes("localhost") || sessionDbUrl.includes("127.0.0.1");
 
 const pgPool = new pg.Pool({
   connectionString: sessionDbUrl,
@@ -126,9 +128,11 @@ const pgPool = new pg.Pool({
   connectionTimeoutMillis: 10000,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10000,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: isLocalDb
+    ? false
+    : {
+        rejectUnauthorized: false,
+      },
 });
 
 pgPool.on("error", (err) => {
@@ -261,7 +265,24 @@ app.use((req, res) => {
 // ============================================================
 
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
   console.error("Error:", err.stack);
+
+  // Tangkap galat batas ukuran upload jika tidak tertangkap di router
+  if (err && (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE")) {
+    const uploadErrMsg =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "Ukuran foto profil melebihi batas maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil (maksimal 2 MB, format JPG/JPEG/PNG)."
+        : `Gagal mengunggah berkas: ${err.message}`;
+
+    if (req.session) {
+      req.session.messages = [{ type: "danger", text: uploadErrMsg }];
+    }
+    const redirectUrl = req.get("Referrer") || req.originalUrl || "/";
+    return res.redirect(redirectUrl);
+  }
 
   const statusCode = err.status || 500;
   res.status(statusCode).render("pages/error", {
@@ -278,8 +299,25 @@ app.use((err, req, res, next) => {
 // START SERVER
 // ============================================================
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server IMS berjalan di http://localhost:${PORT}`);
+function getLocalIpAddress() {
+  const interfaces = os.networkInterfaces();
+  for (const devName in interfaces) {
+    const iface = interfaces[devName];
+    for (let i = 0; i < iface.length; i++) {
+      const alias = iface[i];
+      if (alias.family === "IPv4" && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+  return "127.0.0.1";
+}
+
+app.listen(PORT, "0.0.0.0", () => {
+  const localIp = getLocalIpAddress();
+  console.log(`🚀 Server IMS berjalan di:`);
+  console.log(`   - Laptop / Komputer : http://localhost:${PORT}`);
+  console.log(`   - HP (Jaringan Sama): http://${localIp}:${PORT}`);
   console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
 });
 

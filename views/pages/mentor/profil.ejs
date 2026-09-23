@@ -1,5 +1,265 @@
-<div class="text-center py-5">
-  <i class="bi bi-person-circle text-primary" style="font-size: 3rem;"></i>
-  <h4 class="fw-bold mt-3">Profil Mentor</h4>
-  <p class="text-muted">Halaman ini akan menampilkan profil mentor. Fitur tersedia pada tahap pengembangan berikutnya.</p>
+<!-- Profil Mentor - CIMS -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark">
+      <i class="bi bi-person-circle me-2 text-primary"></i>Profil Mentor
+    </h5>
+    <p class="text-muted small mb-0">Kelola identitas pembimbing lapangan, nomor kontak, dan keamanan akun</p>
+  </div>
 </div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3 shadow-sm" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- Validation Errors -->
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3 shadow-sm" role="alert">
+    <div class="d-flex align-items-center gap-2 fw-semibold mb-1">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>Periksa kembali input Anda:</span>
+    </div>
+    <ul class="mb-0 ps-3">
+      <% errors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>
+
+<div class="row g-4">
+  <!-- Sisi Kiri: Kartu Identitas Mentor -->
+  <div class="col-12 col-lg-4">
+    <div class="card border shadow-sm rounded-4 h-100">
+      <div class="card-body text-center p-4 d-flex flex-column align-items-center justify-content-center">
+        <!-- Foto Profil Avatar -->
+        <div class="mb-3 position-relative">
+          <div class="d-flex align-items-center justify-content-center rounded-circle border border-2 border-primary border-opacity-25 shadow-sm" style="width: 130px; height: 130px; overflow: hidden; background: #f8fafc;">
+            <% if (user.profilePhoto) { %>
+              <img src="/uploads/<%= user.profilePhoto %>" alt="<%= user.fullName %>" id="currentPhoto" class="w-100 h-100" style="object-fit: cover;" />
+            <% } else { %>
+              <div id="currentPhoto" class="d-flex align-items-center justify-content-center w-100 h-100 bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <h5 class="fw-bold mb-1 text-dark"><%= user.fullName %></h5>
+        <p class="text-muted small mb-2"><%= user.email %></p>
+
+        <div class="d-flex flex-wrap justify-content-center gap-1 mb-3">
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-1">
+            <i class="bi bi-shield-check me-1"></i>Mentor Pembimbing
+          </span>
+          <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-1">
+            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Aktif
+          </span>
+        </div>
+
+        <hr class="w-100 my-3 text-secondary opacity-25">
+
+        <div class="w-100 text-start small">
+          <div class="d-flex justify-content-between py-1 border-bottom border-light">
+            <span class="text-muted">Peran Sistem:</span>
+            <span class="fw-semibold text-dark">Supervisor / Pembimbing</span>
+          </div>
+          <div class="d-flex justify-content-between py-1 border-bottom border-light">
+            <span class="text-muted">No. WhatsApp:</span>
+            <span class="fw-semibold text-dark"><%= user.phoneNumber || '-' %></span>
+          </div>
+          <div class="d-flex justify-content-between py-1">
+            <span class="text-muted">Bergabung Sejak:</span>
+            <span class="fw-semibold text-dark"><%= user.createdAt ? new Date(user.createdAt).toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }) : '-' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sisi Kanan: Form Edit Profil & Keamanan Akun -->
+  <div class="col-12 col-lg-8">
+    <div class="card border shadow-sm rounded-4">
+      <div class="card-header bg-transparent py-3 px-4 border-bottom">
+        <h6 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+          <i class="bi bi-pencil-square text-primary"></i>
+          <span>Perbarui Data Diri & Keamanan</span>
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <form method="POST" action="/mentor/profil" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+
+          <!-- Section 1: Biodata -->
+          <div class="mb-4">
+            <h6 class="fw-bold text-secondary text-uppercase small mb-3" style="letter-spacing: 0.5px;">
+              1. Informasi Kontak & Identitas
+            </h6>
+            <div class="row g-3">
+              <!-- Upload Foto Baru -->
+              <div class="col-12">
+                <label for="profilePhoto" class="form-label small fw-semibold text-muted">
+                  Ganti Foto Profil (Opsional, JPG/PNG maks 2MB)
+                </label>
+                <input
+                  type="file"
+                  class="form-control form-control-sm rounded-3"
+                  id="profilePhoto"
+                  name="profilePhoto"
+                  accept="image/jpeg,image/png,image/webp"
+                />
+              </div>
+
+              <!-- Nama Lengkap -->
+              <div class="col-12 col-md-6">
+                <label for="fullName" class="form-label small fw-semibold text-muted">Nama Lengkap <span class="text-danger">*</span></label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                  <input
+                    type="text"
+                    class="form-control rounded-end-3"
+                    id="fullName"
+                    name="fullName"
+                    value="<%= user.fullName %>"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Email (Read-only) -->
+              <div class="col-12 col-md-6">
+                <label class="form-label small fw-semibold text-muted">Alamat Email (Akun)</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                  <input
+                    type="email"
+                    class="form-control rounded-end-3 bg-light text-muted"
+                    value="<%= user.email %>"
+                    disabled
+                  />
+                </div>
+                <small class="text-muted" style="font-size: 0.7rem;">Email akun tidak dapat diubah secara mandiri.</small>
+              </div>
+
+              <!-- Nomor HP / WhatsApp -->
+              <div class="col-12 col-md-6">
+                <label for="phoneNumber" class="form-label small fw-semibold text-muted">Nomor WhatsApp / HP</label>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light"><i class="bi bi-whatsapp text-success"></i></span>
+                  <input
+                    type="text"
+                    class="form-control rounded-end-3"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    value="<%= user.phoneNumber || '' %>"
+                    placeholder="Contoh: 081234567890"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4 text-secondary opacity-25">
+
+          <!-- Section 2: Keamanan Akun (Ganti Password) -->
+          <div class="mb-4">
+            <h6 class="fw-bold text-secondary text-uppercase small mb-2" style="letter-spacing: 0.5px;">
+              2. Ganti Kata Sandi (Opsional)
+            </h6>
+            <p class="text-muted small mb-3">Kosongkan jika Anda tidak ingin memperbarui kata sandi.</p>
+
+            <div class="row g-3">
+              <!-- Password Saat Ini -->
+              <div class="col-12 col-md-4">
+                <label for="currentPassword" class="form-label small fw-semibold text-muted">Kata Sandi Saat Ini</label>
+                <input
+                  type="password"
+                  class="form-control form-control-sm rounded-3"
+                  id="currentPassword"
+                  name="currentPassword"
+                  placeholder="Masukkan sandi saat ini"
+                  autocomplete="current-password"
+                />
+              </div>
+
+              <!-- Password Baru -->
+              <div class="col-12 col-md-4">
+                <label for="newPassword" class="form-label small fw-semibold text-muted">Kata Sandi Baru</label>
+                <input
+                  type="password"
+                  class="form-control form-control-sm rounded-3"
+                  id="newPassword"
+                  name="newPassword"
+                  placeholder="Min. 8 karakter"
+                  autocomplete="new-password"
+                />
+              </div>
+
+              <!-- Konfirmasi Password Baru -->
+              <div class="col-12 col-md-4">
+                <label for="confirmPassword" class="form-label small fw-semibold text-muted">Konfirmasi Sandi Baru</label>
+                <input
+                  type="password"
+                  class="form-control form-control-sm rounded-3"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Ulangi sandi baru"
+                  autocomplete="new-password"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Simpan -->
+          <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a href="/mentor/dashboard" class="btn btn-outline-secondary btn-sm rounded-3 px-3 py-2">
+              Batal
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm rounded-3 px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm">
+              <i class="bi bi-check-lg"></i>
+              <span>Simpan Perubahan</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Image Preview Script -->
+<script>
+  (function() {
+    const photoInput = document.getElementById('profilePhoto');
+    const currentPhoto = document.getElementById('currentPhoto');
+
+    if (photoInput && currentPhoto) {
+      photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const MAX_SIZE = 2 * 1024 * 1024;
+          if (file.size > MAX_SIZE) {
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            alert(`Ukuran foto (${sizeMB} MB) melebihi batas maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil.`);
+            photoInput.value = '';
+            return;
+          }
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+              currentPhoto.innerHTML = `<img src="${evt.target.result}" class="w-100 h-100" style="object-fit: cover;" alt="Preview Foto" />`;
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      });
+    }
+  })();
+</script>

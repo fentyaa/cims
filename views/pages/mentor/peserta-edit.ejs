@@ -189,7 +189,7 @@
           <!-- Periode Magang Terstruktur -->
           <div class="row g-2 mb-3">
             <div class="col-12 col-md-6">
-              <label for="internshipStartDate" class="form-label fw-semibold small">Tanggal Mulai Magang</label>
+              <label for="internshipStartDate" class="form-label fw-semibold small">Tanggal Mulai Magang <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-calendar-event text-primary"></i></span>
                 <input
@@ -198,11 +198,12 @@
                   id="internshipStartDate"
                   name="internshipStartDate"
                   value="<%= participant.internshipStartDate ? new Date(participant.internshipStartDate).toISOString().split('T')[0] : '' %>"
+                  required
                 />
               </div>
             </div>
             <div class="col-12 col-md-6">
-              <label for="internshipEndDate" class="form-label fw-semibold small">Tanggal Selesai Magang</label>
+              <label for="internshipEndDate" class="form-label fw-semibold small">Tanggal Selesai Magang <span class="text-danger">*</span></label>
               <div class="input-group">
                 <span class="input-group-text bg-light"><i class="bi bi-calendar-check text-primary"></i></span>
                 <input
@@ -211,14 +212,15 @@
                   id="internshipEndDate"
                   name="internshipEndDate"
                   value="<%= participant.internshipEndDate ? new Date(participant.internshipEndDate).toISOString().split('T')[0] : '' %>"
+                  required
                 />
               </div>
             </div>
           </div>
 
-          <!-- Periode Magang (Keterangan) -->
+          <!-- Periode Magang (Keterangan Otomatis) -->
           <div class="mb-3">
-            <label for="internshipPeriod" class="form-label fw-semibold small">Periode Magang (Keterangan) <span class="text-danger">*</span></label>
+            <label for="internshipPeriod" class="form-label fw-semibold small">Periode Magang (Otomatis)</label>
             <div class="input-group">
               <span class="input-group-text bg-light">
                 <i class="bi bi-calendar-range text-primary"></i>
@@ -229,10 +231,12 @@
                 id="internshipPeriod"
                 name="internshipPeriod"
                 value="<%= participant.internshipPeriod %>"
-                required
+                readonly
               />
-              <div class="invalid-feedback">Periode magang harus diisi.</div>
             </div>
+            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
+              <i class="bi bi-magic text-primary me-1"></i>Otomatis terisi dari tanggal mulai dan selesai magang di atas tanpa perlu diketik manual.
+            </small>
           </div>
 
           <!-- Mentor -->
@@ -269,3 +273,56 @@
     </div>
   </div>
 </div>
+
+<script>
+  function updateAutoPeriodEdit() {
+    const startVal = document.getElementById('internshipStartDate').value;
+    const endVal = document.getElementById('internshipEndDate').value;
+    const periodEl = document.getElementById('internshipPeriod');
+    if (!startVal || !endVal || !periodEl) return;
+    
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+    
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const startDay = start.getDate();
+    const startMonth = months[start.getMonth()];
+    const startYear = start.getFullYear();
+
+    const endDay = end.getDate();
+    const endMonth = months[end.getMonth()];
+    const endYear = end.getFullYear();
+
+    let text = '';
+    if (startYear === endYear) {
+      if (startMonth === endMonth) {
+        text = `${startDay} - ${endDay} ${startMonth} ${startYear}`;
+      } else {
+        text = `${startDay} ${startMonth} - ${endDay} ${endMonth} ${startYear}`;
+      }
+    } else {
+      text = `${startDay} ${startMonth} ${startYear} - ${endDay} ${endMonth} ${endYear}`;
+    }
+    periodEl.value = text;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const startEl = document.getElementById('internshipStartDate');
+    const endEl = document.getElementById('internshipEndDate');
+    if (startEl) {
+      startEl.addEventListener('change', updateAutoPeriodEdit);
+      startEl.addEventListener('input', updateAutoPeriodEdit);
+    }
+    if (endEl) {
+      endEl.addEventListener('change', updateAutoPeriodEdit);
+      endEl.addEventListener('input', updateAutoPeriodEdit);
+    }
+    if (startEl && startEl.value && endEl && endEl.value) {
+      updateAutoPeriodEdit();
+    }
+  });
+</script>

@@ -22,12 +22,44 @@ const EVALUATION_CATEGORIES = [
 ];
 
 /**
+ * Melakukan parsing nilai angka dengan dukungan pemisah desimal koma (format lokal ID) maupun titik.
+ * Contoh: "85,5" -> 85.5, "90.25" -> 90.25, 85 -> 85
+ * @param {string|number} val
+ * @returns {number}
+ */
+export const parseScore = (val) => {
+  if (val === null || val === undefined || val === "") return 0;
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
+  const normalized = String(val).trim().replace(",", ".");
+  const num = parseFloat(normalized);
+  return isNaN(num) ? 0 : Math.round(num * 100) / 100;
+};
+
+/**
+ * Memvalidasi batas rentang skor penilaian (0 - 100).
+ * Melempar error jika nilai di luar rentang atau tidak valid.
+ * @param {string|number} val
+ * @param {string} fieldName
+ * @returns {number}
+ */
+export const validateScoreBounds = (val, fieldName) => {
+  if (val === null || val === undefined || String(val).trim() === "") {
+    throw new Error(`Nilai ${fieldName} wajib diisi dan harus berada dalam rentang 0 sampai 100.`);
+  }
+  const normalized = typeof val === "number" ? val : parseFloat(String(val).trim().replace(",", "."));
+  if (isNaN(normalized) || normalized < 0 || normalized > 100) {
+    throw new Error(`Nilai ${fieldName} harus berada dalam rentang 0 sampai 100.`);
+  }
+  return Math.round(normalized * 100) / 100;
+};
+
+/**
  * Menghitung nilai akhir (rata-rata dari semua kategori).
  * @param {Object} scores - { discipline, responsibility, communication, teamwork, initiative, technicalSkill }
  * @returns {number} Nilai akhir (0-100)
  */
 export const calculateFinalScore = (scores) => {
-  const total = EVALUATION_CATEGORIES.reduce((sum, cat) => sum + (parseInt(scores[cat]) || 0), 0);
+  const total = EVALUATION_CATEGORIES.reduce((sum, cat) => sum + (parseScore(scores[cat]) || 0), 0);
   return Math.round((total / EVALUATION_CATEGORIES.length) * 10) / 10;
 };
 
@@ -220,19 +252,34 @@ export const createEvaluation = async (data, mentorId) => {
     throw new Error("Peserta tidak ditemukan.");
   }
 
+  // Validasi batas nilai 0 - 100 untuk setiap aspek kompetensi
+  const discipline = validateScoreBounds(data.discipline, "kedisiplinan");
+  const responsibility = validateScoreBounds(data.responsibility, "tanggung jawab");
+  const communication = validateScoreBounds(data.communication, "komunikasi");
+  const teamwork = validateScoreBounds(data.teamwork, "kerjasama tim");
+  const initiative = validateScoreBounds(data.initiative, "inisiatif");
+  const technicalSkill = validateScoreBounds(data.technicalSkill, "keterampilan teknis");
+
   // Hitung nilai akhir
-  const finalScore = calculateFinalScore(data);
+  const finalScore = calculateFinalScore({
+    discipline,
+    responsibility,
+    communication,
+    teamwork,
+    initiative,
+    technicalSkill,
+  });
   const grade = convertToGrade(finalScore);
 
   return prisma.evaluation.create({
     data: {
       userId: data.userId,
-      discipline: parseInt(data.discipline) || 0,
-      responsibility: parseInt(data.responsibility) || 0,
-      communication: parseInt(data.communication) || 0,
-      teamwork: parseInt(data.teamwork) || 0,
-      initiative: parseInt(data.initiative) || 0,
-      technicalSkill: parseInt(data.technicalSkill) || 0,
+      discipline,
+      responsibility,
+      communication,
+      teamwork,
+      initiative,
+      technicalSkill,
       finalScore,
       grade,
       mentorComment: data.mentorComment?.trim() || null,
@@ -278,19 +325,34 @@ export const updateEvaluation = async (id, data) => {
     throw new Error("Penilaian yang sudah diarsipkan tidak dapat diedit.");
   }
 
+  // Validasi batas nilai 0 - 100 untuk setiap aspek kompetensi
+  const discipline = validateScoreBounds(data.discipline, "kedisiplinan");
+  const responsibility = validateScoreBounds(data.responsibility, "tanggung jawab");
+  const communication = validateScoreBounds(data.communication, "komunikasi");
+  const teamwork = validateScoreBounds(data.teamwork, "kerjasama tim");
+  const initiative = validateScoreBounds(data.initiative, "inisiatif");
+  const technicalSkill = validateScoreBounds(data.technicalSkill, "keterampilan teknis");
+
   // Hitung ulang nilai akhir
-  const finalScore = calculateFinalScore(data);
+  const finalScore = calculateFinalScore({
+    discipline,
+    responsibility,
+    communication,
+    teamwork,
+    initiative,
+    technicalSkill,
+  });
   const grade = convertToGrade(finalScore);
 
   return prisma.evaluation.update({
     where: { id },
     data: {
-      discipline: parseInt(data.discipline) || 0,
-      responsibility: parseInt(data.responsibility) || 0,
-      communication: parseInt(data.communication) || 0,
-      teamwork: parseInt(data.teamwork) || 0,
-      initiative: parseInt(data.initiative) || 0,
-      technicalSkill: parseInt(data.technicalSkill) || 0,
+      discipline,
+      responsibility,
+      communication,
+      teamwork,
+      initiative,
+      technicalSkill,
       finalScore,
       grade,
       mentorComment: data.mentorComment?.trim() || null,

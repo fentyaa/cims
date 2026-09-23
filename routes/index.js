@@ -50,8 +50,15 @@ router.get("/mentor/dashboard", isAuthenticated, mentorOnly, mentorController.da
 // Manajemen Peserta
 router.get("/mentor/peserta", isAuthenticated, mentorOnly, mentorController.pesertaList);
 router.get("/mentor/peserta/:id", isAuthenticated, mentorOnly, mentorController.pesertaDetail);
-router.get("/mentor/peserta/:id/edit", isAuthenticated, mentorOnly, mentorController.pesertaEdit);
-router.post("/mentor/peserta/:id/edit", isAuthenticated, mentorOnly, mentorController.pesertaUpdate);
+router.get("/mentor/peserta/:id/edit", isAuthenticated, mentorOnly, (req, res) => {
+  req.session.messages = [
+    { type: "info", text: "Data profil peserta (nama, institusi, NIM) dikelola secara mandiri oleh masing-masing peserta magang." },
+  ];
+  return res.redirect(`/mentor/peserta/${req.params.id}`);
+});
+router.post("/mentor/peserta/:id/edit", isAuthenticated, mentorOnly, (req, res) => {
+  return res.redirect(`/mentor/peserta/${req.params.id}`);
+});
 router.post("/mentor/peserta/:id/status", isAuthenticated, mentorOnly, mentorController.pesertaStatus);
 
 // Arsip
@@ -104,62 +111,24 @@ router.get("/mentor/penilaian/:id", isAuthenticated, mentorOnly, evaluationContr
 router.post("/mentor/penilaian/:id/publish", isAuthenticated, mentorOnly, evaluationController.mentorPublish);
 router.post("/mentor/penilaian/:id/archive", isAuthenticated, mentorOnly, evaluationController.mentorArchive);
 
-// Dokumen (Mentor)
-router.get("/mentor/dokumen", isAuthenticated, mentorOnly, documentController.templatePage);
-router.get("/mentor/dokumen/buat", isAuthenticated, mentorOnly, documentController.generatePage);
-router.post("/mentor/dokumen/buat", isAuthenticated, mentorOnly, csrfProtection, documentController.generateProcess);
-router.get("/mentor/dokumen/live-preview", isAuthenticated, mentorOnly, documentController.livePreviewRender);
-router.get("/mentor/dokumen/template", isAuthenticated, mentorOnly, documentController.templatePage);
-router.get("/mentor/dokumen/template/upload", isAuthenticated, mentorOnly, documentController.templateUploadPage);
-router.post(
-  "/mentor/dokumen/template/upload",
-  isAuthenticated,
-  mentorOnly,
-  uploadTemplate.single("templateFile"),
-  handleUploadError,
-  csrfProtection,
-  documentController.templateUpload
-);
-router.get("/mentor/dokumen/template/edit/:id", isAuthenticated, mentorOnly, documentController.templateEditPage);
-router.post(
-  "/mentor/dokumen/template/edit/:id",
-  isAuthenticated,
-  mentorOnly,
-  uploadTemplate.single("templateFile"),
-  handleUploadError,
-  csrfProtection,
-  documentController.templateUpdate
-);
-router.get("/mentor/dokumen/template/preview/:id", isAuthenticated, mentorOnly, documentController.templatePreview);
-router.post("/mentor/dokumen/template/:id/delete", isAuthenticated, mentorOnly, csrfProtection, documentController.templateDelete);
-router.post("/mentor/dokumen/template/:id/deactivate", isAuthenticated, mentorOnly, csrfProtection, documentController.templateDeactivate);
-router.get("/mentor/dokumen/sertifikat", isAuthenticated, mentorOnly, documentController.sertifikatPage);
-router.post("/mentor/dokumen/sertifikat/generate", isAuthenticated, mentorOnly, csrfProtection, documentController.sertifikatGenerate);
-router.post(
-  "/mentor/dokumen/sertifikat/generate-bulk",
-  isAuthenticated,
-  mentorOnly,
-  bulkCertificateLimiter,
-  csrfProtection,
-  documentController.sertifikatGenerateBulk
-);
-router.get("/mentor/dokumen/surat", isAuthenticated, mentorOnly, documentController.suratPage);
-router.post("/mentor/dokumen/surat/generate", isAuthenticated, mentorOnly, csrfProtection, documentController.suratGenerate);
-router.post(
-  "/mentor/dokumen/surat/generate-bulk",
-  isAuthenticated,
-  mentorOnly,
-  bulkLetterLimiter,
-  csrfProtection,
-  documentController.suratGenerateBulk
-);
-router.get("/mentor/dokumen/riwayat", isAuthenticated, mentorOnly, documentController.riwayatPage);
-router.get("/mentor/dokumen/view/:id", isAuthenticated, mentorOnly, documentController.viewDocument);
-router.get("/mentor/dokumen/download/:id", isAuthenticated, mentorOnly, documentController.downloadDocument);
+// Dokumen (Mentor) - Dinonaktifkan sesuai kebutuhan lingkup proyek
+router.use("/mentor/dokumen", isAuthenticated, mentorOnly, (req, res) => res.redirect("/mentor/dashboard"));
 
-// Placeholder routes
+// Laporan (Mentor)
 router.get("/mentor/laporan", isAuthenticated, mentorOnly, mentorController.laporan);
+
+// Profil (Mentor)
 router.get("/mentor/profil", isAuthenticated, mentorOnly, mentorController.profil);
+router.post(
+  "/mentor/profil",
+  isAuthenticated,
+  mentorOnly,
+  upload.single("profilePhoto"),
+  handleUploadError,
+  csrfProtection,
+  profileUpdateLimiter,
+  mentorController.profilUpdate
+);
 
 // ============================================================
 // DASHBOARD & HALAMAN INTERN
@@ -200,38 +169,39 @@ router.get("/intern/pengumuman/:id", isAuthenticated, internOnly, announcementCo
 // Nilai (Evaluation)
 router.get("/intern/nilai", isAuthenticated, internOnly, evaluationController.internNilai);
 
-// Dokumen (Intern)
-router.get("/intern/dokumen", isAuthenticated, internOnly, documentController.internDokumenPage);
-router.get("/intern/dokumen/view/:id", isAuthenticated, internOnly, documentController.internViewDocument);
-router.get("/intern/dokumen/download/:id", isAuthenticated, internOnly, documentController.internDownloadDocument);
+// Dokumen (Intern) - Dinonaktifkan sesuai kebutuhan lingkup proyek
+router.use("/intern/dokumen", isAuthenticated, internOnly, (req, res) => res.redirect("/intern/dashboard"));
 
 // ============================================================
 // DEVELOPMENT SEED ENDPOINT (Hanya aktif di mode development)
 // ============================================================
 
 if (process.env.NODE_ENV !== "production") {
+  // Dev endpoints: seed & verify-dates
   router.get("/dev/seed", async (req, res) => {
     try {
-      const { runSeed } = await import("../seed.js");
+      console.log(">>> [DEV SEED] Route called at:", new Date().toISOString());
+      const { runSeed } = await import(`../seed.js?t=${Date.now()}`);
       const summary = await runSeed();
       return res.json({
         success: true,
-        message: "Seeding 10 peserta magang dan data dummy berhasil!",
+        message: "Seeding peserta magang Tasikmalaya & Ciamis berhasil!",
         summary,
         credentials: {
-          mentor: "mentor@cims.com (Password: Mentor123!)",
+          mentor: "mentor.cims@gmail.com (Password: Mentor123!)",
           internsPassword: "Intern123! (untuk semua akun intern)",
           sampleInterns: [
-            "ahmad.fauzi@cims.com (Mahasiswa UI - Active + Published Grade A)",
-            "siti.nurhaliza@cims.com (Mahasiswa ITB - Active + Draft Grade A)",
-            "rizky.pratama@cims.com (Siswa SMKN 1 - Active)",
-            "dewi.lestari@cims.com (Mahasiswa UGM - Active)",
-            "bayu.nugroho@cims.com (Siswa SMKN 2 - Active)",
-            "anisa.rahmawati@cims.com (Telkom Univ - Active)",
-            "dimas.arya@cims.com (Siswa SMKN 4 - Active)",
-            "kevin.sanjaya@cims.com (BINUS - Pending Approval)",
-            "maya.putri@cims.com (SMKN 1 Cibinong - Archived)",
-            "fajar.ramadhan@cims.com (UNPAD - Rejected)",
+            "fenty.anggraeni@gmail.com (Mahasiswa UNSIL Tasikmalaya - Active Ongoing + Draft Mid-term)",
+            "ahmad.fauzi@gmail.com (Mahasiswa UNSIL Tasikmalaya - Senior Intern + Published Grade A)",
+            "siti.nurhaliza@gmail.com (Mahasiswa UNIGAL Ciamis - Active Ongoing + Draft Mid-term)",
+            "rizky.pratama@gmail.com (Siswa SMKN 1 Tasikmalaya - Active Ongoing)",
+            "dewi.lestari@gmail.com (Mahasiswa UPI Tasikmalaya - Active Ongoing)",
+            "bayu.nugroho@gmail.com (Siswa SMKN 2 Ciamis - Active Ongoing)",
+            "anisa.rahmawati@gmail.com (Mahasiswa BSI Tasikmalaya - Active Ongoing)",
+            "dimas.arya@gmail.com (Siswa SMKN 4 Tasikmalaya - Active Ongoing)",
+            "kevin.sanjaya@gmail.com (UNPER Tasikmalaya - Pending Approval)",
+            "maya.putri@gmail.com (SMKN 1 Ciamis - Archived Alumni)",
+            "fajar.ramadhan@gmail.com (STMIK DCI Tasikmalaya - Rejected)",
           ],
         },
       });
@@ -241,6 +211,31 @@ if (process.env.NODE_ENV !== "production") {
         success: false,
         error: error.message,
       });
+    }
+  });
+
+  router.get("/dev/check-fridays", async (req, res) => {
+    try {
+      const { default: prisma } = await import("../config/database.js");
+      const presences = await prisma.presence.findMany({
+        include: { user: { select: { fullName: true, email: true, participantType: true } } },
+        orderBy: { date: "asc" },
+      });
+      const byDate = {};
+      for (const p of presences) {
+        const dStr = p.date.toISOString().split("T")[0];
+        const dayOfWeek = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][new Date(p.date).getUTCDay()];
+        if (!byDate[dStr]) {
+          byDate[dStr] = { date: dStr, dayOfWeek, count: 0, statuses: {} };
+        }
+        byDate[dStr].statuses[p.status] = (byDate[dStr].statuses[p.status] || 0) + 1;
+      }
+      return res.json({
+        totalPresences: presences.length,
+        dates: Object.values(byDate),
+      });
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
     }
   });
 }

@@ -84,12 +84,6 @@
               <span>Laporan</span>
             </a>
           </li>
-          <li>
-            <a href="/mentor/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>">
-              <i class="bi bi-person-circle"></i>
-              <span>Profil</span>
-            </a>
-          </li>
         <% } %>
 
         <% if (role === 'INTERN') { %>
@@ -140,12 +134,15 @@
 <% } else { %>
   <!-- Desktop Fixed Sidebar -->
   <aside class="dashboard-sidebar" id="dashboardSidebar">
-    <!-- Brand (Bersih tanpa tombol duplikat toggle) -->
-    <div class="sidebar-brand d-flex align-items-center">
-      <a href="/" class="brand-link text-decoration-none d-flex align-items-center gap-2">
+    <!-- Brand & Top In-Sidebar Toggle -->
+    <div class="sidebar-brand d-flex align-items-center justify-content-between">
+      <div class="brand-link d-flex align-items-center gap-2 user-select-none" id="sidebarBrandLogo" title="CIMS - Intern Management System">
         <i class="bi bi-building-gear fs-4 text-primary"></i>
-        <span class="brand-text fw-bold">CIMS</span>
-      </a>
+        <span class="brand-text fw-bold text-primary">CIMS</span>
+      </div>
+      <button type="button" class="btn btn-sm sidebar-toggle-btn border-0 p-0 d-flex align-items-center justify-content-center" id="desktopSidebarToggleTopBtn" title="Tutup Sidebar" aria-label="Toggle Sidebar">
+        <i class="bi bi-chevron-left fs-6"></i>
+      </button>
     </div>
 
     <!-- Navigation -->
@@ -223,12 +220,6 @@
             <a href="/mentor/laporan" class="<%= pagePath.includes('laporan') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Laporan">
               <i class="bi bi-file-earmark-bar-graph-fill"></i>
               <span>Laporan</span>
-            </a>
-          </li>
-          <li>
-            <a href="/mentor/profil" class="<%= pagePath.includes('profil') ? 'active' : '' %>" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-title="Profil">
-              <i class="bi bi-person-circle"></i>
-              <span>Profil</span>
             </a>
           </li>
         <% } %>

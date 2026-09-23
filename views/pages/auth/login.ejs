@@ -1,4 +1,24 @@
 <!-- Login Page -->
+<style>
+  /* Sembunyikan tombol mata & autofill bawaan browser (Edge, Chrome, WebKit) */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+  input[type="password"]::-webkit-contacts-auto-fill-button,
+  input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden !important;
+    display: none !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    right: 0 !important;
+  }
+</style>
+
 <div class="auth-page-wrapper">
   <!-- Ambient background lighting -->
   <div class="auth-bg-ambient">
@@ -91,6 +111,7 @@
                     id="password"
                     name="password"
                     placeholder="Masukkan password"
+                    autocomplete="current-password"
                     required
                   />
                   <button
@@ -98,6 +119,8 @@
                     type="button"
                     data-target="password"
                     aria-label="Toggle password visibility"
+                    tabindex="-1"
+                    title="Tampilkan / Sembunyikan Password"
                   >
                     <i class="bi bi-eye"></i>
                   </button>

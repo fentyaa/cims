@@ -92,6 +92,7 @@
               <th>Instansi</th>
               <th>Prodi/Jurusan</th>
               <th>Mentor</th>
+              <th style="min-width: 170px;">Progres Magang</th>
               <th>Status Akun</th>
               <th>Aksi</th>
             </tr>
@@ -99,7 +100,7 @@
           <tbody>
             <% if (participants.length === 0) { %>
               <tr>
-                <td colspan="8" class="text-center py-5 text-muted">
+                <td colspan="9" class="text-center py-5 text-muted">
                   <i class="bi bi-inbox" style="font-size: 2rem;"></i>
                   <p class="mt-2 mb-0">Tidak ada data peserta.</p>
                 </td>
@@ -135,11 +136,34 @@
                     <%= p.participantType === 'UNIVERSITY' ? (p.studyProgram || '-') : (p.major || '-') %>
                   </td>
                   <td>
-                    <small><%= p.mentor ? p.mentor.fullName : '<span class="text-muted">-</span>' %></small>
+                    <small class="text-muted"><%= p.mentor ? p.mentor.fullName : '-' %></small>
+                  </td>
+                  <td>
+                    <% const prog = (typeof progressMap !== 'undefined' && progressMap) ? progressMap[p.id] : null; %>
+                    <% if (prog) { %>
+                      <div style="min-width: 130px;" title="Hari <%= prog.currentDay %> dari <%= prog.totalWorkDays %> hari kerja • Sisa <%= prog.remainingWorkDays %> hari (<%= prog.progressPercent %>%)">
+                        <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem;">
+                          <span class="fw-bold text-dark">H-<%= prog.currentDay %>/<%= prog.totalWorkDays %></span>
+                          <span class="text-muted small">Sisa <%= prog.remainingWorkDays %>h</span>
+                        </div>
+                        <div class="progress rounded-pill bg-light border" style="height: 6px;">
+                          <div class="progress-bar <%= prog.status === 'COMPLETED' ? 'bg-success' : 'bg-primary' %>" role="progressbar" style="width: <%= prog.progressPercent %>%;"></div>
+                        </div>
+                      </div>
+                    <% } else { %>
+                      <small class="text-muted">-</small>
+                    <% } %>
                   </td>
                   <td>
                     <% if (p.status === 'ACTIVE') { %>
                       <span class="badge bg-success">Active</span>
+                      <% if (typeof absenceMap !== 'undefined' && absenceMap[p.id] && absenceMap[p.id].consecutiveDays > 0) { %>
+                        <div class="mt-1">
+                          <span class="badge bg-danger text-white border border-danger shadow-sm" title="Mangkir <%= absenceMap[p.id].consecutiveDays %> hari kerja berturut-turut">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i><%= absenceMap[p.id].consecutiveDays %> Hari Mangkir
+                          </span>
+                        </div>
+                      <% } %>
                     <% } else if (p.status === 'PENDING') { %>
                       <span class="badge bg-warning text-dark">Pending</span>
                     <% } else if (p.status === 'REJECTED') { %>
@@ -150,11 +174,8 @@
                   </td>
                   <td>
                     <div class="d-flex gap-1">
-                      <a href="/mentor/peserta/<%= p.id %>" class="btn btn-sm btn-outline-primary rounded-3" title="Detail">
-                        <i class="bi bi-eye"></i>
-                      </a>
-                      <a href="/mentor/peserta/<%= p.id %>/edit" class="btn btn-sm btn-outline-warning rounded-3" title="Edit">
-                        <i class="bi bi-pencil"></i>
+                      <a href="/mentor/peserta/<%= p.id %>" class="btn btn-sm btn-outline-primary rounded-3" title="Detail Peserta">
+                        <i class="bi bi-eye me-1"></i>Detail
                       </a>
                     </div>
                   </td>
@@ -203,6 +224,13 @@
                 <div class="col-6 text-end">
                   <% if (p.status === 'ACTIVE') { %>
                     <span class="badge bg-success">Active</span>
+                    <% if (typeof absenceMap !== 'undefined' && absenceMap[p.id] && absenceMap[p.id].consecutiveDays > 0) { %>
+                      <div class="mt-1">
+                        <span class="badge bg-danger text-white border border-danger shadow-sm">
+                          <i class="bi bi-exclamation-triangle-fill me-1"></i><%= absenceMap[p.id].consecutiveDays %> Hari Mangkir
+                        </span>
+                      </div>
+                    <% } %>
                   <% } else if (p.status === 'PENDING') { %>
                     <span class="badge bg-warning text-dark">Pending</span>
                   <% } else if (p.status === 'REJECTED') { %>
@@ -220,13 +248,23 @@
                 <div class="col-12">
                   <i class="bi bi-person-badge me-1"></i>Mentor: <%= p.mentor ? p.mentor.fullName : '-' %>
                 </div>
+
+                <% const mProg = (typeof progressMap !== 'undefined' && progressMap) ? progressMap[p.id] : null; %>
+                <% if (mProg) { %>
+                  <div class="col-12 mt-2 pt-2 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem;">
+                      <span class="fw-bold text-dark">H-<%= mProg.currentDay %>/<%= mProg.totalWorkDays %></span>
+                      <span class="text-muted small">Sisa <%= mProg.remainingWorkDays %>h (<%= mProg.progressPercent %>%)</span>
+                    </div>
+                    <div class="progress rounded-pill bg-light border" style="height: 6px;">
+                      <div class="progress-bar <%= mProg.status === 'COMPLETED' ? 'bg-success' : 'bg-primary' %>" role="progressbar" style="width: <%= mProg.progressPercent %>%;"></div>
+                    </div>
+                  </div>
+                <% } %>
               </div>
               <div class="d-flex gap-2">
                 <a href="/mentor/peserta/<%= p.id %>" class="btn btn-sm btn-outline-primary flex-fill rounded-3">
-                  <i class="bi bi-eye me-1"></i>Detail
-                </a>
-                <a href="/mentor/peserta/<%= p.id %>/edit" class="btn btn-sm btn-outline-warning flex-fill rounded-3">
-                  <i class="bi bi-pencil me-1"></i>Edit
+                  <i class="bi bi-eye me-1"></i>Lihat Detail
                 </a>
               </div>
             </div>

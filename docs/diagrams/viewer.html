@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIMS Diagram Viewer - PT Cikara Bakti Nusantara</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --sidebar-width: 320px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #1e293b;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .nav-list {
+      list-style: none;
+      overflow-y: auto;
+      padding: 12px;
+      flex: 1;
+    }
+
+    .nav-category {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      padding: 12px 10px 6px;
+      font-weight: 600;
+    }
+
+    .nav-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #cbd5e1;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+
+    .topbar {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar-title h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .topbar-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .viewer-area {
+      flex: 1;
+      padding: 24px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .diagram-card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+      padding: 30px;
+      min-height: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    .diagram-desc {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px 24px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .diagram-desc h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+      color: #1e293b;
+    }
+
+    .mermaid {
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar Navigasi -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>📊 CIMS Diagram Viewer</h1>
+      <p>PT Cikara Bakti Nusantara</p>
+    </div>
+    <ul class="nav-list" id="navList">
+      <div class="nav-category">Tinjauan Pustaka (Teori SDLC)</div>
+      <li class="nav-item active" onclick="showDiagram(0)">🔄 Alur Model Inkremental (Redesain Modern)</li>
+      <li class="nav-item" onclick="showDiagram(1)">📚 Teori Lengkap SDLC (Pressman)</li>
+
+      <div class="nav-category">Metode Pelaksanaan (Bab III)</div>
+      <li class="nav-item" onclick="showDiagram(2)">📋 Alur Kerja Pelaksanaan Magang</li>
+
+      <div class="nav-category">Metodologi & Perancangan CIMS</div>
+      <li class="nav-item" onclick="showDiagram(3)">🔄 Incremental Model CIMS</li>
+      <li class="nav-item" onclick="showDiagram(4)">👥 Use Case Diagram</li>
+      <li class="nav-item" onclick="showDiagram(5)">🏛️ Class Diagram Arsitektur</li>
+      <li class="nav-item" onclick="showDiagram(6)">🗄️ Entity Relationship (ERD)</li>
+
+      <div class="nav-category">Sequence Diagram</div>
+      <li class="nav-item" onclick="showDiagram(7)">⏱️ Sequence: Pengisian Logbook</li>
+      <li class="nav-item" onclick="showDiagram(8)">⏱️ Sequence: Presensi Kehadiran</li>
+
+      <div class="nav-category">Activity Diagram</div>
+      <li class="nav-item" onclick="showDiagram(9)">⚡ Activity: Presensi Harian</li>
+      <li class="nav-item" onclick="showDiagram(10)">⚡ Activity: Logbook Kegiatan</li>
+      <li class="nav-item" onclick="showDiagram(11)">⚡ Activity: Penilaian Evaluasi</li>
+      <li class="nav-item" onclick="showDiagram(12)">⚡ Activity: Registrasi Peserta</li>
+    </ul>
+  </aside>
+
+  <!-- Main View -->
+  <main class="main-content">
+    <div class="topbar">
+      <div class="topbar-title">
+        <h2 id="diagramTitle">Incremental Model CIMS</h2>
+        <p id="diagramSubtitle">Alur pengembangan sistem terbagi menjadi 3 Increment bertahap</p>
+      </div>
+      <div class="actions">
+        <a id="btnDownloadPng" class="btn" href="#" download>⬇️ Unduh Gambar PNG</a>
+        <a id="btnDownloadSvg" class="btn btn-secondary" href="#" download>⬇️ Unduh Vektor SVG</a>
+        <button class="btn btn-secondary" onclick="copyMermaidCode()">📋 Salin Kode</button>
+        <a id="btnLive" class="btn btn-secondary" href="https://mermaid.live" target="_blank">🌐 Mermaid Live</a>
+      </div>
+    </div>
+
+    <div class="viewer-area">
+      <div class="diagram-card" id="diagramContainer">
+        <div class="mermaid" id="mermaidTarget">
+          <!-- Rendered here -->
+        </div>
+      </div>
+      <div class="diagram-desc" id="diagramDesc">
+        <!-- Description here -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }
+    });
+
+    const diagrams = [
+      {
+        id: "model-incremental-iterasi-bersih",
+        title: "Alur Incremental Model (Iterasi 1, 2, ke-n)",
+        subtitle: "Bab II Laporan (Tinjauan Pustaka): Redesain Modern Berdasarkan Contoh Model Iteratif",
+        desc: "<h3>Alur Model Inkremental (Iterasi 1, Iterasi 2, Iterasi ke-n)</h3><p>Model ini mengilustrasikan pengembangan perangkat lunak bertahap di mana setiap iterasi (siklus) menjalankan urutan: <strong>Analisa Kebutuhan &rarr; Desain &rarr; Koding &rarr; Testing</strong> hingga menghasilkan rilis operasional (<strong>Produk 1, Produk 2, hingga Produk Akhir</strong>). Seluruh isi teks dan tahapan dipertahankan 100% persis sesuai format contoh dengan peningkatan visual yang lebih bersih, modern, dan berstandar akademik.</p>",
+        code: `%%{init: {'theme': 'neutral', 'themeVariables': { 'clusterBkg': '#ffffff', 'clusterBorder': '#cbd5e1', 'fontSize': '14px', 'fontFamily': 'Inter, Segoe UI, sans-serif'}}}%%
+flowchart TD
+    classDef stepGreen fill:#10b981,stroke:#059669,stroke-width:1.5px,color:#ffffff,font-weight:bold,rx:10;
+    classDef prodGreen fill:#047857,stroke:#065f46,stroke-width:2px,color:#ffffff,font-weight:bold,rx:10;
+    
+    classDef stepBlue fill:#3b82f6,stroke:#2563eb,stroke-width:1.5px,color:#ffffff,font-weight:bold,rx:10;
+    classDef prodBlue fill:#1d4ed8,stroke:#1e40af,stroke-width:2px,color:#ffffff,font-weight:bold,rx:10;
+    
+    classDef stepOrange fill:#f59e0b,stroke:#d97706,stroke-width:1.5px,color:#ffffff,font-weight:bold,rx:10;
+    classDef prodOrange fill:#ea580c,stroke:#c2410c,stroke-width:2px,color:#ffffff,font-weight:bold,rx:10;
+
+    subgraph It1 ["<b>iterasi 1</b>"]
+        direction LR
+        AK1["Analisa<br/>Kebutuhan"]:::stepGreen --> D1["Desain"]:::stepGreen --> K1["Koding"]:::stepGreen --> T1["Testing"]:::stepGreen --> P1["<b>Produk 1</b>"]:::prodGreen
+    end
+
+    subgraph It2 ["<b>iterasi 2</b>"]
+        direction LR
+        AK2["Analisa<br/>Kebutuhan"]:::stepBlue --> D2["Desain"]:::stepBlue --> K2["Koding"]:::stepBlue --> T2["Testing"]:::stepBlue --> P2["<b>Produk 2</b>"]:::prodBlue
+    end
+
+    subgraph ItN ["<b>iterasi ke-n</b>"]
+        direction LR
+        AKN["Analisa<br/>Kebutuhan"]:::stepOrange --> DN["Desain"]:::stepOrange --> KN["Koding"]:::stepOrange --> TN["Testing"]:::stepOrange --> PN["<b>Produk Akhir</b>"]:::prodOrange
+    end
+
+    It1 ==> It2
+    It2 ==> ItN`
+      },
+      {
+        id: "00-incremental-model-theory",
+        title: "Teori Incremental Model (Roger S. Pressman)",
+        subtitle: "Bab II Laporan (Tinjauan Pustaka): 5 Aktivitas Kerangka Kerja Generik & Siklus Umpan Balik Pengguna",
+        desc: "<h3>Landasan Teori Model Inkremental (The Incremental Model)</h3><p>Menurut <strong>Roger S. Pressman & Bruce R. Maxim (2020)</strong> dan <strong>Ian Sommerville (2011)</strong>, Model Inkremental menggabungkan proses linier sekuensial (seperti Waterfall) dengan pendekatan berulang (Prototyping). Setiap rilis (<em>increment</em>) menjalani 5 aktivitas kerangka kerja generik: <strong>Komunikasi</strong> (analisis kebutuhan), <strong>Perencanaan</strong> (skala prioritas & jadwal), <strong>Pemodelan</strong> (analisis & desain arsitektur/UML), <strong>Konstruksi</strong> (koding & pengujian), serta <strong>Penyerahan</strong> (deployment operasional & evaluasi).</p><p><strong>Inkremen 1</strong> difokuskan menghasilkan <strong>Produk Inti (Core Product)</strong> yang langsung digunakan oleh pemangku kepentingan. Masukan dari <strong>Siklus Umpan Balik (Customer Feedback Loop)</strong> dievaluasi untuk merencanakan inkremen berikutnya hingga menghasilkan sistem akhir yang lengkap dan stabil.</p>",
+        code: `flowchart TD
+    subgraph Inc1 ["INKREMEN 1 (PENGEMBANGAN PRODUK INTI / CORE PRODUCT)"]
+        direction LR
+        C1["Komunikasi<br/><i>Communication</i>"] --> P1["Perencanaan<br/><i>Planning</i>"]
+        P1 --> M1["Pemodelan<br/><i>Modeling</i><br/>(Analisis & Desain)"]
+        M1 --> K1["Konstruksi<br/><i>Construction</i><br/>(Koding & Uji)"]
+        K1 --> D1["Penyerahan<br/><i>Deployment</i><br/>(Delivery & Evaluasi)"]
+        D1 --> R1(["📦 <b>Rilis Inkremen 1</b><br/>(Produk Inti / Core Product)"])
+    end
+
+    subgraph Inc2 ["INKREMEN 2 (PENGEMBANGAN FITUR TAMBAHAN)"]
+        direction LR
+        C2["Komunikasi<br/><i>Communication</i>"] --> P2["Perencanaan<br/><i>Planning</i>"]
+        P2 --> M2["Pemodelan<br/><i>Modeling</i><br/>(Analisis & Desain)"]
+        M2 --> K2["Konstruksi<br/><i>Construction</i><br/>(Koding & Uji)"]
+        K2 --> D2["Penyerahan<br/><i>Deployment</i><br/>(Delivery & Evaluasi)"]
+        D2 --> R2(["📦 <b>Rilis Inkremen 2</b><br/>(Fitur Bertambah)"])
+    end
+
+    subgraph IncN ["INKREMEN n (PENYEMPURNAAN & INTEGRASI SISTEM LENGKAP)"]
+        direction LR
+        CN["Komunikasi<br/><i>Communication</i>"] --> PN["Perencanaan<br/><i>Planning</i>"]
+        PN --> MN["Pemodelan<br/><i>Modeling</i><br/>(Analisis & Desain)"]
+        MN --> KN["Konstruksi<br/><i>Construction</i><br/>(Koding & Uji)"]
+        KN --> DN["Penyerahan<br/><i>Deployment</i><br/>(Delivery & Evaluasi)"]
+        DN --> RN(["🚀 <b>Rilis Akhir Perangkat Lunak</b><br/>(Sistem Lengkap / Final Product)"])
+    end
+
+    R1 -.->|"Evaluasi Pengguna & Umpan Balik (Customer Feedback)"| C2
+    R2 -.->|"Evaluasi Pengguna & Kebutuhan Rilis Akhir"| CN`
+      },
+      {
+        id: "alur-kerja-magang-2-baris",
+        title: "Alur Kerja Pelaksanaan Magang (Format 2 Baris)",
+        subtitle: "Bab III.2 Laporan: Prosedur Pengerjaan Tugas & Evaluasi Peserta Magang di PT Cikara Bakti Nusantara",
+        desc: "<h3>Prosedur Pelaksanaan Magang (Format 2 Baris Ringkas & Jelas)</h3><p>Alur kerja 2 baris horizontal tanpa ikon: <strong>Baris 1:</strong> (1) Menerima arahan & tugas &rarr; (2) Mempelajari materi & tools &rarr; (3) Mengerjakan tugas. <strong>Baris 2:</strong> (4) Melakukan diskusi & penyesuaian dengan pembimbing &rarr; (5) Memeriksa hasil &rarr; <strong>Evaluasi: Hasil sesuai kebutuhan?</strong>. Jika <em>Tidak</em>, berulang kembali ke langkah 4. Jika <em>Ya</em>, berlanjut ke (6) Menyelesaikan/mengumpulkan hasil &rarr; <strong>Selesai</strong>.</p><p><em>Catatan:</em> Alur kerja ini diterapkan pada seluruh penugasan magang, meliputi pembuatan 27 template mockup produk, pengembangan game (GameSeed), pembuatan aset dan map 3D/Roblox, hingga proyek akhir aplikasi web CIMS.</p>",
+        code: `%%{init: {'theme': 'neutral', 'themeVariables': {'fontSize': '12px', 'fontFamily': 'Inter, Segoe UI, sans-serif'}}}%%
+flowchart TB
+    subgraph Row1 [" "]
+        direction LR
+        Mulai(["Mulai"]):::startEnd --> Step1["1. Menerima arahan dan tugas<br/>dari pembimbing lapangan"]:::s1
+        Step1 --> Step2["2. Mempelajari kebutuhan atau materi<br/>pekerjaan (termasuk tools yang digunakan)"]:::s2
+        Step2 --> Step3["3. Mengerjakan tugas<br/>sesuai arahan"]:::s3
+    end
+
+    subgraph Row2 [" "]
+        direction LR
+        Step4["4. Melakukan diskusi dan penyesuaian<br/>dengan pembimbing lapangan"]:::s4 --> Step5["5. Memeriksa hasil pekerjaan<br/>(apakah sudah sesuai)"]:::s5
+        Step5 --> Decision{"Hasil sesuai<br/>kebutuhan?"}:::dec
+        Decision -- "Ya" --> Step6["6. Menyelesaikan atau mengumpulkan<br/>hasil pekerjaan"]:::s6
+        Step6 --> Selesai(["Selesai"]):::startEnd
+        Decision -- "Tidak" --> Step4
+    end
+
+    Step3 --> Step4
+
+    classDef startEnd fill:#f8fafc,stroke:#64748b,stroke-width:2px,color:#0f172a,font-weight:bold,rx:20;
+    classDef s1 fill:#eff6ff,stroke:#3b82f6,stroke-width:1.8px,color:#1e3a8a,font-weight:600,rx:8;
+    classDef s2 fill:#fffbeb,stroke:#f59e0b,stroke-width:1.8px,color:#78350f,font-weight:600,rx:8;
+    classDef s3 fill:#f0fdf4,stroke:#22c55e,stroke-width:1.8px,color:#14532d,font-weight:600,rx:8;
+    classDef s4 fill:#fff1f2,stroke:#f43f5e,stroke-width:1.8px,color:#881337,font-weight:600,rx:8;
+    classDef s5 fill:#f0fdfa,stroke:#14b8a6,stroke-width:1.8px,color:#134e4a,font-weight:600,rx:8;
+    classDef dec fill:#faf5ff,stroke:#a855f7,stroke-width:2px,color:#581c87,font-weight:bold;
+    classDef s6 fill:#f8fafc,stroke:#475569,stroke-width:1.8px,color:#0f172a,font-weight:600,rx:8;
+
+    style Row1 fill:#ffffff,stroke:#e2e8f0,stroke-width:1px,stroke-dasharray:3 3;
+    style Row2 fill:#ffffff,stroke:#e2e8f0,stroke-width:1px,stroke-dasharray:3 3;`
+      },
+      {
+        id: "01-incremental-model-cims",
+        title: "Incremental Model CIMS",
+        subtitle: "Bab III & Bab V Laporan: Alur 3 Increment (Fondasi RBAC -> Logbook/Presensi -> Evaluasi/Security)",
+        desc: "<h3>Deskripsi Alur Inkremental CIMS</h3><p>Pengembangan CIMS mengadaptasi <strong>Incremental Model</strong> (Pressman & Maxim, 2019). Sistem dibagi ke dalam 3 rilis modul fungsional: <strong>Increment 1</strong> membangun modul inti akun, periode terkunci, approval mentor, dan profil mandiri; <strong>Increment 2</strong> memfasilitasi monitoring presensi, deteksi libur nasional, penegakan drop-out 3 hari mangkir, bar hari kerja, dan logbook harian; serta <strong>Increment 3</strong> menyempurnakan penilaian kompetensi 6 kriteria, paginasi riwayat untuk mobile, dan penguatan keamanan (CSRF & Helmet).</p>",
+        code: `flowchart TD
+    subgraph Inc1 ["Increment 1: Core System & Role-Based Access Control (RBAC)"]
+        Plan1["1. Analisis Kebutuhan Awal & Planning<br/>- Identifikasi Stakeholder (Admin, Mentor, Intern)<br/>- Skema Database Dasar (User, Profile, Session)"]
+        Design1["2. Desain & Modeling Increment 1<br/>- Use Case Login & Registrasi<br/>- Arsitektur MVC Express.js & Prisma Schema"]
+        Code1["3. Implementasi Kode Increment 1<br/>- Route Auth & Middleware (isAuthenticated, mentorOnly)<br/>- Dashboard Layout EJS & Bootstrap 5"]
+        Test1["4. Pengujian Increment 1<br/>- Black Box Testing: Login, Registrasi, Proteksi URL"]
+        Plan1 --> Design1 --> Code1 --> Test1
+    end
+
+    subgraph Inc2 ["Increment 2: Monitoring Presensi & Logbook Kegiatan Harian"]
+        Plan2["1. Analisis Alur Aktivitas Kerja<br/>- Kebijakan WFO/WFH di PT Cikara Bakti Nusantara<br/>- Format Isian Logbook & Validasi Lapangan"]
+        Design2["2. Desain & Modeling Increment 2<br/>- Sequence Diagram Presensi & Logbook<br/>- Relasi Database Presence & Logbook ke User"]
+        Code2["3. Implementasi Kode Increment 2<br/>- presenceController & logbookController<br/>- Kalender Interaktif & Status Approval Mentor"]
+        Test2["4. Pengujian Increment 2<br/>- Black Box Testing: Input Hadir/Izin, CRUD Logbook, Verifikasi Mentor"]
+        Plan2 --> Design2 --> Code2 --> Test2
+    end
+
+    subgraph Inc3 ["Increment 3: Evaluasi Kompetensi, Security Hardening & Optimasi Antarmuka Mobile"]
+        Plan3["1. Analisis Luaran & Keamanan Sistem<br/>- 6 Kriteria Penilaian Kompetensi Magang<br/>- Kebutuhan Audit Keamanan & Ergonomi Mobile"]
+        Design3["2. Desain & Modeling Increment 3<br/>- Diagram Alur Evaluasi & Publikasi Nilai<br/>- Arsitektur Keamanan CSRF, Session, Helmet"]
+        Code3["3. Implementasi Kode Increment 3<br/>- evaluationController.js & Paginasi Riwayat<br/>- Middleware CSRF Double-Submit & Helmet Headers"]
+        Test3["4. Pengujian Terpadu Increment 3<br/>- Black Box Testing & Regression Suite Komprehensif"]
+        Plan3 --> Design3 --> Code3 --> Test3
+    end
+
+    Inc1 ==>|Fondasi Pengguna Siap| Inc2
+    Inc2 ==>|Data Presensi & Logbook Siap| Inc3
+    Inc3 ==> FinalSystem(["CIMS Siap Digunakan Secara Penuh (Production-Ready)"])`
+      },
+      {
+        id: "02-use-case-cims",
+        title: "Use Case Diagram CIMS",
+        subtitle: "Bab V Laporan: Interaksi Aktor Mentor dan Intern beserta relasi <<include>> dan <<extend>>",
+        desc: "<h3>Penjelasan Use Case Diagram</h3><p>Diagram ini memetakan seluruh use case pada sistem CIMS. Aktor <strong>Mentor</strong> memiliki wewenang mengelola data seluruh peserta, menyetujui pendaftaran baru, memantau progres hari kerja (H-X/Y), menegakkan kebijakan drop-out 3 hari mangkir, memeriksa logbook, dan menginput penilaian 6 kriteria kompetensi. Aktor <strong>Intern</strong> dapat mengisi presensi harian, mengelola profil mandiri, menginput logbook aktivitas, melihat kalender, dan melihat kartu nilai evaluasi resmi.</p>",
+        code: `flowchart LR
+    subgraph Aktor ["Aktor Pengguna"]
+        Mentor(("Mentor / Pembimbing Lapangan"))
+        Intern(("Intern / Peserta Magang"))
+    end
+
+    subgraph CIMS ["Aplikasi Pengelolaan Peserta Magang di PT Cikara Bakti Nusantara (CIMS)"]
+        UC_Register(["Registrasi Akun & Periode Terkunci"])
+        UC_Login(["Login Sistem"])
+        UC_Logout(["Logout"])
+        UC_ForgotPass(["Lupa & Reset Kata Sandi"])
+        UC_Approval(["Verifikasi & Persetujuan Akun"])
+        UC_Profile(["Kelola Profil Mandiri (Self-Service)"])
+        UC_ManageIntern(["Monitoring & Manajemen Peserta"])
+        UC_ArchiveIntern(["Arsip & Penegakan Drop-Out 3 Hari"])
+        UC_SubmitPresence(["Pencatatan Presensi Harian (WFO/WFH/Izin/Sakit)"])
+        UC_ViewPresenceRecap(["Monitoring Rekapitulasi Presensi"])
+        UC_ViewCalendar(["Visualisasi Kalender Magang"])
+        UC_SubmitLogbook(["Pengisian Logbook Aktivitas Harian"])
+        UC_ReviewLogbook(["Review, Evaluasi & Catatan Revisi Logbook"])
+        UC_ManageAnnouncement(["Kelola Pengumuman Terarah"])
+        UC_ViewAnnouncement(["Melihat Informasi & Pengumuman"])
+        UC_ManageEvaluation(["Penilaian Kinerja 6 Kriteria Kompetensi"])
+        UC_PublishEvaluation(["Publikasi Nilai Akhir"])
+        UC_ViewEvaluation(["Melihat Kartu Hasil Evaluasi Nilai"])
+    end
+
+    Intern --> UC_Register
+    Intern --> UC_Login
+    Intern --> UC_Logout
+    Intern --> UC_ForgotPass
+    Intern --> UC_Profile
+    Intern --> UC_SubmitPresence
+    Intern --> UC_ViewCalendar
+    Intern --> UC_SubmitLogbook
+    Intern --> UC_ViewAnnouncement
+    Intern --> UC_ViewEvaluation
+
+    Mentor --> UC_Login
+    Mentor --> UC_Logout
+    Mentor --> UC_ForgotPass
+    Mentor --> UC_Approval
+    Mentor --> UC_ManageIntern
+    Mentor --> UC_ArchiveIntern
+    Mentor --> UC_ViewPresenceRecap
+    Mentor --> UC_ViewCalendar
+    Mentor --> UC_ReviewLogbook
+    Mentor --> UC_ManageAnnouncement
+    Mentor --> UC_ManageEvaluation
+
+    UC_ManageEvaluation -.->|include| UC_PublishEvaluation
+    UC_Approval -.->|extend| UC_ManageIntern
+    UC_ArchiveIntern -.->|extend| UC_ManageIntern
+    UC_ReviewLogbook -.->|extend| UC_SubmitLogbook`
+      },
+      {
+        id: "05-class-diagram",
+        title: "Class Diagram Arsitektur CIMS",
+        subtitle: "Bab V Laporan: Struktur Model Basis Data Prisma dan Kontroler",
+        desc: "<h3>Penjelasan Class Diagram</h3><p>Class diagram menggambarkan struktur kelas-kelas data pada model Prisma (User, Profile, Presence, Logbook, Evaluation, Announcement) beserta relasi antarentitas dan metode kontroler yang menanganinya.</p>",
+        code: `classDiagram
+    class User {
+        +String id
+        +String email
+        +String passwordHash
+        +Role role
+        +AccountStatus status
+        +DateTime createdAt
+        +register()
+        +authenticate()
+    }
+    class Profile {
+        +String id
+        +String fullName
+        +String studentId
+        +String phone
+        +String department
+        +DateTime startDate
+        +DateTime endDate
+        +updateProfile()
+    }
+    class Presence {
+        +String id
+        +DateTime date
+        +PresenceStatus status
+        +DateTime checkInTime
+        +String proofFile
+        +submitPresence()
+    }
+    class Logbook {
+        +String id
+        +DateTime date
+        +String activityTitle
+        +String description
+        +LogbookStatus status
+        +String feedbackNotes
+        +submitLogbook()
+        +approve()
+        +reject()
+    }
+    class Evaluation {
+        +String id
+        +Float disciplineScore
+        +Float responsibilityScore
+        +Float initiativeScore
+        +Float teamworkScore
+        +Float communicationScore
+        +Float technicalSkillScore
+        +Float finalScore
+        +publish()
+    }
+    User "1" -- "1" Profile : has
+    User "1" -- "*" Presence : records
+    User "1" -- "*" Logbook : submits
+    User "1" -- "1" Evaluation : receives`
+      },
+      {
+        id: "06-erd-database",
+        title: "Entity Relationship Diagram (ERD)",
+        subtitle: "Bab V Laporan: Skema Relasi Database Relasional PostgreSQL",
+        desc: "<h3>Penjelasan ERD CIMS</h3><p>ERD memodelkan struktur tabel pada database PostgreSQL: User berhubungan One-to-One dengan Profile, One-to-Many dengan Presence dan Logbook, serta One-to-One dengan Evaluation.</p>",
+        code: `erDiagram
+    USERS ||--|| PROFILES : has
+    USERS ||--o{ PRESENCES : submits
+    USERS ||--o{ LOGBOOKS : writes
+    USERS ||--o| EVALUATIONS : receives
+    USERS ||--o{ ANNOUNCEMENTS : publishes
+
+    USERS {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        enum role "MENTOR, INTERN"
+        enum status "PENDING, APPROVED, REJECTED"
+        timestamp created_at
+    }
+    PROFILES {
+        uuid id PK
+        uuid user_id FK
+        varchar full_name
+        varchar student_id
+        varchar phone
+        varchar institution_name
+        date start_date
+        date end_date
+    }
+    PRESENCES {
+        uuid id PK
+        uuid user_id FK
+        date presence_date
+        enum work_mode "WFO, WFH, LEAVE, SICK"
+        timestamp check_in_time
+        varchar notes
+    }
+    LOGBOOKS {
+        uuid id PK
+        uuid user_id FK
+        date log_date
+        varchar activity_title
+        text description
+        enum status "PENDING, APPROVED, REVISION"
+        text mentor_feedback
+    }
+    EVALUATIONS {
+        uuid id PK
+        uuid user_id FK
+        uuid mentor_id FK
+        float discipline
+        float responsibility
+        float technical_skill
+        float final_score
+        enum status "DRAFT, PUBLISHED"
+    }`
+      },
+      {
+        id: "03-sequence-logbook",
+        title: "Sequence Diagram: Pengisian Logbook",
+        subtitle: "Bab V Laporan: Alur Sekuensial Submit Logbook hingga Validasi Mentor",
+        desc: "<h3>Alur Kerja Logbook</h3><p>Menggambarkan pertukaran pesan dari Peserta Magang membuka form logbook, validasi CSRF dan input, penyimpanan database berstatus PENDING, hingga Mentor memberikan status APPROVED atau REVISION.</p>",
+        code: `sequenceDiagram
+    autonumber
+    actor Intern as Peserta Magang
+    participant View as Web Browser (EJS)
+    participant Ctrl as logbookController
+    participant DB as PostgreSQL (Prisma)
+    actor Mentor as Pembimbing Lapangan
+
+    Intern->>View: Buka halaman form logbook
+    View->>Ctrl: GET /intern/logbook
+    Ctrl->>DB: Cek status kehadiran hari ini
+    alt Presensi Tercatat IZIN / SAKIT
+        DB-->>Ctrl: Status IZIN / SAKIT
+        Ctrl-->>View: Render info: Form logbook dinonaktifkan
+        View-->>Intern: Tampilkan peringatan izin/sakit
+    else Presensi Hadir Aktif (WFO/WFH)
+        DB-->>Ctrl: Status Hadir Terkonfirmasi
+        Ctrl-->>View: Render form logbook harian
+        Intern->>View: Input judul aktivitas, deskripsi, lampiran
+        View->>Ctrl: POST /intern/logbook (_csrf, data)
+        Ctrl->>Ctrl: Validasi input & verifikasi CSRF token
+        Ctrl->>DB: Simpan logbook (status: PENDING)
+        DB-->>Ctrl: Sukses simpan
+        Ctrl-->>View: Notifikasi 'Logbook berhasil dikirim'
+    end
+
+    Mentor->>View: Buka menu Review Logbook (/mentor/logbook)
+    View->>Ctrl: GET /mentor/logbook
+    Ctrl->>DB: Query logbook peserta bimbingan
+    DB-->>Ctrl: Daftar logbook
+    Ctrl-->>View: Tampilkan daftar logbook
+    Mentor->>View: Klik 'Setujui' (Approve) & beri catatan
+    View->>Ctrl: POST /mentor/logbook/:id/approve
+    Ctrl->>DB: Update status = APPROVED
+    DB-->>Ctrl: Status terupdate
+    Ctrl-->>View: Tampilkan status hijau (Approved)`
+      },
+      {
+        id: "04-sequence-presence",
+        title: "Sequence Diagram: Presensi Kehadiran",
+        subtitle: "Bab V Laporan: Alur Pencatatan Kehadiran Harian WFO/WFH",
+        desc: "<h3>Alur Presensi Kehadiran</h3><p>Peserta memilih status kehadiran (WFO/WFH/Izin/Sakit). Sistem memvalidasi tanggal untuk mencegah presensi ganda, mencatat jam kehadiran, dan memperbarui metrik streak.</p>",
+        code: `sequenceDiagram
+    autonumber
+    actor Intern as Peserta Magang
+    participant View as Web Browser (EJS)
+    participant Ctrl as presenceController
+    participant DB as PostgreSQL (Prisma)
+
+    Intern->>View: Akses halaman Presensi (/intern/presence)
+    View->>Ctrl: GET /intern/presence
+    Ctrl->>DB: Cari data presensi tanggal hari ini
+    DB-->>Ctrl: Belum ada presensi
+    Ctrl-->>View: Render tombol presensi harian
+    Intern->>View: Pilih status WFO/WFH dan klik Submit
+    View->>Ctrl: POST /intern/presence (_csrf, work_mode)
+    Ctrl->>Ctrl: Validasi token CSRF & jam kerja
+    Ctrl->>DB: Insert kehadiran baru (checkInTime: now)
+    Ctrl->>DB: Update streak hari aktif di profil
+    DB-->>Ctrl: Sukses simpan
+    Ctrl-->>View: Notifikasi 'Presensi hari ini berhasil dicatat'`
+      },
+      {
+        id: "07-activity-presence",
+        title: "Activity Diagram: Presensi Harian & Penegakan Drop-Out 3 Hari",
+        subtitle: "Bab V Laporan: Alur Logika Pengisian Presensi, Reset Streak, & Penegakan Drop-Out Otomatis",
+        desc: "<h3>Alur Aktivitas Presensi & Penegakan Drop-Out</h3><p>Memodelkan alur pencatatan presensi harian oleh peserta magang, validasi hari kerja (Senin s.d. Sabtu di luar libur nasional), reset streak mangkir saat hadir/izin/sakit, deteksi otomatis akumulasi 3 hari mangkir berturut-turut, serta eksekusi otomatis status ARCHIVED (Drop-Out) dengan notifikasi lencana peringatan untuk mentor.</p>",
+        code: `flowchart TD
+    StartNode((●))
+    EndNode((◉))
+
+    subgraph Swimlane_Intern ["Intern (Peserta Magang)"]
+        A1["Akses Halaman Presensi (/intern/presensi)"]
+        A2["Periksa Status Hari Ini (Hari Libur / Sudah Absen)"]
+        A3{"Apakah Sudah Mengisi Hari Ini?"}
+        A4["Tampilkan Status & Riwayat Kehadiran (Form Presensi Terkunci)"]
+        A5["Pilih Status Kehadiran (WFO / WFH / IZIN / SAKIT)"]
+        A6["Input Keterangan Catatan / Bukti Surat (Wajib jika Izin/Sakit)"]
+        A7["Submit Form Presensi Harian (POST /intern/presensi)"]
+        A8["Menerima Notifikasi Keberhasilan Presensi"]
+        A9["Lihat Progres Hari Kerja Magang di Dashboard"]
+    end
+
+    subgraph Swimlane_System ["Sistem Backend CIMS"]
+        S1["Cek Kalender Hari Libur Nasional & Hari Minggu (holidayHelper.js)"]
+        S2["Query Rekapitulasi Presensi Tanggal Berjalan"]
+        S3["Validasi Input & Token Keamanan CSRF"]
+        S4["Simpan Data Presensi ke Tabel presences (Unique [userId, date])"]
+        S5["Reset Streak Mangkir (Consecutive Absences = 0) Karena Ada Kabar/Kehadiran"]
+        S6["Kalkulasi Ulang Hari Kerja:
+        - Hari ke-X dari Y Total Hari Kerja Magang
+        - Sisa Hari Kerja yang Belum Dijalani
+        - Persentase Progres Ketercapaian"]
+        
+        S7{"Pemeriksaan Rutin: Ada Hari Kerja Tanpa Presensi/Keterangan?"}
+        S8["Hitung Jumlah Hari Mangkir Berturut-turut (Senin s.d. Sabtu)"]
+        S9{"Apakah Streak Mangkir >= 3 Hari Kerja?"}
+        S10["Pasang Banner & Lencana Peringatan: Mangkir 1 - 2 Hari"]
+        S11["Eksekusi Drop-Out Otomatis (enforceDropoutPolicy):
+        - Ubah Status Peserta Menjadi ARCHIVED
+        - Catat Keterangan Drop-Out 3 Hari Mangkir"]
+    end
+
+    subgraph Swimlane_Mentor ["Mentor (Pembimbing Lapangan)"]
+        M1["Akses Halaman Monitoring Presensi (/mentor/presensi)"]
+        M2["Pantau Rekap Kehadiran, Status WFO/WFH, & Izin"]
+        M3["Menerima Lencana Peringatan '⚠️ X Hari Mangkir' di Tabel Peserta"]
+        M4["Melihat Status Peserta yang Terkena Drop-Out Otomatis"]
+    end
+
+    StartNode --> A1
+    A1 --> S1
+    S1 --> S2
+    S2 --> A2
+    A2 --> A3
+    A3 -- "Sudah Presensi" --> A4
+    A4 --> EndNode
+    A3 -- "Belum Presensi" --> A5
+    A5 --> A6
+    A6 --> A7
+    A7 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+    S6 --> A8
+    A8 --> A9
+    A9 --> EndNode
+
+    S1 --> S7
+    S7 -- "Ada Hari Kerja Mangkir" --> S8
+    S8 --> S9
+    S9 -- "1 - 2 Hari" --> S10
+    S10 --> M3
+    S9 -- ">= 3 Hari" --> S11
+    S11 --> M4
+    M3 --> EndNode
+    M4 --> EndNode
+
+    S4 -.-> M1
+    M1 --> M2
+    M2 --> EndNode`
+      },
+      {
+        id: "08-activity-logbook",
+        title: "Activity Diagram: Logbook Kegiatan",
+        subtitle: "Bab V Laporan: Alur Siklus Pengisian dan Peninjauan Logbook",
+        desc: "<h3>Alur Siklus Logbook</h3><p>Sistem memverifikasi status presensi hari ini (jika tercatat IZIN atau SAKIT, form pengisian dinonaktifkan). Pada hari aktif, peserta mengisi rincian tugas harian. Logbook berstatus PENDING hingga Mentor meninjau dan menentukan apakah disetujui (APPROVED) atau perlu perbaikan (REVISION).</p>",
+        code: `flowchart TD
+    Start([Mulai]) --> CekPresensi{Cek Status Presensi Hari Ini}
+    CekPresensi -- IZIN / SAKIT --> FormLocked[Form Logbook Dinonaktifkan] --> Selesai([Selesai])
+    CekPresensi -- Hadir Aktif WFO/WFH --> InternInput[Peserta Mengisi Uraian Kegiatan Harian]
+    InternInput --> UploadLampiran[Unggah Lampiran / Tautan Hasil Kerja]
+    UploadLampiran --> SubmitLogbook[Kirim Laporan Logbook]
+    SubmitLogbook --> StatusPending[Status Logbook: PENDING]
+    StatusPending --> MentorReview[Mentor Membuka Halaman Review Logbook]
+    MentorReview --> Keputusan{Keputusan Mentor}
+    Keputusan -- Setujui --> StatusApproved[Status Diubah: APPROVED]
+    Keputusan -- Minta Revisi --> StatusRevision[Status Diubah: REVISION + Catatan Koreksi]
+    StatusRevision --> InternRevisi[Peserta Memperbaiki Isian Logbook]
+    InternRevisi --> SubmitLogbook
+    StatusApproved --> Selesai([Selesai / Terekap di Laporan Akhir])`
+      },
+      {
+        id: "09-activity-evaluation",
+        title: "Activity Diagram: Penilaian Evaluasi",
+        subtitle: "Bab V Laporan: Alur Penilaian 6 Kriteria Kompetensi Magang",
+        desc: "<h3>Alur Penilaian Kompetensi</h3><p>Mentor menginput skor 0–100 (mendukung format desimal koma lokal misal 85,5 maupun titik) untuk 6 kriteria kompetensi (disiplin, tanggung jawab, komunikasi, kerja sama, inisiatif, keterampilan teknis). Nilai divalidasi rentangnya, dihitung rata-rata desimal dan predikat grade otomatis, serta dipublikasikan.</p>",
+        code: `flowchart TD
+    Start([Mulai]) --> OpenEval[Mentor Membuka Menu Penilaian Peserta]
+    OpenEval --> SelectIntern[Pilih Peserta Magang yang Akan Dinilai]
+    SelectIntern --> InputScores[Input Nilai 6 Kriteria: Disiplin, Tanggung Jawab, Komunikasi, Kerja Sama, Inisiatif, Teknis<br/>(Dukungan Desimal Koma misal: 85,5)]
+    InputScores --> ValidasiRentang{Validasi Batas Rentang Skor 0 s.d. 100}
+    ValidasiRentang -- Tidak Valid (Di Luar Rentang 0-100) --> ErrScore[Tampilkan Pesan Validasi Skor & Kembalikan ke Form] --> InputScores
+    ValidasiRentang -- Valid (0 - 100) --> HitungOtomatis[Sistem Menghitung Rata-rata Desimal & Predikat Grade Otomatis]
+    HitungOtomatis --> PublishChoice{Simpan sebagai Draft atau Publikasi?}
+    PublishChoice -- Draft --> SaveDraft[Simpan Status DRAFT] --> End([Selesai])
+    PublishChoice -- Publikasi --> SavePub[Simpan Status PUBLISHED]
+    SavePub --> InternNotif[Peserta Dapat Melihat Kartu Nilai Resmi]
+    InternNotif --> End`
+      },
+      {
+        id: "10-activity-registration",
+        title: "Activity Diagram: Registrasi Peserta & Self-Service Profil",
+        subtitle: "Bab V Laporan: Alur Pendaftaran, Periode Terkunci, Approval Mentor, & Profil Mandiri",
+        desc: "<h3>Alur Registrasi, Periode Terkunci & Profil Mandiri</h3><p>Calon peserta mendaftar dengan memilih tanggal magang (keterangan periode dihitung dan dikunci otomatis anti-manipulasi). Mentor menyetujui akun di halaman approval. Peserta memiliki wewenang penuh memperbarui biodata mandiri di /intern/profil tanpa intervensi mentor.</p>",
+        code: `flowchart TD
+    StartNode((●))
+    EndSuccess((◉))
+    EndFail((◉))
+
+    subgraph Swimlane_Intern ["Intern (Calon Peserta & Peserta Magang)"]
+        A1["Akses Halaman Registrasi (/auth/register)"]
+        A2["Pilih Tipe Peserta:
+        1. Mahasiswa (Universitas, Prodi, NIM)
+        2. Siswa SMK (Sekolah, Kejuruan, Kelas)"]
+        A3["Pilih Tanggal Mulai & Tanggal Selesai Magang"]
+        A4["Sistem Otomatis Mengisi & Mengunci Keterangan Periode Magang"]
+        A5["Input Biodata Lengkap, Password, & Unggah Foto Profil"]
+        A6["Submit Formulir Registrasi"]
+        A7["Menerima Konfirmasi Akun Berstatus PENDING"]
+        A8["Login Setelah Disetujui Mentor (/auth/login)"]
+        A9["Mengakses Halaman Profil Mandiri (/intern/profil)"]
+        A10["Memperbaiki Salah Ketik Nama, NIM, Asal Sekolah/Kampus, atau Kontak"]
+    end
+
+    subgraph Swimlane_System ["Sistem Backend CIMS"]
+        S1["Hitung Teks Periode Otomatis via formatInternshipPeriod:
+        Contoh: '2 Juni - 31 Juli 2026'"]
+        S2["Kunci Input Periode (readonly bg-light) Anti-Manipulasi"]
+        S3["Validasi Form & Berkas:<br/>• Nama Lengkap Valid (Mendukung Tanda Petik / Apostrof)<br/>• Format Email Unik & Password Kuat<br/>• Validasi Ukuran Foto Profil (Maksimal 2 MB, JPG/PNG)"]
+        S4{"Validasi Berhasil?"}
+        S5["Tampilkan Pesan Koreksi Validasi Ramah Pengguna"]
+        S6["Simpan Data ke Tabel users:
+        - Status: PENDING
+        - Periode & Tanggal Magang Terkunci Permanen"]
+        S7["Verifikasi Sesi & Kredensial Login (bcrypt)"]
+        S8{"Pemeriksaan Status Akun?"}
+        S9["Peringatan: Akun Masih Menunggu Approval Mentor"]
+        S10["Peringatan: Akun Telah Ditolak Mentor"]
+        S11["Izinkan Masuk ke Dashboard Peserta"]
+        S12["updateOwnProfile(): Simpan Pembaruan Profil Mandiri<br/>• Validasi Nama (Mendukung Apostrof)<br/>• Validasi Ukuran Foto (Maksimal 2 MB)<br/>• Proteksi: Blokir Perubahan Periode & Tanggal Magang"]
+    end
+
+    subgraph Swimlane_Mentor ["Mentor (Pembimbing Lapangan)"]
+        M1["Akses Halaman Persetujuan Akun (/auth/approval)"]
+        M2["Periksa Biodata, Asal Institusi, & Periode Terkunci Pendaftar"]
+        M3{"Keputusan Persetujuan?"}
+        M4["Klik Tolak (Reject) -> Status Akun: REJECTED"]
+        M5["Klik Setuju (Approve) -> Status Akun: ACTIVE"]
+        M6["Memantau Peserta di Daftar Magang (Hak Edit Profil Ditiadakan)"]
+    end
+
+    StartNode --> A1
+    A1 --> A2
+    A2 --> A3
+    A3 --> S1
+    S1 --> S2
+    S2 --> A4
+    A4 --> A5
+    A5 --> A6
+    A6 --> S3
+    S3 --> S4
+    S4 -- "Gagal" --> S5
+    S5 --> A5
+    S4 -- "Sukses" --> S6
+    S6 --> A7
+
+    A7 --> M1
+    M1 --> M2
+    M2 --> M3
+    M3 -- "Tolak" --> M4
+    M4 --> A8
+    M3 -- "Setuju" --> M5
+    M5 --> M6
+    M5 --> A8
+
+    A8 --> S7
+    S7 --> S8
+    S8 -- "Status PENDING" --> S9
+    S9 --> EndFail
+    S8 -- "Status REJECTED" --> S10
+    S10 --> EndFail
+    S8 -- "Status ACTIVE" --> S11
+    S11 --> EndSuccess
+
+    S11 -.-> A9
+    A9 --> A10
+    A10 --> S12
+    S12 --> EndSuccess`
+      }
+    ];
+
+    let currentIdx = 0;
+
+    function showDiagram(idx) {
+      currentIdx = idx;
+      const d = diagrams[idx];
+
+      // Update Nav
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+
+      // Update Header
+      document.getElementById('diagramTitle').innerText = d.title;
+      document.getElementById('diagramSubtitle').innerText = d.subtitle;
+      document.getElementById('diagramDesc').innerHTML = d.desc;
+
+      // Update Live URL
+      const liveData = {
+        code: d.code,
+        mermaid: { theme: 'default' }
+      };
+      const jsonStr = JSON.stringify(liveData);
+      const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+      document.getElementById('btnLive').href = `https://mermaid.live/edit#base64:${encoded}`;
+      const fileId = d.id || ('diagram-' + (idx + 1));
+      document.getElementById('btnDownloadPng').href = `images/${fileId}.png`;
+      document.getElementById('btnDownloadPng').setAttribute('download', `${fileId}.png`);
+      document.getElementById('btnDownloadSvg').href = `images/${fileId}.svg`;
+      document.getElementById('btnDownloadSvg').setAttribute('download', `${fileId}.svg`);
+
+      // Render Mermaid
+      const container = document.getElementById('mermaidTarget');
+      container.removeAttribute('data-processed');
+      container.innerHTML = d.code;
+      mermaid.run({ nodes: [container] });
+    }
+
+    function copyMermaidCode() {
+      const code = diagrams[currentIdx].code;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Kode Mermaid berhasil disalin ke clipboard! Anda dapat menempelkannya di Mermaid Live Editor atau dokumen Anda.');
+      });
+    }
+
+    // Init first diagram
+    window.onload = () => {
+      showDiagram(0);
+    };
+  </script>
+</body>
+</html>

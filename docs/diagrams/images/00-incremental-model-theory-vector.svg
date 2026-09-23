@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1280" height="820" viewBox="0 0 1280 820" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <!-- Filters -->
+    <filter id="cardShadow" x="-10" y="-5" width="120%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0f172a" flood-opacity="0.08" />
+    </filter>
+    <filter id="boxShadow" x="-10%" y="-10%" width="125%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.06" />
+    </filter>
+    
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+
+    <linearGradient id="inc1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#eff6ff" />
+      <stop offset="100%" stop-color="#dbeafe" />
+    </linearGradient>
+
+    <linearGradient id="inc2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f0fdf4" />
+      <stop offset="100%" stop-color="#dcfce7" />
+    </linearGradient>
+
+    <linearGradient id="inc3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#faf5ff" />
+      <stop offset="100%" stop-color="#f3e8ff" />
+    </linearGradient>
+
+    <linearGradient id="release1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+
+    <linearGradient id="release2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16a34a" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+
+    <linearGradient id="release3Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" />
+      <stop offset="100%" stop-color="#6d28d9" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+    </marker>
+    <marker id="arrowPrimary" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+    </marker>
+    <marker id="arrowAxis" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 1 L 9 5 L 0 9 z" fill="#334155" />
+    </marker>
+    <marker id="arrowFeedback" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#ea580c" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1280" height="820" fill="url(#bgGrad)" rx="16" />
+  <rect x="2" y="2" width="1276" height="816" fill="none" stroke="#cbd5e1" stroke-width="1.5" rx="15" />
+
+  <!-- Header Section -->
+  <g transform="translate(40, 32)">
+    <rect x="0" y="0" width="1200" height="64" fill="#ffffff" rx="10" filter="url(#boxShadow)" />
+    <rect x="0" y="0" width="6" height="64" fill="#2563eb" rx="3" />
+    <text x="24" y="28" font-size="18" font-weight="700" fill="#0f172a" letter-spacing="0.3">MODEL PROSES PENGEMBANGAN INKREMENTAL (THE INCREMENTAL MODEL)</text>
+    <text x="24" y="48" font-size="13" font-weight="400" fill="#64748b">Landasan Teori Rekayasa Perangkat Lunak menurut Roger S. Pressman &amp; Bruce R. Maxim (Software Engineering: A Practitioner's Approach)</text>
+  </g>
+
+  <!-- AXIS SYSTEM (Staggered Waterfall Dimension) -->
+  <!-- Sumbu Y: Fungsionalitas & Fitur -->
+  <line x1="80" y1="670" x2="80" y2="125" stroke="#334155" stroke-width="2.5" marker-end="url(#arrowAxis)" />
+  <!-- Sumbu X: Waktu Kalender Proyek -->
+  <line x1="80" y1="670" x2="1220" y2="670" stroke="#334155" stroke-width="2.5" marker-end="url(#arrowAxis)" />
+
+  <!-- Label Sumbu Y -->
+  <g transform="translate(68, 380) rotate(-90)">
+    <text x="0" y="0" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b" letter-spacing="0.5">
+      FUNGSIONALITAS &amp; FITUR SISTEM (SOFTWARE FUNCTIONALITY)
+    </text>
+  </g>
+
+  <!-- Label Sumbu X -->
+  <text x="650" y="700" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b" letter-spacing="0.5">
+    WAKTU KALENDER PROYEK (PROJECT CALENDAR TIME)
+  </text>
+
+  <!-- ==================== INCREMENT 1 ==================== -->
+  <g transform="translate(110, 480)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="760" height="150" fill="url(#inc1Grad)" stroke="#bfdbfe" stroke-width="1.5" rx="12" filter="url(#cardShadow)" />
+    
+    <!-- Badge Inkremen 1 -->
+    <rect x="18" y="14" width="220" height="26" fill="#2563eb" rx="6" />
+    <text x="128" y="31" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.5">INKREMEN 1 (PRODUK INTI)</text>
+    <text x="250" y="32" font-size="12" font-weight="500" fill="#1e40af">Tahap Fondasi Esensial Sistem</text>
+
+    <!-- 5 Tahapan Pressman -->
+    <!-- 1. Komunikasi -->
+    <g transform="translate(18, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">1. Komunikasi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#3b82f6">Communication</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Analisis Awal</text>
+    </g>
+    <line x1="114" y1="92" x2="126" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 2. Perencanaan -->
+    <g transform="translate(128, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">2. Perencanaan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#3b82f6">Planning</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Jadwal &amp; Ruang</text>
+    </g>
+    <line x1="224" y1="92" x2="236" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 3. Pemodelan -->
+    <g transform="translate(238, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">3. Pemodelan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#3b82f6">Modeling</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Analisis &amp; Desain</text>
+    </g>
+    <line x1="334" y1="92" x2="346" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 4. Konstruksi -->
+    <g transform="translate(348, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">4. Konstruksi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#3b82f6">Construction</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Koding &amp; Uji Unit</text>
+    </g>
+    <line x1="444" y1="92" x2="456" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 5. Penyerahan -->
+    <g transform="translate(458, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#93c5fd" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#1e3a8a">5. Penyerahan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#3b82f6">Deployment</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Rilis &amp; Evaluasi</text>
+    </g>
+    <line x1="554" y1="92" x2="572" y2="92" stroke="#2563eb" stroke-width="2" marker-end="url(#arrowPrimary)" />
+
+    <!-- Deliverable: Rilis Inkremen 1 -->
+    <g transform="translate(578, 52)">
+      <rect x="0" y="0" width="164" height="80" fill="url(#release1Grad)" rx="10" filter="url(#boxShadow)" />
+      <text x="82" y="26" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">RILIS INKREMEN 1</text>
+      <text x="82" y="46" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd">Produk Inti</text>
+      <text x="82" y="64" text-anchor="middle" font-size="10" font-style="italic" fill="#e0e7ff">(Core Product)</text>
+    </g>
+  </g>
+
+  <!-- ==================== INCREMENT 2 ==================== -->
+  <g transform="translate(290, 300)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="760" height="150" fill="url(#inc2Grad)" stroke="#bbf7d0" stroke-width="1.5" rx="12" filter="url(#cardShadow)" />
+    
+    <!-- Badge Inkremen 2 -->
+    <rect x="18" y="14" width="220" height="26" fill="#16a34a" rx="6" />
+    <text x="128" y="31" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.5">INKREMEN 2 (FITUR TAMBAHAN)</text>
+    <text x="250" y="32" font-size="12" font-weight="500" fill="#15803d">Pengembangan Fungsionalitas Lanjutan</text>
+
+    <!-- 5 Tahapan Pressman -->
+    <!-- 1. Komunikasi -->
+    <g transform="translate(18, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">1. Komunikasi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#16a34a">Communication</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Kebutuhan Baru</text>
+    </g>
+    <line x1="114" y1="92" x2="126" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 2. Perencanaan -->
+    <g transform="translate(128, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">2. Perencanaan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#16a34a">Planning</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Prioritas Rilis 2</text>
+    </g>
+    <line x1="224" y1="92" x2="236" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 3. Pemodelan -->
+    <g transform="translate(238, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">3. Pemodelan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#16a34a">Modeling</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Desain Modul 2</text>
+    </g>
+    <line x1="334" y1="92" x2="346" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 4. Konstruksi -->
+    <g transform="translate(348, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">4. Konstruksi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#16a34a">Construction</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Integrasi &amp; Koding</text>
+    </g>
+    <line x1="444" y1="92" x2="456" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 5. Penyerahan -->
+    <g transform="translate(458, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#86efac" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#14532d">5. Penyerahan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#16a34a">Deployment</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Rilis &amp; Evaluasi</text>
+    </g>
+    <line x1="554" y1="92" x2="572" y2="92" stroke="#16a34a" stroke-width="2" marker-end="url(#arrowPrimary)" />
+
+    <!-- Deliverable: Rilis Inkremen 2 -->
+    <g transform="translate(578, 52)">
+      <rect x="0" y="0" width="164" height="80" fill="url(#release2Grad)" rx="10" filter="url(#boxShadow)" />
+      <text x="82" y="26" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">RILIS INKREMEN 2</text>
+      <text x="82" y="46" text-anchor="middle" font-size="11" font-weight="600" fill="#bbf7d0">Fungsionalitas Meluas</text>
+      <text x="82" y="64" text-anchor="middle" font-size="10" font-style="italic" fill="#dcfce7">(Second Increment)</text>
+    </g>
+  </g>
+
+  <!-- ==================== INCREMENT 3 / n ==================== -->
+  <g transform="translate(470, 120)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="760" height="150" fill="url(#inc3Grad)" stroke="#e9d5ff" stroke-width="1.5" rx="12" filter="url(#cardShadow)" />
+    
+    <!-- Badge Inkremen n -->
+    <rect x="18" y="14" width="240" height="26" fill="#7c3aed" rx="6" />
+    <text x="138" y="31" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="0.5">INKREMEN n (PRODUK AKHIR)</text>
+    <text x="270" y="32" font-size="12" font-weight="500" fill="#6d28d9">Sistem Lengkap, Keamanan &amp; Optimasi</text>
+
+    <!-- 5 Tahapan Pressman -->
+    <!-- 1. Komunikasi -->
+    <g transform="translate(18, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">1. Komunikasi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#7c3aed">Communication</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Penyempurnaan</text>
+    </g>
+    <line x1="114" y1="92" x2="126" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 2. Perencanaan -->
+    <g transform="translate(128, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">2. Perencanaan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#7c3aed">Planning</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Finalisasi Rilis</text>
+    </g>
+    <line x1="224" y1="92" x2="236" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 3. Pemodelan -->
+    <g transform="translate(238, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">3. Pemodelan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#7c3aed">Modeling</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Arsitektur Akhir</text>
+    </g>
+    <line x1="334" y1="92" x2="346" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 4. Konstruksi -->
+    <g transform="translate(348, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">4. Konstruksi</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#7c3aed">Construction</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Full Regression</text>
+    </g>
+    <line x1="444" y1="92" x2="456" y2="92" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow)" />
+
+    <!-- 5. Penyerahan -->
+    <g transform="translate(458, 55)">
+      <rect x="0" y="0" width="94" height="74" fill="#ffffff" stroke="#d8b4fe" stroke-width="1.2" rx="8" filter="url(#boxShadow)" />
+      <text x="47" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="#581c87">5. Penyerahan</text>
+      <text x="47" y="42" text-anchor="middle" font-size="10" font-style="italic" fill="#7c3aed">Deployment</text>
+      <text x="47" y="60" text-anchor="middle" font-size="9" fill="#64748b">Serah Terima</text>
+    </g>
+    <line x1="554" y1="92" x2="572" y2="92" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrowPrimary)" />
+
+    <!-- Deliverable: Rilis Produk Akhir -->
+    <g transform="translate(578, 52)">
+      <rect x="0" y="0" width="164" height="80" fill="url(#release3Grad)" rx="10" filter="url(#boxShadow)" />
+      <text x="82" y="26" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">PRODUK AKHIR</text>
+      <text x="82" y="46" text-anchor="middle" font-size="11" font-weight="600" fill="#e9d5ff">Sistem Lengkap Operasional</text>
+      <text x="82" y="64" text-anchor="middle" font-size="10" font-style="italic" fill="#f3e8ff">(Final Product Release)</text>
+    </g>
+  </g>
+
+  <!-- ==================== FEEDBACK LOOPS ==================== -->
+  <!-- Feedback 1: dari Rilis Inkremen 1 ke Perencanaan Inkremen 2 -->
+  <path d="M 770 532 C 770 470, 460 480, 436 410" fill="none" stroke="#ea580c" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrowFeedback)" />
+  <g transform="translate(560, 452)">
+    <rect x="-105" y="-12" width="210" height="24" fill="#fff7ed" stroke="#fdba74" stroke-width="1" rx="6" />
+    <text x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2410c">Evaluasi &amp; Umpan Balik Pengguna</text>
+  </g>
+
+  <!-- Feedback 2: dari Rilis Inkremen 2 ke Perencanaan Inkremen 3 -->
+  <path d="M 950 352 C 950 290, 640 300, 616 230" fill="none" stroke="#ea580c" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrowFeedback)" />
+  <g transform="translate(740, 272)">
+    <rect x="-105" y="-12" width="210" height="24" fill="#fff7ed" stroke="#fdba74" stroke-width="1" rx="6" />
+    <text x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="600" fill="#c2410c">Evaluasi &amp; Umpan Balik Pengguna</text>
+  </g>
+
+  <!-- ==================== FOOTER / EXPLANATION BAR ==================== -->
+  <g transform="translate(40, 728)">
+    <rect x="0" y="0" width="1200" height="66" fill="#ffffff" rx="10" stroke="#e2e8f0" filter="url(#boxShadow)" />
+    
+    <text x="24" y="24" font-size="11.5" font-weight="700" fill="#0f172a">5 AKTIVITAS KERANGKA KERJA UMUM (GENERIC FRAMEWORK ACTIVITIES):</text>
+    
+    <text x="24" y="48" font-size="11" fill="#334155">
+      <tspan font-weight="600" fill="#2563eb">1. Komunikasi:</tspan> Temu awal &amp; identifikasi sasaran  |  
+      <tspan font-weight="600" fill="#4f46e5">2. Perencanaan:</tspan> Penjadwalan &amp; pemilahan fitur  |  
+      <tspan font-weight="600" fill="#0891b2">3. Pemodelan:</tspan> Analisis kebutuhan &amp; arsitektur  |  
+      <tspan font-weight="600" fill="#16a34a">4. Konstruksi:</tspan> Pemrograman &amp; pengujian  |  
+      <tspan font-weight="600" fill="#7c3aed">5. Penyerahan:</tspan> Rilis operasional &amp; evaluasi feedback
+    </text>
+
+    <!-- Source Note -->
+    <text x="1176" y="24" text-anchor="end" font-size="10" font-style="italic" fill="#94a3b8">Roger S. Pressman &amp; Bruce R. Maxim, 2020</text>
+  </g>
+</svg>

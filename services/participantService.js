@@ -7,6 +7,7 @@
 
 import prisma from "../config/database.js";
 import bcrypt from "bcrypt";
+import { formatInternshipPeriod } from "../utils/helpers.js";
 
 const SALT_ROUNDS = 10;
 
@@ -118,6 +119,27 @@ export const getParticipantById = async (id) => {
   // Hanya return jika role INTERN
   if (!user || user.role !== "INTERN") return null;
 
+  // Jika mentor belum terhubung tetapi ada mentor di sistem (karena mentor tunggal di CIMS), fallback otomatis
+  if (!user.mentor) {
+    const defaultMentor = await prisma.user.findFirst({
+      where: { role: "MENTOR" },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+      },
+    });
+    if (defaultMentor) {
+      user.mentor = defaultMentor;
+      user.mentorId = defaultMentor.id;
+      // Sinkronkan ke database
+      await prisma.user.update({
+        where: { id },
+        data: { mentorId: defaultMentor.id },
+      }).catch((err) => console.warn("Auto-assign mentor warning:", err));
+    }
+  }
+
   return user;
 };
 
@@ -145,12 +167,21 @@ export const updateParticipant = async (id, data) => {
   // Field yang bisa diubah
   if (data.fullName !== undefined) updateData.fullName = data.fullName.trim();
   if (data.phoneNumber !== undefined) updateData.phoneNumber = data.phoneNumber.trim();
-  if (data.internshipPeriod !== undefined) updateData.internshipPeriod = data.internshipPeriod.trim();
   if (data.internshipStartDate !== undefined) {
     updateData.internshipStartDate = data.internshipStartDate ? new Date(data.internshipStartDate) : null;
   }
   if (data.internshipEndDate !== undefined) {
     updateData.internshipEndDate = data.internshipEndDate ? new Date(data.internshipEndDate) : null;
+  }
+
+  // Otomatis turunkan periode magang dari tanggal mulai dan selesai
+  const finalStartDate = updateData.internshipStartDate !== undefined ? updateData.internshipStartDate : user.internshipStartDate;
+  const finalEndDate = updateData.internshipEndDate !== undefined ? updateData.internshipEndDate : user.internshipEndDate;
+
+  if (finalStartDate && finalEndDate) {
+    updateData.internshipPeriod = formatInternshipPeriod(finalStartDate, finalEndDate);
+  } else if (data.internshipPeriod !== undefined) {
+    updateData.internshipPeriod = data.internshipPeriod.trim();
   }
 
   // Field berdasarkan jenis peserta
@@ -322,13 +353,41 @@ export const updateOwnProfile = async (id, data, photoFilename = null) => {
 
   const updateData = {};
 
+  // Nama Lengkap (koreksi typo mandiri)
+  if (data.fullName !== undefined && data.fullName.trim().length >= 3) {
+    updateData.fullName = data.fullName.trim();
+  }
+
+  // Data Akademik & Institusi (koreksi typo mandiri)
+  if (user.participantType === "UNIVERSITY") {
+    if (data.university !== undefined && data.university.trim()) {
+      updateData.university = data.university.trim();
+    }
+    if (data.studyProgram !== undefined && data.studyProgram.trim()) {
+      updateData.studyProgram = data.studyProgram.trim();
+    }
+    if (data.studentId !== undefined && data.studentId.trim()) {
+      updateData.studentId = data.studentId.trim();
+    }
+  } else if (user.participantType === "SMK") {
+    if (data.schoolName !== undefined && data.schoolName.trim()) {
+      updateData.schoolName = data.schoolName.trim();
+    }
+    if (data.major !== undefined && data.major.trim()) {
+      updateData.major = data.major.trim();
+    }
+    if (data.classGrade !== undefined && data.classGrade.trim()) {
+      updateData.classGrade = data.classGrade.trim();
+    }
+  }
+
   // Foto profil
   if (photoFilename) {
     updateData.profilePhoto = photoFilename;
   }
 
   // Nomor HP
-  if (data.phoneNumber !== undefined) {
+  if (data.phoneNumber !== undefined && data.phoneNumber.trim()) {
     updateData.phoneNumber = data.phoneNumber.trim();
   }
 

@@ -46,13 +46,26 @@ export const isValidPhoneNumber = (phone) => {
 };
 
 /**
- * Validasi nama lengkap (minimal 3 karakter, hanya huruf dan spasi).
+ * Validasi nama lengkap (minimal 3 karakter, mendukung huruf, spasi, apostrof, tanda hubung, titik gelar).
  * @param {string} name
  * @returns {boolean}
  */
 export const isValidFullName = (name) => {
   if (!name || typeof name !== "string") return false;
-  return name.trim().length >= 3 && /^[a-zA-Z\s]+$/.test(name.trim());
+  const trimmed = name.trim();
+  if (trimmed.length < 3 || trimmed.length > 100) return false;
+
+  // Hanya boleh berisi huruf, spasi, apostrof (', ’), tanda hubung (-), dan titik (.)
+  if (!/^[a-zA-Z\s'’.\-]+$/.test(trimmed)) return false;
+
+  // Wajib memiliki minimal 3 huruf alfabet
+  const letterCount = (trimmed.match(/[a-zA-Z]/g) || []).length;
+  if (letterCount < 3) return false;
+
+  // Mencegah pola berbahaya
+  if (/(--|;|\/\*|\*\/|<|>)/.test(trimmed)) return false;
+
+  return true;
 };
 
 /**
@@ -106,8 +119,9 @@ export const validateRegister = (data) => {
     }
   }
 
-  // Periode Magang
-  if (!data.internshipPeriod || data.internshipPeriod.trim().length < 5) {
+  // Periode Magang (wajib jika tanggal magang terstruktur tidak diberikan lengkap)
+  const hasStructuredDates = Boolean(data.internshipStartDate && data.internshipEndDate);
+  if (!hasStructuredDates && (!data.internshipPeriod || data.internshipPeriod.trim().length < 5)) {
     errors.push("Periode magang harus diisi.");
   }
 
@@ -353,6 +367,18 @@ export const validateAnnouncement = (data) => {
 };
 
 /**
+ * Normalisasi dan parsing nilai angka evaluasi (mendukung format desimal koma lokal maupun titik).
+ * @param {string|number} val
+ * @returns {number}
+ */
+export const parseEvaluationScore = (val) => {
+  if (val === null || val === undefined || String(val).trim() === "") return NaN;
+  if (typeof val === "number") return isNaN(val) ? NaN : val;
+  const normalized = String(val).trim().replace(",", ".");
+  return parseFloat(normalized);
+};
+
+/**
  * Validasi penilaian peserta.
  * @param {Object} data - { discipline, responsibility, communication, teamwork, initiative, technicalSkill, mentorComment }
  * @returns {Object} { valid: boolean, errors: string[] }
@@ -360,9 +386,10 @@ export const validateAnnouncement = (data) => {
 export const validateEvaluation = (data) => {
   const errors = [];
 
-  // Fungsi validasi nilai 0-100
+  // Fungsi validasi nilai 0-100 (mendukung angka bulat dan desimal dengan titik atau koma)
   const isValidScore = (val) => {
-    const num = parseInt(val);
+    if (val === null || val === undefined || String(val).trim() === "") return false;
+    const num = parseEvaluationScore(val);
     return !isNaN(num) && num >= 0 && num <= 100;
   };
 
@@ -435,6 +462,7 @@ export default {
   validateParticipantUpdate,
   validateLogbook,
   validateAnnouncement,
+  parseEvaluationScore,
   validateEvaluation,
   validateDocumentTemplate,
 };

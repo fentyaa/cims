@@ -203,19 +203,32 @@ export const uploadTemplate = multer({
 export const handleUploadError = (err, req, res, next) => {
   let errorMessage = null;
 
-  if (err instanceof multer.MulterError) {
+  if (err && (err.name === "MulterError" || err.code === "LIMIT_FILE_SIZE")) {
     if (err.code === "LIMIT_FILE_SIZE") {
-      errorMessage = "Ukuran file melebihi batas maksimal.";
+      if (err.field === "profilePhoto") {
+        errorMessage = "Ukuran foto profil melebihi batas maksimal 2 MB. Silakan pilih berkas foto dengan ukuran lebih kecil (maksimal 2 MB, format JPG/JPEG/PNG).";
+      } else if (err.field === "attachment") {
+        errorMessage = "Ukuran berkas lampiran melebihi batas maksimal 10 MB. Silakan gunakan berkas dengan ukuran lebih kecil.";
+      } else if (err.field === "templateFile") {
+        errorMessage = "Ukuran berkas template dokumen melebihi batas maksimal 10 MB.";
+      } else {
+        errorMessage = "Ukuran berkas yang diunggah melebihi batas maksimal 2 MB. Silakan pilih berkas dengan ukuran lebih kecil.";
+      }
+    } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      errorMessage = "Field unggahan berkas tidak sesuai atau jumlah berkas melebihi ketentuan.";
     } else {
-      errorMessage = "Terjadi kesalahan upload: " + err.message;
+      errorMessage = `Terjadi kesalahan saat mengunggah berkas: ${err.message}`;
     }
   } else if (err) {
-    errorMessage = err.message || "File yang diupload tidak valid.";
+    errorMessage = err.message || "Berkas yang diunggah tidak valid atau format tidak didukung.";
   }
 
   if (errorMessage) {
-    req.session.messages = [{ type: "danger", text: errorMessage }];
-    return res.redirect(req.get("Referrer") || "/");
+    if (req.session) {
+      req.session.messages = [{ type: "danger", text: errorMessage }];
+    }
+    const redirectUrl = req.get("Referrer") || (req.baseUrl + req.path) || "/";
+    return res.redirect(redirectUrl);
   }
 
   next();

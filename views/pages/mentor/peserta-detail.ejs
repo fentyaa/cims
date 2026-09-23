@@ -25,9 +25,37 @@
   <% }) %>
 <% } %>
 
+<!-- Absence & Dropout Policy Alert -->
+<% if (typeof absenceInfo !== 'undefined' && absenceInfo && absenceInfo.consecutiveDays > 0) { %>
+  <div class="alert <%= absenceInfo.consecutiveDays >= 3 ? 'alert-danger' : 'alert-warning' %> border-0 rounded-3 shadow-sm mb-4 d-flex align-items-start gap-3">
+    <i class="bi <%= absenceInfo.consecutiveDays >= 3 ? 'bi-exclamation-octagon-fill text-danger' : 'bi-exclamation-triangle-fill text-warning' %> fs-3"></i>
+    <div>
+      <h6 class="fw-bold mb-1">
+        <%= absenceInfo.consecutiveDays >= 3 ? 'Peringatan Status Drop-Out (Mangkir \u2265 3 Hari Kerja)' : 'Peringatan Presensi: ' + absenceInfo.consecutiveDays + ' Hari Kerja Mangkir' %>
+      </h6>
+      <p class="mb-0 small">
+        Peserta tidak mencatatkan presensi atau izin selama <%= absenceInfo.consecutiveDays %> hari kerja berturut-turut
+        <% if (absenceInfo.absentDates && absenceInfo.absentDates.length > 0) { %>
+          (<%= absenceInfo.absentDates.join(', ') %>)
+        <% } %>.
+        <% if (absenceInfo.consecutiveDays >= 3) { %>
+          Sesuai kebijakan operasional, ketidakhadiran tanpa kabar selama 3 hari berturut-turut mengakibatkan peserta dinyatakan <strong>tidak melanjutkan magang</strong>.
+        <% } else { %>
+          Perhatian: Jika akumulasi mangkir mencapai 3 hari kerja berturut-turut tanpa kabar, sistem akan otomatis menetapkan peserta tidak melanjutkan magang.
+        <% } %>
+      </p>
+    </div>
+  </div>
+<% } %>
+
 <div class="row g-4">
   <!-- Profile Card -->
   <div class="col-12 col-lg-4">
+    <% 
+      const detailProg = (typeof internshipProgress !== 'undefined' && internshipProgress) 
+        ? internshipProgress 
+        : (typeof gamificationStats !== 'undefined' && gamificationStats && gamificationStats.progress ? gamificationStats.progress : null);
+    %>
     <div class="card border-0 shadow-sm rounded-3 mb-4">
       <div class="card-body text-center p-4">
         <!-- Foto Profil -->
@@ -47,20 +75,44 @@
         <div class="mb-3">
           <% if (participant.status === 'ACTIVE') { %>
             <span class="badge bg-success fs-6">Active</span>
+            <% if (typeof absenceInfo !== 'undefined' && absenceInfo && absenceInfo.consecutiveDays > 0) { %>
+              <div class="mt-2">
+                <span class="badge bg-danger text-white border border-danger shadow-sm">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i><%= absenceInfo.consecutiveDays %> Hari Mangkir
+                </span>
+              </div>
+            <% } %>
           <% } else if (participant.status === 'PENDING') { %>
             <span class="badge bg-warning text-dark fs-6">Pending</span>
           <% } else if (participant.status === 'REJECTED') { %>
             <span class="badge bg-danger fs-6">Rejected</span>
           <% } else if (participant.status === 'ARCHIVED') { %>
             <span class="badge bg-secondary fs-6">Archived</span>
+            <% if (typeof absenceInfo !== 'undefined' && absenceInfo && absenceInfo.consecutiveDays >= 3) { %>
+              <div class="mt-2">
+                <span class="badge bg-danger text-white border border-danger shadow-sm">
+                  <i class="bi bi-person-x-fill me-1"></i>Drop-Out (Mangkir \u2265 3 Hari)
+                </span>
+              </div>
+            <% } %>
           <% } %>
         </div>
 
+        <!-- Sleek Compact Progress Bar (Bar Only, No Bulky Text) -->
+        <% if (detailProg) { %>
+          <div class="mb-3 px-2 text-start" title="Hari <%= detailProg.currentDay %> dari <%= detailProg.totalWorkDays %> hari kerja • Sisa <%= detailProg.remainingWorkDays %> hari">
+            <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem;">
+              <span class="fw-bold text-dark">H-<%= detailProg.currentDay %>/<%= detailProg.totalWorkDays %></span>
+              <span class="text-muted small">Sisa <%= detailProg.remainingWorkDays %>h (<%= detailProg.progressPercent %>%)</span>
+            </div>
+            <div class="progress rounded-pill bg-light border" style="height: 6px;">
+              <div class="progress-bar <%= detailProg.status === 'COMPLETED' ? 'bg-success' : 'bg-primary' %>" role="progressbar" style="width: <%= detailProg.progressPercent %>%;"></div>
+            </div>
+          </div>
+        <% } %>
+
         <!-- Action Buttons -->
         <div class="d-flex gap-2 justify-content-center">
-          <a href="/mentor/peserta/<%= participant.id %>/edit" class="btn btn-warning btn-sm rounded-3">
-            <i class="bi bi-pencil me-1"></i>Edit
-          </a>
           <% if (participant.status === 'ACTIVE') { %>
             <form method="POST" action="/mentor/peserta/<%= participant.id %>/status" class="d-inline" onsubmit="return confirm('Arsipkan peserta ini?')">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>">
@@ -216,7 +268,13 @@
 
           <div class="col-12 col-md-6">
             <label class="small text-muted fw-semibold">Mentor</label>
-            <p class="mb-0"><%= participant.mentor ? participant.mentor.fullName : '<span class="text-muted">Belum ditentukan</span>' %></p>
+            <p class="mb-0">
+              <% if (participant.mentor && participant.mentor.fullName) { %>
+                <%= participant.mentor.fullName %>
+              <% } else { %>
+                <span class="text-muted">Belum ditentukan</span>
+              <% } %>
+            </p>
           </div>
 
           <div class="col-12 col-md-6">
@@ -232,6 +290,21 @@
               <% } %>
             </p>
           </div>
+
+          <% if (detailProg) { %>
+            <div class="col-12 col-md-6">
+              <label class="small text-muted fw-semibold">Progres Magang</label>
+              <div class="mt-1" style="max-width: 260px;">
+                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.75rem;">
+                  <span class="fw-bold text-dark">H-<%= detailProg.currentDay %>/<%= detailProg.totalWorkDays %></span>
+                  <span class="text-muted small">Sisa <%= detailProg.remainingWorkDays %>h (<%= detailProg.progressPercent %>%)</span>
+                </div>
+                <div class="progress rounded-pill bg-light border" style="height: 6px;">
+                  <div class="progress-bar <%= detailProg.status === 'COMPLETED' ? 'bg-success' : 'bg-primary' %>" role="progressbar" style="width: <%= detailProg.progressPercent %>%;"></div>
+                </div>
+              </div>
+            </div>
+          <% } %>
 
           <div class="col-12 col-md-6">
             <label class="small text-muted fw-semibold">Status Akun</label>

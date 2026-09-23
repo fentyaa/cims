@@ -35,3 +35,13 @@ logs/
 # === Coverage (testing nanti) ===
 coverage/
 
+# === Non-system Archives & Local Materials ===
+*.zip
+*.docx
+paper kp*/
+paper kp*
+powershell.cmd
+scratch/
+scripts/*
+!scripts/seed-cikara-templates.mjs
+

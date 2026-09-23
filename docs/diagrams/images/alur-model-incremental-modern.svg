@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1040" height="760" viewBox="0 0 1040 760" fill="none" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Inter', Roboto, sans-serif">
+  <defs>
+    <!-- Soft Shadows -->
+    <filter id="cardShadow" x="-10" y="-5" width="102%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.06" />
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.04" />
+    </filter>
+    <filter id="stepShadow" x="-10%" y="-10%" width="125%" height="135%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+
+    <!-- Gradients Iterasi 1 (Green) -->
+    <linearGradient id="card1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0fdf4" />
+    </linearGradient>
+    <linearGradient id="step1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="prod1Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#15803d" />
+      <stop offset="100%" stop-color="#166534" />
+    </linearGradient>
+
+    <!-- Gradients Iterasi 2 (Blue) -->
+    <linearGradient id="card2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#eff6ff" />
+    </linearGradient>
+    <linearGradient id="step2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="prod2Grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+
+    <!-- Gradients Iterasi ke-n (Orange / Amber) -->
+    <linearGradient id="cardNGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#fffbeb" />
+    </linearGradient>
+    <linearGradient id="stepNGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <linearGradient id="prodNGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c2410c" />
+      <stop offset="100%" stop-color="#9a3412" />
+    </linearGradient>
+
+    <!-- Flow Arrows -->
+    <marker id="arrow1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669" />
+    </marker>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
+    </marker>
+    <marker id="arrowN" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#d97706" />
+    </marker>
+
+    <!-- Big Vertical Transition Arrow Marker -->
+    <marker id="bigArrow" viewBox="0 0 14 14" refX="8" refY="7" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 2 L 11 7 L 0 12 L 2 7 z" fill="#475569" />
+    </marker>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1040" height="760" fill="#ffffff" />
+
+  <!-- ======================================================== -->
+  <!-- 1. ITERASI 1                                             -->
+  <!-- ======================================================== -->
+  <g transform="translate(40, 30)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="960" height="190" fill="url(#card1Grad)" stroke="#6ee7b7" stroke-width="1.5" rx="16" filter="url(#cardShadow)" />
+    
+    <!-- Title: iterasi 1 -->
+    <rect x="420" y="14" width="120" height="30" fill="#ecfdf5" stroke="#a7f3d0" stroke-width="1" rx="8" />
+    <text x="480" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#065f46" letter-spacing="0.4">iterasi 1</text>
+
+    <!-- Node 1: Analisa Kebutuhan -->
+    <g transform="translate(35, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#step1Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="75" y="27" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Analisa</text>
+      <text x="75" y="47" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Kebutuhan</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <line x1="193" y1="109" x2="223" y2="109" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow1)" />
+
+    <!-- Node 2: Desain -->
+    <g transform="translate(231, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step1Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Desain</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <line x1="374" y1="109" x2="404" y2="109" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow1)" />
+
+    <!-- Node 3: Koding -->
+    <g transform="translate(412, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step1Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Koding</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <line x1="555" y1="109" x2="585" y2="109" stroke="#059669" stroke-width="2.5" marker-end="url(#arrow1)" />
+
+    <!-- Node 4: Testing -->
+    <g transform="translate(593, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step1Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Testing</text>
+    </g>
+
+    <!-- Arrow 4 -> 5 -->
+    <line x1="736" y1="109" x2="766" y2="109" stroke="#047857" stroke-width="3" marker-end="url(#arrow1)" />
+
+    <!-- Node 5: Produk 1 -->
+    <g transform="translate(774, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#prod1Grad)" rx="12" filter="url(#stepShadow)" stroke="#bbf7d0" stroke-width="1.5" />
+      <text x="75" y="39" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">Produk 1</text>
+    </g>
+  </g>
+
+  <!-- Big Transition Arrow 1 -> 2 -->
+  <g transform="translate(520, 224)">
+    <line x1="0" y1="0" x2="0" y2="38" stroke="#334155" stroke-width="4.5" stroke-linecap="round" />
+    <polygon points="-8,34 0,48 8,34" fill="#334155" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 2. ITERASI 2                                             -->
+  <!-- ======================================================== -->
+  <g transform="translate(40, 275)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="960" height="190" fill="url(#card2Grad)" stroke="#93c5fd" stroke-width="1.5" rx="16" filter="url(#cardShadow)" />
+    
+    <!-- Title: iterasi 2 -->
+    <rect x="420" y="14" width="120" height="30" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1" rx="8" />
+    <text x="480" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#1e40af" letter-spacing="0.4">iterasi 2</text>
+
+    <!-- Node 1: Analisa Kebutuhan -->
+    <g transform="translate(35, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#step2Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="75" y="27" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Analisa</text>
+      <text x="75" y="47" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Kebutuhan</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <line x1="193" y1="109" x2="223" y2="109" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow2)" />
+
+    <!-- Node 2: Desain -->
+    <g transform="translate(231, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step2Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Desain</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <line x1="374" y1="109" x2="404" y2="109" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow2)" />
+
+    <!-- Node 3: Koding -->
+    <g transform="translate(412, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step2Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Koding</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <line x1="555" y1="109" x2="585" y2="109" stroke="#2563eb" stroke-width="2.5" marker-end="url(#arrow2)" />
+
+    <!-- Node 4: Testing -->
+    <g transform="translate(593, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#step2Grad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Testing</text>
+    </g>
+
+    <!-- Arrow 4 -> 5 -->
+    <line x1="736" y1="109" x2="766" y2="109" stroke="#1d4ed8" stroke-width="3" marker-end="url(#arrow2)" />
+
+    <!-- Node 5: Produk 2 -->
+    <g transform="translate(774, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#prod2Grad)" rx="12" filter="url(#stepShadow)" stroke="#bfdbfe" stroke-width="1.5" />
+      <text x="75" y="39" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">Produk 2</text>
+    </g>
+  </g>
+
+  <!-- Big Transition Arrow 2 -> 3 -->
+  <g transform="translate(520, 469)">
+    <line x1="0" y1="0" x2="0" y2="38" stroke="#334155" stroke-width="4.5" stroke-linecap="round" />
+    <polygon points="-8,34 0,48 8,34" fill="#334155" />
+  </g>
+
+  <!-- ======================================================== -->
+  <!-- 3. ITERASI KE-N                                          -->
+  <!-- ======================================================== -->
+  <g transform="translate(40, 520)">
+    <!-- Container Card -->
+    <rect x="0" y="0" width="960" height="190" fill="url(#cardNGrad)" stroke="#fcd34d" stroke-width="1.5" rx="16" filter="url(#cardShadow)" />
+    
+    <!-- Title: iterasi ke-n -->
+    <rect x="415" y="14" width="130" height="30" fill="#fffbeb" stroke="#fde68a" stroke-width="1" rx="8" />
+    <text x="480" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#92400e" letter-spacing="0.4">iterasi ke-n</text>
+
+    <!-- Node 1: Analisa Kebutuhan -->
+    <g transform="translate(35, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#stepNGrad)" rx="12" filter="url(#stepShadow)" />
+      <text x="75" y="27" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Analisa</text>
+      <text x="75" y="47" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">Kebutuhan</text>
+    </g>
+
+    <!-- Arrow 1 -> 2 -->
+    <line x1="193" y1="109" x2="223" y2="109" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrowN)" />
+
+    <!-- Node 2: Desain -->
+    <g transform="translate(231, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#stepNGrad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Desain</text>
+    </g>
+
+    <!-- Arrow 2 -> 3 -->
+    <line x1="374" y1="109" x2="404" y2="109" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrowN)" />
+
+    <!-- Node 3: Koding -->
+    <g transform="translate(412, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#stepNGrad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Koding</text>
+    </g>
+
+    <!-- Arrow 3 -> 4 -->
+    <line x1="555" y1="109" x2="585" y2="109" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrowN)" />
+
+    <!-- Node 4: Testing -->
+    <g transform="translate(593, 75)">
+      <rect x="0" y="0" width="135" height="68" fill="url(#stepNGrad)" rx="12" filter="url(#stepShadow)" />
+      <text x="67.5" y="39" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Testing</text>
+    </g>
+
+    <!-- Arrow 4 -> 5 -->
+    <line x1="736" y1="109" x2="766" y2="109" stroke="#b45309" stroke-width="3" marker-end="url(#arrowN)" />
+
+    <!-- Node 5: Produk Akhir -->
+    <g transform="translate(774, 75)">
+      <rect x="0" y="0" width="150" height="68" fill="url(#prodNGrad)" rx="12" filter="url(#stepShadow)" stroke="#fed7aa" stroke-width="1.5" />
+      <text x="75" y="39" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">Produk Akhir</text>
+    </g>
+  </g>
+</svg>

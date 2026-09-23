@@ -70,24 +70,49 @@ export const calculateInternshipProgress = (startDate, endDate, asOfDate = new D
 
   const totalWorkDays = calculateWorkDaysBetween(start, end);
   if (totalWorkDays === 0) {
-    return { totalWorkDays: 0, elapsedWorkDays: 0, progressPercent: 100 };
+    return {
+      totalWorkDays: 0,
+      elapsedWorkDays: 0,
+      remainingWorkDays: 0,
+      currentDay: 0,
+      progressPercent: 100,
+      status: "COMPLETED",
+    };
   }
 
   if (today < start) {
-    return { totalWorkDays, elapsedWorkDays: 0, progressPercent: 0 };
+    return {
+      totalWorkDays,
+      elapsedWorkDays: 0,
+      remainingWorkDays: totalWorkDays,
+      currentDay: 0,
+      progressPercent: 0,
+      status: "NOT_STARTED",
+    };
   }
 
   if (today >= end) {
-    return { totalWorkDays, elapsedWorkDays: totalWorkDays, progressPercent: 100 };
+    return {
+      totalWorkDays,
+      elapsedWorkDays: totalWorkDays,
+      remainingWorkDays: 0,
+      currentDay: totalWorkDays,
+      progressPercent: 100,
+      status: "COMPLETED",
+    };
   }
 
   const elapsedWorkDays = calculateWorkDaysBetween(start, today);
+  const remainingWorkDays = Math.max(0, totalWorkDays - elapsedWorkDays);
   const progressPercent = Math.min(100, Math.max(0, Math.round((elapsedWorkDays / totalWorkDays) * 100)));
 
   return {
     totalWorkDays,
     elapsedWorkDays,
+    remainingWorkDays,
+    currentDay: elapsedWorkDays,
     progressPercent,
+    status: "ONGOING",
   };
 };
 

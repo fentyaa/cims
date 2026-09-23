@@ -64,7 +64,13 @@ export const submitPresence = async (userId, { status, notes = null, date = null
   }
   targetDate.setHours(0, 0, 0, 0);
 
-  // 4. Periksa apakah sudah ada presensi pada tanggal target (Mencegah Duplikasi)
+  // 4. Validasi Tanggal Merah / Libur Resmi (Hari Minggu & Libur Nasional)
+  const redInfo = checkRedDate(targetDate);
+  if (redInfo.isRedDate) {
+    throw new Error(`Hari ini adalah hari libur resmi (${redInfo.label}). Anda tidak perlu melakukan presensi.`);
+  }
+
+  // 5. Periksa apakah sudah ada presensi pada tanggal target (Mencegah Duplikasi)
   const existing = await prisma.presence.findUnique({
     where: {
       userId_date: {
@@ -338,6 +344,142 @@ export const getInternDashboardStats = async (userId) => {
   };
 };
 
+/**
+ * Memeriksa akumulasi hari kerja berturut-turut tanpa kabar/presensi.
+ * Aturan CIMS:
+ * - Hari kerja resmi: Senin s.d. Sabtu di luar Libur Nasional (checkRedDate).
+ * - Minggu dan Hari Libur Nasional dilewati (bukan hari kerja).
+ * - Kehadiran (WFO/WFH) atau permohonan izin/sakit (IZIN/SAKIT) dihitung sebagai "ada kabar" (memutus mangkir).
+ * - Tidak ada record presensi sama sekali pada hari kerja lampau = mangkir tanpa kabar.
+ * - Jika mencapai 3 hari berturut-turut: isDropout = true.
+ *
+ * @param {string} userId - ID peserta
+ * @param {Date|string} [asOfDate] - Tanggal acuan (default: hari ini)
+ * @returns {Promise<Object>} { consecutiveDays, isDropout, unexcusedDates }
+ */
+export const checkConsecutiveUnexcusedAbsences = async (userId, asOfDate = new Date()) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      status: true,
+      internshipStartDate: true,
+      internshipEndDate: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    return { consecutiveDays: 0, isDropout: false, unexcusedDates: [] };
+  }
+
+  // Tanggal mulai magang sebagai batas paling awal
+  const startDate = user.internshipStartDate
+    ? new Date(user.internshipStartDate)
+    : new Date(user.createdAt);
+  startDate.setHours(0, 0, 0, 0);
+
+  const refDate = new Date(asOfDate);
+  refDate.setHours(23, 59, 59, 999);
+
+  // Ambil presensi user dari startDate s.d. refDate
+  const presences = await prisma.presence.findMany({
+    where: {
+      userId,
+      date: {
+        gte: startDate,
+        lte: refDate,
+      },
+    },
+    select: { date: true, status: true },
+  });
+
+  const presenceMap = new Map();
+  presences.forEach((p) => {
+    const dStr = new Date(p.date).toISOString().split("T")[0];
+    presenceMap.set(dStr, p.status);
+  });
+
+  // Cek apakah hari ini (refDate) sudah ada presensi
+  const todayDStr = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, "0")}-${String(refDate.getDate()).padStart(2, "0")}`;
+  const todayStatus = presenceMap.get(todayDStr);
+
+  // Jika hari ini sudah ada presensi (WFO, WFH, IZIN, SAKIT), rangkaian mangkir langsung 0
+  if (todayStatus) {
+    return { consecutiveDays: 0, isDropout: false, unexcusedDates: [] };
+  }
+
+  let consecutiveDays = 0;
+  const unexcusedDates = [];
+
+  const walk = new Date(refDate);
+  walk.setDate(walk.getDate() - 1); // Mulai dari kemarin mundur ke belakang
+
+  while (walk >= startDate) {
+    const redInfo = checkRedDate(walk);
+    // Hanya hitung pada hari kerja resmi (bukan Minggu dan bukan Libur Nasional)
+    if (!redInfo.isRedDate) {
+      const dStr = `${walk.getFullYear()}-${String(walk.getMonth() + 1).padStart(2, "0")}-${String(walk.getDate()).padStart(2, "0")}`;
+      const status = presenceMap.get(dStr);
+
+      if (!status) {
+        // Tidak ada catatan presensi sama sekali (tanpa kabar / unrecorded)
+        consecutiveDays++;
+        unexcusedDates.push(dStr);
+        if (consecutiveDays >= 3) {
+          // Sudah mencapai batas 3 hari tanpa kabar
+          break;
+        }
+      } else {
+        // Ada catatan presensi (WFO, WFH, IZIN, atau SAKIT) -> Ada kabar resmi! Memutus rangkaian mangkir.
+        break;
+      }
+    }
+    walk.setDate(walk.getDate() - 1);
+  }
+
+  return {
+    consecutiveDays,
+    isDropout: consecutiveDays >= 3,
+    unexcusedDates,
+    absentDates: unexcusedDates,
+  };
+};
+
+/**
+ * Menerapkan aturan penonaktifan peserta yang mangkir 3 hari kerja berturut-turut.
+ * Jika peserta ACTIVE terbukti 3 hari tidak ada kabar/presensi, status otomatis diubah ke ARCHIVED.
+ *
+ * @returns {Promise<Array>} Daftar peserta yang di-dropout
+ */
+export const enforceDropoutPolicy = async () => {
+  const activeInterns = await prisma.user.findMany({
+    where: { role: "INTERN", status: "ACTIVE" },
+    select: { id: true, fullName: true, email: true },
+  });
+
+  const droppedOut = [];
+
+  for (const intern of activeInterns) {
+    const check = await checkConsecutiveUnexcusedAbsences(intern.id);
+    if (check.isDropout) {
+      await prisma.user.update({
+        where: { id: intern.id },
+        data: { status: "ARCHIVED" },
+      });
+      droppedOut.push({
+        id: intern.id,
+        fullName: intern.fullName,
+        email: intern.email,
+        consecutiveDays: check.consecutiveDays,
+        unexcusedDates: check.unexcusedDates,
+      });
+    }
+  }
+
+  return droppedOut;
+};
+
 export default {
   VALID_STATUSES,
   ACTIVE_STATUSES,
@@ -349,4 +491,6 @@ export default {
   getAllPresences,
   getMentorDashboardStats,
   getInternDashboardStats,
+  checkConsecutiveUnexcusedAbsences,
+  enforceDropoutPolicy,
 };

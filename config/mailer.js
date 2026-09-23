@@ -57,7 +57,7 @@ export const createTransporter = () => {
  * @returns {Object} Mail options
  */
 export const createMailOptions = ({ to, subject, html }) => {
-  const fromAddress = (process.env.SMTP_USER && process.env.SMTP_USER.trim()) || "noreply@cims.com";
+  const fromAddress = (process.env.SMTP_USER && process.env.SMTP_USER.trim()) || "noreply.cims@gmail.com";
   return {
     from: `"Internship Management System" <${fromAddress}>`,
     to,

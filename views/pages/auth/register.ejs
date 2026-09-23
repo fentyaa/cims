@@ -318,8 +318,8 @@
                   <!-- Tanggal Mulai & Tanggal Selesai Magang -->
                   <div class="row g-2 mb-3">
                     <div class="col-12 col-md-6 mb-2 mb-md-0">
-                      <label for="internshipStartDate" class="auth-label">Tanggal Mulai Magang</label>
-                      <div class="auth-input-group">
+                      <label for="internshipStartDate" class="auth-label">Tanggal Mulai Magang <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupStartDate">
                         <span class="input-icon"><i class="bi bi-calendar-event"></i></span>
                         <input
                           type="date"
@@ -327,12 +327,14 @@
                           id="internshipStartDate"
                           name="internshipStartDate"
                           value="<%= typeof formData !== 'undefined' && formData.internshipStartDate ? formData.internshipStartDate : '' %>"
+                          required
                         />
                       </div>
+                      <div class="invalid-feedback" id="feedbackStartDate">Tanggal mulai magang wajib diisi.</div>
                     </div>
                     <div class="col-12 col-md-6">
-                      <label for="internshipEndDate" class="auth-label">Tanggal Selesai Magang</label>
-                      <div class="auth-input-group">
+                      <label for="internshipEndDate" class="auth-label">Tanggal Selesai Magang <span class="text-danger">*</span></label>
+                      <div class="auth-input-group" id="groupEndDate">
                         <span class="input-icon"><i class="bi bi-calendar-check"></i></span>
                         <input
                           type="date"
@@ -340,27 +342,32 @@
                           id="internshipEndDate"
                           name="internshipEndDate"
                           value="<%= typeof formData !== 'undefined' && formData.internshipEndDate ? formData.internshipEndDate : '' %>"
+                          required
                         />
                       </div>
+                      <div class="invalid-feedback" id="feedbackEndDate">Tanggal selesai magang wajib diisi.</div>
                     </div>
                   </div>
 
-                  <!-- Periode Magang (Keterangan Teks) -->
+                  <!-- Periode Magang (Keterangan Otomatis) -->
                   <div class="mb-1">
-                    <label for="internshipPeriod" class="auth-label">Keterangan Periode <span class="text-danger">*</span></label>
+                    <label for="internshipPeriod" class="auth-label">Periode Magang (Otomatis)</label>
                     <div class="auth-input-group" id="groupPeriod">
                       <span class="input-icon"><i class="bi bi-calendar-range"></i></span>
                       <input
                         type="text"
-                        class="form-control"
+                        class="form-control bg-light"
                         id="internshipPeriod"
                         name="internshipPeriod"
-                        placeholder="Contoh: Januari - Maret 2026 atau 01 Jan 2026 - 31 Mar 2026"
+                        placeholder="Otomatis terisi setelah memilih tanggal mulai & selesai"
                         value="<%= typeof formData !== 'undefined' && formData.internshipPeriod ? formData.internshipPeriod : '' %>"
-                        required
+                        readonly
                       />
                     </div>
-                    <div class="invalid-feedback" id="feedbackPeriod">Keterangan periode magang wajib diisi.</div>
+                    <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
+                      <i class="bi bi-magic text-primary me-1"></i>Otomatis terisi dari tanggal mulai dan selesai magang di atas tanpa perlu diketik manual.
+                    </small>
+                    <div class="invalid-feedback" id="feedbackPeriod">Periode magang belum terisi. Silakan pilih tanggal mulai dan selesai.</div>
                   </div>
                 </div>
 
@@ -425,9 +432,9 @@
                       </button>
                     </div>
                     <div class="auth-helper-text">
-                      <i class="bi bi-info-circle me-1"></i>Minimal 8 karakter.
+                      <i class="bi bi-info-circle me-1"></i>Minimal 8 karakter (kombinasi huruf besar, huruf kecil, dan angka).
                     </div>
-                    <div class="invalid-feedback" id="feedbackPassword">Password minimal 8 karakter.</div>
+                    <div class="invalid-feedback" id="feedbackPassword">Password minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka.</div>
                   </div>
 
                   <!-- Konfirmasi Password -->
@@ -493,6 +500,15 @@
 <!-- CLIENT-SIDE MULTI-STEP LOGIC -->
 <script>
   let currentStep = 1;
+  <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+    <% if (errors.some(e => e.toLowerCase().includes('password') || e.toLowerCase().includes('konfirmasi'))) { %>
+      currentStep = 3;
+    <% } else if (errors.some(e => e.toLowerCase().includes('sekolah') || e.toLowerCase().includes('universitas') || e.toLowerCase().includes('jurusan') || e.toLowerCase().includes('nim') || e.toLowerCase().includes('prodi') || e.toLowerCase().includes('periode') || e.toLowerCase().includes('tanggal'))) { %>
+      currentStep = 2;
+    <% } else { %>
+      currentStep = 1;
+    <% } %>
+  <% } %>
 
   function updateStepperUI(targetStep) {
     // Panels
@@ -547,9 +563,13 @@
       const email = document.getElementById('email');
       const phone = document.getElementById('phoneNumber');
 
-      // Validate Full Name
-      if (!fullName.value.trim() || fullName.value.trim().length < 3) {
+      // Validate Full Name (mendukung apostrof, strip, dan titik singkatan gelar)
+      const nameVal = fullName.value.trim();
+      const letterCount = (nameVal.match(/[a-zA-Z]/g) || []).length;
+      if (!nameVal || nameVal.length < 3 || !/^[a-zA-Z\s'’.\-]+$/.test(nameVal) || letterCount < 3) {
         setFieldValidity(fullName, 'groupFullName', false);
+        const fb = document.getElementById('feedbackFullName');
+        if (fb) fb.textContent = 'Nama lengkap minimal 3 karakter dan hanya boleh berisi huruf serta karakter nama valid.';
         isValid = false;
       } else {
         setFieldValidity(fullName, 'groupFullName', true);
@@ -564,9 +584,13 @@
         setFieldValidity(email, 'groupEmail', true);
       }
 
-      // Validate Phone
-      if (!phone.value.trim()) {
+      // Validate Phone (format 08xx atau +62xx, minimal 10 digit)
+      const phoneRegex = /^(0|62|\+62)[0-9]{8,13}$/;
+      const cleanPhone = phone.value.replace(/\s/g, '');
+      if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
         setFieldValidity(phone, 'groupPhone', false);
+        const fb = document.getElementById('feedbackPhone');
+        if (fb) fb.textContent = 'Nomor HP tidak valid. Gunakan format 08xx atau +62xx (minimal 10 digit).';
         isValid = false;
       } else {
         setFieldValidity(phone, 'groupPhone', true);
@@ -603,12 +627,38 @@
         else { setFieldValidity(classGrade, 'groupClassGrade', true); }
       }
 
+      const startDate = document.getElementById('internshipStartDate');
+      const endDate = document.getElementById('internshipEndDate');
       const period = document.getElementById('internshipPeriod');
-      if (!period.value.trim()) {
-        setFieldValidity(period, 'groupPeriod', false);
+
+      let datesValid = true;
+      if (!startDate.value.trim()) {
+        setFieldValidity(startDate, 'groupStartDate', false);
         isValid = false;
+        datesValid = false;
       } else {
-        setFieldValidity(period, 'groupPeriod', true);
+        setFieldValidity(startDate, 'groupStartDate', true);
+      }
+
+      if (!endDate.value.trim()) {
+        setFieldValidity(endDate, 'groupEndDate', false);
+        isValid = false;
+        datesValid = false;
+      } else {
+        setFieldValidity(endDate, 'groupEndDate', true);
+      }
+
+      if (datesValid) {
+        const start = new Date(startDate.value);
+        const end = new Date(endDate.value);
+        if (start > end) {
+          setFieldValidity(endDate, 'groupEndDate', false);
+          const feedback = document.getElementById('feedbackEndDate');
+          if (feedback) feedback.textContent = 'Tanggal selesai magang tidak boleh lebih awal dari tanggal mulai.';
+          isValid = false;
+        } else {
+          updateAutoPeriodRegister();
+        }
       }
     }
 
@@ -677,8 +727,15 @@
     const cpw = document.getElementById('confirmPassword');
     let valid = true;
 
-    if (!pw.value || pw.value.length < 8) {
+    const pwVal = pw.value || '';
+    const hasUpper = /[A-Z]/.test(pwVal);
+    const hasLower = /[a-z]/.test(pwVal);
+    const hasNum = /[0-9]/.test(pwVal);
+
+    if (pwVal.length < 8 || !hasUpper || !hasLower || !hasNum) {
       setFieldValidity(pw, 'groupPassword', false);
+      const feedback = document.getElementById('feedbackPassword');
+      if (feedback) feedback.textContent = 'Password minimal 8 karakter dan harus mengandung huruf besar, huruf kecil, serta angka.';
       valid = false;
     } else {
       setFieldValidity(pw, 'groupPassword', true);
@@ -695,6 +752,63 @@
       e.preventDefault();
       e.stopPropagation();
       return false;
+    }
+  });
+
+  function updateAutoPeriodRegister() {
+    const startVal = document.getElementById('internshipStartDate')?.value;
+    const endVal = document.getElementById('internshipEndDate')?.value;
+    const periodEl = document.getElementById('internshipPeriod');
+    if (!startVal || !endVal || !periodEl) return;
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) return;
+
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    const startDay = start.getDate();
+    const startMonth = months[start.getMonth()];
+    const startYear = start.getFullYear();
+
+    const endDay = end.getDate();
+    const endMonth = months[end.getMonth()];
+    const endYear = end.getFullYear();
+
+    let text = '';
+    if (startYear === endYear) {
+      if (startMonth === endMonth) {
+        text = `${startDay} - ${endDay} ${startMonth} ${startYear}`;
+      } else {
+        text = `${startDay} ${startMonth} - ${endDay} ${endMonth} ${startYear}`;
+      }
+    } else {
+      text = `${startDay} ${startMonth} ${startYear} - ${endDay} ${endMonth} ${endYear}`;
+    }
+    periodEl.value = text;
+    setFieldValidity(periodEl, 'groupPeriod', true);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const startEl = document.getElementById('internshipStartDate');
+    const endEl = document.getElementById('internshipEndDate');
+    if (startEl) {
+      startEl.addEventListener('change', updateAutoPeriodRegister);
+      startEl.addEventListener('input', updateAutoPeriodRegister);
+    }
+    if (endEl) {
+      endEl.addEventListener('change', updateAutoPeriodRegister);
+      endEl.addEventListener('input', updateAutoPeriodRegister);
+    }
+    if (startEl && startEl.value && endEl && endEl.value) {
+      updateAutoPeriodRegister();
+    }
+
+    // Jika terjadi error dari server pada step lanjutan, buka step tersebut langsung
+    if (typeof currentStep !== 'undefined' && currentStep > 1) {
+      updateStepperUI(currentStep);
     }
   });
 </script>

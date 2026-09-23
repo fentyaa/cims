@@ -734,7 +734,7 @@ export const previewTemplate = async (id) => {
 
   const sampleMentor = {
     fullName: "Admin Mentor CIMS",
-    email: "mentor@cims.com",
+    email: "mentor.cims@gmail.com",
   };
 
   const placeholderMap = preparePlaceholderData(sampleParticipant, sampleEvaluation, sampleMentor);
@@ -789,7 +789,7 @@ export const generateDocument = async (
     select: { id: true, fullName: true, email: true },
   });
 
-  const mentor = mentorUser || participant.mentor || { fullName: "Mentor Pembimbing", email: "mentor@cims.com" };
+  const mentor = mentorUser || participant.mentor || { fullName: "Mentor Pembimbing", email: "mentor.cims@gmail.com" };
   const evaluation = Array.isArray(participant.evaluations)
     ? participant.evaluations[0]
     : participant.evaluations;

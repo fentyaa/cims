@@ -67,7 +67,22 @@ export const createLogbook = async (userId, data) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Cek apakah sudah ada logbook hari ini
+  // 1. Cek status presensi hari ini: jika IZIN atau SAKIT, tolak pengisian logbook
+  const todayPresence = await prisma.presence.findUnique({
+    where: {
+      userId_date: {
+        userId,
+        date: today,
+      },
+    },
+  });
+
+  if (todayPresence && (todayPresence.status === "IZIN" || todayPresence.status === "SAKIT")) {
+    const statusLabel = todayPresence.status === "IZIN" ? "Izin" : "Sakit";
+    throw new Error(`Tidak dapat membuat logbook kegiatan karena status presensi Anda hari ini tercatat ${statusLabel}.`);
+  }
+
+  // 2. Cek apakah sudah ada logbook hari ini
   const existing = await getTodayLogbook(userId, today);
   if (existing) {
     throw new Error("Anda sudah membuat logbook hari ini. Silakan edit logbook yang sudah ada.");
@@ -102,6 +117,24 @@ export const updateLogbook = async (logbookId, userId, data) => {
 
   if (logbook.status === "REVIEWED") {
     throw new Error("Logbook sudah direview mentor. Tidak dapat diedit lagi.");
+  }
+
+  // Cek status presensi pada tanggal logbook: jika IZIN atau SAKIT, tolak perubahan
+  const logbookDate = new Date(logbook.date);
+  logbookDate.setHours(0, 0, 0, 0);
+
+  const presenceOnDate = await prisma.presence.findUnique({
+    where: {
+      userId_date: {
+        userId,
+        date: logbookDate,
+      },
+    },
+  });
+
+  if (presenceOnDate && (presenceOnDate.status === "IZIN" || presenceOnDate.status === "SAKIT")) {
+    const statusLabel = presenceOnDate.status === "IZIN" ? "Izin" : "Sakit";
+    throw new Error(`Tidak dapat mengubah logbook kegiatan karena status presensi Anda pada tanggal tersebut tercatat ${statusLabel}.`);
   }
 
   return prisma.logbook.update({

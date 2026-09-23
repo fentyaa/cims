@@ -25,7 +25,9 @@
     <div class="card border-0 shadow-sm rounded-4 h-100" style="border: 1px solid #e2e8f0 !important;">
       <div class="card-header bg-transparent py-3 border-bottom d-flex justify-content-between align-items-center">
         <h6 class="fw-bold mb-0 text-dark">
-          <% if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
+          <% if (typeof todayPresence !== 'undefined' && todayPresence && (todayPresence.status === 'IZIN' || todayPresence.status === 'SAKIT')) { %>
+            <i class="bi bi-slash-circle text-warning me-2"></i>Logbook Dinonaktifkan
+          <% } else if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
             <i class="bi bi-patch-check-fill text-success me-2"></i>Logbook Terverifikasi
           <% } else if (typeof todayLogbook !== 'undefined' && todayLogbook) { %>
             <i class="bi bi-pencil-square text-primary me-2"></i>Edit Logbook Hari Ini
@@ -33,7 +35,11 @@
             <i class="bi bi-plus-circle-fill text-primary me-2"></i>Buat Logbook Hari Ini
           <% } %>
         </h6>
-        <% if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
+        <% if (typeof todayPresence !== 'undefined' && todayPresence && (todayPresence.status === 'IZIN' || todayPresence.status === 'SAKIT')) { %>
+          <span class="badge bg-warning bg-opacity-20 text-dark border border-warning border-opacity-50 rounded-pill px-2 py-1 small">
+            Status: <%= todayPresence.status === 'IZIN' ? 'Izin' : 'Sakit' %>
+          </span>
+        <% } else if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
           <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small">
             ✅ Direview
           </span>
@@ -71,7 +77,29 @@
             </div>
           <% } %>
 
-          <% if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
+          <% if (typeof todayPresence !== 'undefined' && todayPresence && (todayPresence.status === 'IZIN' || todayPresence.status === 'SAKIT')) { %>
+            <!-- Skenario Khusus: Sedang Izin / Sakit (Pengisian Logbook Dinonaktifkan) -->
+            <div class="p-4 bg-warning bg-opacity-10 border border-warning border-opacity-25 rounded-4 text-center mb-3">
+              <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-20 text-warning rounded-circle mb-3" style="width: 52px; height: 52px;">
+                <i class="bi bi-<%= todayPresence.status === 'SAKIT' ? 'heart-pulse-fill' : 'envelope-paper-fill' %> fs-3 text-warning"></i>
+              </div>
+              <h6 class="fw-bold text-dark mb-1">Pengisian Logbook Tidak Diperlukan</h6>
+              <div class="mb-2">
+                <span class="badge bg-warning text-dark px-3 py-1 fw-semibold">
+                  Status Presensi: <%= todayPresence.status === 'IZIN' ? 'Izin' : 'Sakit' %>
+                </span>
+              </div>
+              <p class="text-muted small mb-0">
+                Anda tercatat berstatus <strong><%= todayPresence.status === 'IZIN' ? 'Izin' : 'Sakit' %></strong> hari ini. Selama tidak menjalankan aktivitas pekerjaan magang, formulir pengisian logbook harian dinonaktifkan oleh sistem.
+              </p>
+              <% if (todayPresence.notes) { %>
+                <div class="mt-3 p-2 px-3 bg-white bg-opacity-80 border rounded-3 text-start small text-secondary">
+                  <i class="bi bi-chat-left-text text-warning me-1"></i><strong>Keterangan:</strong> <%= todayPresence.notes %>
+                </div>
+              <% } %>
+            </div>
+
+          <% } else if (typeof todayLogbook !== 'undefined' && todayLogbook && todayLogbook.status === 'REVIEWED') { %>
             <!-- Skenario A: Sudah Direview (Readonly) -->
             <div class="p-3 bg-success bg-opacity-10 border border-success border-opacity-20 rounded-3 text-center mb-3">
               <i class="bi bi-check-circle-fill text-success fs-3"></i>
@@ -334,17 +362,29 @@
             <% }) %>
           </div>
 
-          <!-- Pagination -->
+          <!-- Pagination Next / Prev Controls -->
           <% if (typeof pagination !== 'undefined' && pagination.totalPages > 1) { %>
-            <nav class="mt-4">
-              <ul class="pagination pagination-sm justify-content-center mb-0 gap-1">
-                <% for (let p = 1; p <= pagination.totalPages; p++) { %>
-                  <li class="page-item <%= pagination.page === p ? 'active' : '' %>">
-                    <a class="page-link rounded-pill px-3 py-1" href="/intern/logbook?page=<%= p %>"><%= p %></a>
-                  </li>
+            <div class="pt-3 mt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+              <small class="text-muted" style="font-size: 0.775rem;">
+                Hal. <strong><%= pagination.page %></strong> dari <strong><%= pagination.totalPages %></strong> (<%= pagination.total %> catatan)
+              </small>
+              <div class="d-flex gap-1">
+                <% if (pagination.hasPrev) { %>
+                  <a href="/intern/logbook?page=<%= pagination.page - 1 %>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.775rem;">
+                    &larr; Prev
+                  </a>
+                <% } else { %>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold disabled opacity-50" style="font-size: 0.775rem;" disabled>&larr; Prev</button>
                 <% } %>
-              </ul>
-            </nav>
+                <% if (pagination.hasNext) { %>
+                  <a href="/intern/logbook?page=<%= pagination.page + 1 %>" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold" style="font-size: 0.775rem;">
+                    Next &rarr;
+                  </a>
+                <% } else { %>
+                  <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold disabled opacity-50" style="font-size: 0.775rem;" disabled>Next &rarr;</button>
+                <% } %>
+              </div>
+            </div>
           <% } %>
         <% } else { %>
           <div class="text-center py-5">

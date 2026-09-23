@@ -1,35 +1,122 @@
-<footer class="footer bg-dark text-light py-4 mt-auto">
-  <div class="container">
-    <div class="row">
-      <div class="col-md-6 mb-3 mb-md-0">
-        <h5 class="fw-bold">
-          <i class="bi bi-building-gear me-2"></i>Internship Management System
-        </h5>
-        <p class="text-light-emphasis small mb-0">
-          Sistem manajemen peserta magang internal perusahaan.
+<footer class="app-footer text-light mt-auto">
+  <div class="container py-4">
+    <!-- Top Footer: Brand, Links & Contact -->
+    <div class="row g-3 align-items-center justify-content-between mb-3">
+      <!-- Brand & Tagline -->
+      <div class="col-12 col-md-5 text-center text-md-start">
+        <div class="d-inline-flex align-items-center gap-2 mb-1">
+          <div class="footer-brand-icon">
+            <i class="bi bi-building-gear"></i>
+          </div>
+          <span class="fw-bold text-white fs-6">Cikara Studio</span>
+        </div>
+        <p class="text-secondary small mb-0" style="font-size: 0.8rem;">
+          Internship Management System &bull; Platform pemantauan aktivitas dan presensi magang terpadu.
         </p>
       </div>
-      <div class="col-md-3 mb-3 mb-md-0">
-        <h6 class="fw-bold">Navigasi</h6>
-        <ul class="list-unstyled small">
-          <li><a href="/" class="text-light-emphasis text-decoration-none">Home</a></li>
-          <!-- Link akan ditambahkan pada tahap berikutnya -->
-        </ul>
+
+      <!-- Quick Nav Links -->
+      <div class="col-12 col-md-3 text-center">
+        <div class="d-flex justify-content-center gap-3 footer-links">
+          <a href="/" class="footer-link">Home</a>
+          <span class="text-secondary opacity-25">&bull;</span>
+          <a href="/auth/login" class="footer-link">Masuk</a>
+          <span class="text-secondary opacity-25">&bull;</span>
+          <a href="/auth/register" class="footer-link">Daftar</a>
+        </div>
       </div>
-      <div class="col-md-3">
-        <h6 class="fw-bold">Kontak</h6>
-        <ul class="list-unstyled small">
-          <li class="text-light-emphasis">
-            <i class="bi bi-envelope me-1"></i> hr@perusahaan.com
-          </li>
-          <!-- Info kontak akan ditambahkan nanti -->
-        </ul>
+
+      <!-- Social Icons Tray -->
+      <div class="col-12 col-md-4 text-center text-md-end">
+        <div class="d-inline-flex align-items-center gap-2">
+          <a href="mailto:cikarastudio@gmail.com" class="footer-icon-btn mail" title="Email: cikarastudio@gmail.com" aria-label="Email">
+            <i class="bi bi-envelope-fill"></i>
+          </a>
+          <a href="https://cikara.com" target="_blank" rel="noopener noreferrer" class="footer-icon-btn web" title="Website: cikara.com" aria-label="Website">
+            <i class="bi bi-globe"></i>
+          </a>
+          <a href="https://instagram.com/cikarastudio" target="_blank" rel="noopener noreferrer" class="footer-icon-btn ig" title="Instagram: @cikarastudio" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="https://youtube.com/@cikarastudio" target="_blank" rel="noopener noreferrer" class="footer-icon-btn yt" title="YouTube: @cikarastudio" aria-label="YouTube">
+            <i class="bi bi-youtube"></i>
+          </a>
+        </div>
       </div>
     </div>
-    <hr class="border-light my-3" />
-    <div class="text-center small text-light-emphasis">
-      &copy; <%= typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear() %> Internship Management System. All rights reserved.
+
+    <!-- Middle: Office Address Strip -->
+    <div class="py-2.5 px-3 rounded-2 text-center text-md-start mb-3 footer-address-strip">
+      <small class="text-secondary d-inline-flex flex-column flex-md-row align-items-center gap-1 gap-md-2" style="font-size: 0.775rem;">
+        <span class="text-white-50 d-inline-flex align-items-center gap-1">
+          <i class="bi bi-geo-alt-fill text-danger"></i>
+          <strong>Studio:</strong>
+        </span>
+        <span>Perum Cipta Graha Mandiri (CGM) Blok A 23, Sukarindik, Kec. Bungursari, Kota Tasikmalaya, Jawa Barat 46151</span>
+      </small>
+    </div>
+
+    <!-- Bottom Line: Copyright -->
+    <div class="pt-3 border-top border-secondary border-opacity-25 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-1 text-secondary" style="font-size: 0.75rem;">
+      <span>&copy; <%= typeof currentYear !== 'undefined' ? currentYear : new Date().getFullYear() %> <strong>Cikara Studio</strong>. All rights reserved.</span>
+      <span class="text-secondary opacity-75">Internship Management System (CIMS)</span>
     </div>
   </div>
 </footer>
 
+<style>
+  .app-footer {
+    background-color: #0b1120;
+    border-top: 1px solid #1e293b;
+    color: #94a3b8;
+  }
+  .footer-brand-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+  .footer-links .footer-link {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.825rem;
+    transition: color 0.15s ease;
+  }
+  .footer-links .footer-link:hover {
+    color: #ffffff;
+  }
+  .footer-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+  .footer-icon-btn:hover {
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  .footer-icon-btn.mail:hover { background: #d97706; border-color: #d97706; }
+  .footer-icon-btn.web:hover { background: #0284c7; border-color: #0284c7; }
+  .footer-icon-btn.ig:hover {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    border-color: transparent;
+  }
+  .footer-icon-btn.yt:hover { background: #dc2626; border-color: #dc2626; }
+  .footer-address-strip {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+</style>

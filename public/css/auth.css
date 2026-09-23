@@ -256,12 +256,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  position: relative !important;
   transition: var(--auth-transition);
 }
 
 .auth-input-group .btn-toggle-pw:hover {
   color: var(--auth-text-main);
 }
+
+/* Sembunyikan tombol mata bawaan browser (Edge/IE/Chrome/WebKit) agar tidak muncul ganda */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden !important;
+  position: absolute !important;
+  right: 0 !important;
+  pointer-events: none !important;
+}
+
 
 /* === Segmented Selection Cards (Mahasiswa vs SMK) === */
 .auth-selection-grid {

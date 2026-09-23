@@ -17,7 +17,7 @@ import logbookService from "../services/logbookService.js";
 import evaluationService from "../services/evaluationService.js";
 import gamificationService from "../services/gamificationService.js";
 import documentService from "../services/documentService.js";
-import { isValidPassword } from "../utils/validators.js";
+import { isValidPassword, isValidFullName } from "../utils/validators.js";
 
 /**
  * Dashboard Intern
@@ -32,6 +32,7 @@ export const dashboard = async (req, res) => {
       evalStatus,
       gamificationStats,
       documents,
+      absenceInfo,
     ] = await Promise.all([
       prisma.user.findUnique({
         where: { id: userId },
@@ -42,18 +43,29 @@ export const dashboard = async (req, res) => {
       evaluationService.getInternEvaluationStatus(userId),
       gamificationService.getInternGamificationStats(userId),
       documentService.getDocumentsByUser(userId),
+      presenceService.checkConsecutiveUnexcusedAbsences(userId).catch(() => ({ consecutiveDays: 0, isDropout: false, unexcusedDates: [] })),
     ]);
+
+    let currentStatus = user?.status || "ACTIVE";
+    if (absenceInfo?.isDropout && currentStatus === "ACTIVE") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { status: "ARCHIVED" },
+      });
+      currentStatus = "ARCHIVED";
+    }
 
     res.render("pages/intern/dashboard", {
       title: "Dashboard Peserta Magang - Internship Management System",
       layout: "layouts/dashboard",
       userName: user?.fullName || req.session.user.fullName,
-      status: user?.status || "ACTIVE",
+      status: currentStatus,
       participantType: user?.participantType || null,
       presensiStats,
       logbookStats,
       evalStatus,
       gamificationStats,
+      absenceInfo,
       documents: documents || [],
     });
   } catch (error) {
@@ -102,8 +114,8 @@ export const profil = async (req, res) => {
 };
 
 /**
- * Proses update profil peserta.
- * Hanya bisa mengubah: foto profil, nomor HP, password.
+ * Proses update profil peserta (Self-Service).
+ * Memungkinkan koreksi typo mandiri: Nama Lengkap, Institusi, NIM/NIS, Prodi/Jurusan, Nomor HP, Foto, Password.
  */
 export const profilUpdate = async (req, res) => {
   try {
@@ -113,6 +125,15 @@ export const profilUpdate = async (req, res) => {
 
     // Validasi
     const errors = [];
+
+    // Nama Lengkap
+    if (formData.fullName !== undefined) {
+      if (!formData.fullName.trim() || formData.fullName.trim().length < 3) {
+        errors.push("Nama lengkap harus diisi minimal 3 karakter.");
+      } else if (!isValidFullName(formData.fullName)) {
+        errors.push("Nama lengkap hanya boleh berisi huruf, spasi, tanda petik ('), titik, atau tanda hubung (-).");
+      }
+    }
 
     // Nomor HP
     if (formData.phoneNumber) {
@@ -146,7 +167,11 @@ export const profilUpdate = async (req, res) => {
 
     // Simpan perubahan
     const photoFilename = photoFile ? photoFile.filename : null;
-    await participantService.updateOwnProfile(userId, formData, photoFilename);
+    const updated = await participantService.updateOwnProfile(userId, formData, photoFilename);
+
+    // Sinkronkan data sesi pengguna
+    if (updated.fullName) req.session.user.fullName = updated.fullName;
+    if (updated.profilePhoto) req.session.user.profilePhoto = updated.profilePhoto;
 
     req.session.messages = [
       { type: "success", text: "Profil berhasil diperbarui." },

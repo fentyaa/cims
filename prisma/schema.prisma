@@ -100,12 +100,12 @@ model Announcement {
 model Evaluation {
   id             String           @id @default(cuid())
   userId         String           @unique
-  discipline     Int
-  responsibility Int
-  communication  Int
-  teamwork       Int
-  initiative     Int
-  technicalSkill Int
+  discipline     Float
+  responsibility Float
+  communication  Float
+  teamwork       Float
+  initiative     Float
+  technicalSkill Float
   finalScore     Float            @default(0)
   grade          String           @default("")
   mentorComment  String?

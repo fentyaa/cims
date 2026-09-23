@@ -1,5 +1,323 @@
-<div class="text-center py-5">
-  <i class="bi bi-file-earmark-bar-graph-fill text-primary" style="font-size: 3rem;"></i>
-  <h4 class="fw-bold mt-3">Laporan</h4>
-  <p class="text-muted">Halaman ini akan menampilkan laporan perkembangan peserta magang. Fitur tersedia pada tahap pengembangan berikutnya.</p>
+<!-- Laporan Perkembangan Peserta Magang - CIMS -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h5 class="fw-bold mb-1 text-dark d-flex align-items-center gap-2">
+      <i class="bi bi-file-earmark-bar-graph-fill text-primary"></i>
+      <span>Laporan Perkembangan Peserta Magang</span>
+    </h5>
+    <p class="text-muted small mb-0">Rekapitulasi akumulasi presensi, jurnal logbook, dan evaluasi capaian akhir</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 d-flex align-items-center gap-1 shadow-sm" onclick="exportReportToCSV()">
+      <i class="bi bi-filetype-csv"></i>
+      <span>Ekspor CSV</span>
+    </button>
+    <button type="button" class="btn btn-primary btn-sm rounded-3 d-flex align-items-center gap-1 shadow-sm" onclick="window.print()">
+      <i class="bi bi-printer-fill"></i>
+      <span>Cetak Laporan Resmi</span>
+    </button>
+  </div>
 </div>
+
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages.length > 0) { %>
+  <% messages.forEach(msg => { %>
+    <div class="alert alert-<%= msg.type %> alert-dismissible fade show border-0 rounded-3 small py-2 px-3 mb-3 shadow-sm" role="alert">
+      <i class="bi bi-<%= msg.type === 'success' ? 'check-circle' : 'exclamation-circle' %> me-2"></i>
+      <%= msg.text %>
+      <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% }) %>
+<% } %>
+
+<!-- 1. KPI SUMMARY TILES -->
+<div class="row g-3 mb-4">
+  <!-- Card 1: Total Peserta -->
+  <div class="col-6 col-lg-3">
+    <div class="card border shadow-sm rounded-4 h-100 p-3 bg-white">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="text-muted small fw-semibold">Peserta Terdata</span>
+        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+          <i class="bi bi-people-fill fs-6"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold mb-1 text-dark"><%= summary.totalInterns %></h3>
+      <small class="text-muted">Peserta magang dalam filter</small>
+    </div>
+  </div>
+
+  <!-- Card 2: Rata-Rata Kehadiran -->
+  <div class="col-6 col-lg-3">
+    <div class="card border shadow-sm rounded-4 h-100 p-3 bg-white">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="text-muted small fw-semibold">Rata-rata Kehadiran</span>
+        <div class="rounded-circle bg-success bg-opacity-10 text-success p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+          <i class="bi bi-calendar-check-fill fs-6"></i>
+        </div>
+      </div>
+      <div class="d-flex align-items-baseline gap-2 mb-1">
+        <h3 class="fw-bold mb-0 text-success"><%= summary.avgPresenceRate %>%</h3>
+        <span class="badge bg-success bg-opacity-15 text-success rounded-pill small">Aktif</span>
+      </div>
+      <div class="progress rounded-pill" style="height: 5px;">
+        <div class="progress-bar bg-success" style="width: <%= summary.avgPresenceRate %>%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Total Logbook Direview -->
+  <div class="col-6 col-lg-3">
+    <div class="card border shadow-sm rounded-4 h-100 p-3 bg-white">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="text-muted small fw-semibold">Logbook Direview</span>
+        <div class="rounded-circle bg-warning bg-opacity-10 text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+          <i class="bi bi-journal-check fs-6"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold mb-1 text-dark"><%= summary.totalReviewedLogbooks %> <span class="text-muted fs-6 fw-normal">/ <%= summary.totalLogbooks %></span></h3>
+      <small class="text-muted">
+        <%= summary.totalLogbooks > 0 ? Math.round((summary.totalReviewedLogbooks / summary.totalLogbooks) * 100) : 0 %>% telah diperiksa mentor
+      </small>
+    </div>
+  </div>
+
+  <!-- Card 4: Evaluasi Selesai -->
+  <div class="col-6 col-lg-3">
+    <div class="card border shadow-sm rounded-4 h-100 p-3 bg-white">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="text-muted small fw-semibold">Evaluasi Akhir</span>
+        <div class="rounded-circle bg-info bg-opacity-10 text-info p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+          <i class="bi bi-award-fill fs-6"></i>
+        </div>
+      </div>
+      <h3 class="fw-bold mb-1 text-dark"><%= summary.completedEvaluations %> <span class="text-muted fs-6 fw-normal">/ <%= summary.totalInterns %></span></h3>
+      <small class="text-muted">Nilai telah dipublikasi</small>
+    </div>
+  </div>
+</div>
+
+<!-- 2. FILTER & CONTROLS -->
+<div class="card border shadow-sm rounded-4 mb-4">
+  <div class="card-body p-3">
+    <form method="GET" action="/mentor/laporan" class="row g-2 align-items-center">
+      <div class="col-12 col-sm-5 col-md-4">
+        <label class="small text-muted fw-semibold mb-1">Institusi / Tipe Peserta:</label>
+        <select name="type" class="form-select form-select-sm rounded-3" onchange="this.form.submit()">
+          <option value="ALL" <%= currentType === 'ALL' ? 'selected' : '' %>>Semua Institusi (Mahasiswa & SMK)</option>
+          <option value="UNIVERSITY" <%= currentType === 'UNIVERSITY' ? 'selected' : '' %>>Hanya Mahasiswa (Universitas)</option>
+          <option value="SMK" <%= currentType === 'SMK' || currentType === 'VOCATIONAL' ? 'selected' : '' %>>Hanya Siswa (PKL SMK)</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-sm-5 col-md-4">
+        <label class="small text-muted fw-semibold mb-1">Status Keaktifan:</label>
+        <select name="status" class="form-select form-select-sm rounded-3" onchange="this.form.submit()">
+          <option value="ALL" <%= currentStatus === 'ALL' ? 'selected' : '' %>>Semua Status (Aktif & Alumni)</option>
+          <option value="ACTIVE" <%= currentStatus === 'ACTIVE' ? 'selected' : '' %>>Hanya Peserta Aktif</option>
+          <option value="ARCHIVED" <%= currentStatus === 'ARCHIVED' ? 'selected' : '' %>>Hanya Alumni / Arsip</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-sm-2 col-md-4 text-sm-end pt-sm-4">
+        <a href="/mentor/laporan" class="btn btn-outline-secondary btn-sm rounded-3 px-3">
+          <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filter
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 3. TABEL DATA LAPORAN DETAIL -->
+<div class="card border shadow-sm rounded-4" id="reportPrintArea">
+  <div class="card-header bg-transparent py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+    <div>
+      <h6 class="fw-bold mb-0 text-dark">
+        <i class="bi bi-table text-primary me-2"></i>Tabel Rekapitulasi Individu Peserta
+      </h6>
+      <small class="text-muted">Data performa akumulatif peserta magang</small>
+    </div>
+    <span class="badge bg-light text-muted border px-2 py-1"><%= internReports.length %> Peserta Ditemukan</span>
+  </div>
+
+  <div class="card-body p-0">
+    <% if (internReports.length === 0) { %>
+      <div class="text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        <h6 class="fw-bold text-dark mt-3">Tidak Ada Data Peserta</h6>
+        <p class="text-muted small">Tidak ditemukan data peserta sesuai filter yang dipilih.</p>
+      </div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="reportTable">
+          <thead class="table-light text-muted small text-uppercase" style="letter-spacing: 0.5px;">
+            <tr>
+              <th class="ps-4">Peserta Magang</th>
+              <th>Institusi & Prodi</th>
+              <th class="text-center">Kehadiran (%)</th>
+              <th class="text-center">Jurnal Logbook</th>
+              <th class="text-center">Nilai Akhir</th>
+              <th class="text-end pe-4">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="small">
+            <% internReports.forEach(intern => { %>
+              <tr>
+                <!-- Profil Peserta -->
+                <td class="ps-4">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle border bg-light d-flex align-items-center justify-content-center flex-shrink-0" style="width: 38px; height: 38px; overflow: hidden;">
+                      <% if (intern.profilePhoto) { %>
+                        <img src="/uploads/<%= intern.profilePhoto %>" alt="<%= intern.fullName %>" class="w-100 h-100" style="object-fit: cover;" />
+                      <% } else { %>
+                        <i class="bi bi-person text-secondary fs-5"></i>
+                      <% } %>
+                    </div>
+                    <div>
+                      <div class="fw-bold text-dark"><%= intern.fullName %></div>
+                      <div class="text-muted" style="font-size: 0.725rem;"><%= intern.email %></div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Institusi & Prodi -->
+                <td>
+                  <div class="fw-semibold text-dark"><%= intern.institution %></div>
+                  <div class="text-muted" style="font-size: 0.725rem;">
+                    <%= intern.major %> • <span class="badge bg-light text-secondary border px-1"><%= intern.participantType === 'UNIVERSITY' ? 'Mahasiswa' : 'SMK' %></span>
+                  </div>
+                </td>
+
+                <!-- Kehadiran -->
+                <td class="text-center">
+                  <div class="fw-bold <%= intern.presenceRate >= 80 ? 'text-success' : intern.presenceRate >= 60 ? 'text-warning' : 'text-danger' %>">
+                    <%= intern.presenceRate %>%
+                  </div>
+                  <div class="text-muted" style="font-size: 0.7rem;">
+                    <%= intern.totalHadir %> hari (<%= intern.wfoCount %> WFO, <%= intern.wfhCount %> WFH)
+                  </div>
+                </td>
+
+                <!-- Logbook Progress -->
+                <td class="text-center">
+                  <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+                    <span class="fw-bold text-dark"><%= intern.logbookReviewed %></span>
+                    <span class="text-muted">/ <%= intern.logbookTotal %></span>
+                    <span class="badge <%= intern.logbookPending > 0 ? 'bg-warning bg-opacity-20 text-warning-emphasis' : 'bg-success bg-opacity-15 text-success' %> rounded-pill px-2 py-0" style="font-size: 0.65rem;">
+                      <%= intern.logbookRate %>%
+                    </span>
+                  </div>
+                  <div class="progress mx-auto rounded-pill" style="height: 4px; max-width: 100px;">
+                    <div class="progress-bar <%= intern.logbookPending > 0 ? 'bg-warning' : 'bg-success' %>" style="width: <%= intern.logbookRate %>%;"></div>
+                  </div>
+                </td>
+
+                <!-- Nilai Akhir -->
+                <td class="text-center">
+                  <% if (intern.evalStatus === 'PUBLISHED') { %>
+                    <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 px-2 py-1 fw-bold">
+                      Grade <%= intern.evalGrade %> (<%= intern.evalScore %>)
+                    </span>
+                  <% } else if (intern.evalStatus === 'DRAFT') { %>
+                    <span class="badge bg-secondary bg-opacity-15 text-secondary border px-2 py-1">
+                      Draft (<%= intern.evalGrade %>)
+                    </span>
+                  <% } else { %>
+                    <span class="badge bg-light text-muted border px-2 py-1">Belum Dinilai</span>
+                  <% } %>
+                </td>
+
+
+                <!-- Aksi -->
+                <td class="text-end pe-4">
+                  <div class="d-flex justify-content-end gap-1">
+                    <a href="/mentor/peserta/<%= intern.id %>" class="btn btn-sm btn-outline-secondary rounded-3 px-2 py-1" title="Lihat Profil Peserta">
+                      <i class="bi bi-person"></i>
+                    </a>
+                    <a href="/mentor/logbook?search=<%= encodeURIComponent(intern.fullName) %>" class="btn btn-sm btn-outline-primary rounded-3 px-2 py-1" title="Review Logbook <%= intern.fullName %>">
+                      <i class="bi bi-journal-text"></i>
+                    </a>
+                    <% if (intern.evalStatus === 'NONE') { %>
+                      <a href="/mentor/penilaian/buat/<%= intern.id %>" class="btn btn-sm btn-outline-warning rounded-3 px-2 py-1" title="Buat Penilaian">
+                        <i class="bi bi-star"></i>
+                      </a>
+                    <% } else { %>
+                      <a href="/mentor/penilaian?search=<%= encodeURIComponent(intern.fullName) %>" class="btn btn-sm btn-outline-warning rounded-3 px-2 py-1" title="Kelola Penilaian">
+                        <i class="bi bi-star-fill"></i>
+                      </a>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Print Stylesheet -->
+<style>
+  @media print {
+    body {
+      background: #fff !important;
+      color: #000 !important;
+    }
+    .dashboard-sidebar,
+    .dashboard-navbar,
+    .btn,
+    form,
+    nav,
+    .alert {
+      display: none !important;
+    }
+    .dashboard-content {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+    #reportTable {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+    #reportTable th, #reportTable td {
+      border: 1px solid #ccc !important;
+      padding: 8px !important;
+    }
+  }
+</style>
+
+<!-- CSV Export Script -->
+<script>
+  function exportReportToCSV() {
+    const table = document.getElementById('reportTable');
+    if (!table) return;
+
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+
+    rows.forEach(row => {
+      let cols = row.querySelectorAll('th, td');
+      let rowData = [];
+      // Skip column 'Aksi' (last column)
+      for (let i = 0; i < cols.length - 1; i++) {
+        let text = cols[i].innerText.replace(/(\r\n|\n|\r)/gm, ' ').replace(/\s+/g, ' ').trim();
+        rowData.push('"' + text.replace(/"/g, '""') + '"');
+      }
+      if (rowData.length > 0) {
+        csv.push(rowData.join(','));
+      }
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv.join('\n'));
+    const link = document.createElement('a');
+    link.setAttribute('href', csvContent);
+    link.setAttribute('download', 'Laporan_Peserta_Magang_CIMS_' + new Date().toISOString().slice(0,10) + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+</script>

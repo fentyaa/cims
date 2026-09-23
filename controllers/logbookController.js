@@ -7,6 +7,7 @@
  */
 
 import logbookService from "../services/logbookService.js";
+import presenceService from "../services/presenceService.js";
 import { validateLogbook } from "../utils/validators.js";
 
 // ============================================================
@@ -25,14 +26,20 @@ export const internLogbookPage = async (req, res) => {
     // Cek logbook hari ini
     const todayLogbook = await logbookService.getTodayLogbook(userId, new Date());
 
-    // Riwayat logbook
-    const { data: logbooks, pagination } = await logbookService.getInternLogbooks(userId, { page });
+    // Cek status presensi hari ini
+    const todayPresence = await presenceService.getTodayPresence(userId);
+
+    // Riwayat logbook (5 per halaman agar ringkas di HP)
+    const { data: logbooks, pagination } = await logbookService.getInternLogbooks(userId, { page, limit: 5 });
+    pagination.hasPrev = pagination.page > 1;
+    pagination.hasNext = pagination.page < pagination.totalPages;
 
     res.render("pages/intern/logbook", {
       title: "Logbook Harian - Internship Management System",
       layout: "layouts/dashboard",
       userName: req.session.user.fullName,
       todayLogbook,
+      todayPresence,
       logbooks,
       pagination,
       formData: {},
@@ -53,6 +60,17 @@ export const internLogbookPage = async (req, res) => {
 export const internCreateLogbook = async (req, res) => {
   try {
     const userId = req.session.user.id;
+
+    // Cek status presensi hari ini sebelum memproses: tolak jika IZIN atau SAKIT
+    const todayPresence = await presenceService.getTodayPresence(userId).catch(() => null);
+    if (todayPresence && (todayPresence.status === "IZIN" || todayPresence.status === "SAKIT")) {
+      const statusLabel = todayPresence.status === "IZIN" ? "Izin" : "Sakit";
+      req.session.messages = [
+        { type: "warning", text: `Pengisian logbook ditolak karena status kehadiran Anda hari ini tercatat ${statusLabel}.` },
+      ];
+      return res.redirect("/intern/logbook");
+    }
+
     const formData = {
       activity: req.body.activity?.trim(),
       obstacle: req.body.obstacle?.trim(),
@@ -70,6 +88,7 @@ export const internCreateLogbook = async (req, res) => {
         layout: "layouts/dashboard",
         userName: req.session.user.fullName,
         todayLogbook,
+        todayPresence,
         logbooks,
         pagination,
         formData,
@@ -88,6 +107,7 @@ export const internCreateLogbook = async (req, res) => {
     console.error("Create logbook error:", error);
     const userId = req.session.user.id;
     const todayLogbook = await logbookService.getTodayLogbook(userId, new Date()).catch(() => null);
+    const todayPresence = await presenceService.getTodayPresence(userId).catch(() => null);
     const { data: logbooks, pagination } = await logbookService.getInternLogbooks(userId).catch(() => ({ data: [], pagination: {} }));
 
     return res.render("pages/intern/logbook", {
@@ -95,6 +115,7 @@ export const internCreateLogbook = async (req, res) => {
       layout: "layouts/dashboard",
       userName: req.session.user.fullName,
       todayLogbook,
+      todayPresence,
       logbooks,
       pagination,
       formData: req.body,
@@ -120,6 +141,7 @@ export const internUpdateLogbook = async (req, res) => {
     const validation = validateLogbook(formData);
     if (!validation.valid) {
       const todayLogbook = await logbookService.getTodayLogbook(userId, new Date()).catch(() => null);
+      const todayPresence = await presenceService.getTodayPresence(userId).catch(() => null);
       const { data: logbooks, pagination } = await logbookService.getInternLogbooks(userId);
 
       return res.render("pages/intern/logbook", {
@@ -127,6 +149,7 @@ export const internUpdateLogbook = async (req, res) => {
         layout: "layouts/dashboard",
         userName: req.session.user.fullName,
         todayLogbook,
+        todayPresence,
         logbooks,
         pagination,
         formData,

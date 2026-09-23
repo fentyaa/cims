@@ -21,6 +21,7 @@ import {
   validateResetPassword,
 } from "../utils/validators.js";
 import { regenerateCsrfToken } from "../middlewares/csrf.js";
+import { formatInternshipPeriod } from "../utils/helpers.js";
 
 const SALT_ROUNDS = 10;
 
@@ -102,6 +103,12 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(formData.password, SALT_ROUNDS);
 
+    // Dapatkan atau turunkan keterangan periode dari tanggal mulai & selesai
+    let computedPeriod = formData.internshipPeriod ? formData.internshipPeriod.trim() : "";
+    if (formData.internshipStartDate && formData.internshipEndDate) {
+      computedPeriod = formatInternshipPeriod(formData.internshipStartDate, formData.internshipEndDate) || computedPeriod;
+    }
+
     // Data untuk disimpan ke database
     const userData = {
       fullName: formData.fullName,
@@ -111,7 +118,7 @@ export const register = async (req, res) => {
       role: "INTERN",
       participantType: formData.participantType,
       status: "PENDING",
-      internshipPeriod: formData.internshipPeriod,
+      internshipPeriod: computedPeriod || "-",
       internshipStartDate: formData.internshipStartDate ? new Date(formData.internshipStartDate) : null,
       internshipEndDate: formData.internshipEndDate ? new Date(formData.internshipEndDate) : null,
     };
@@ -612,9 +619,22 @@ export const approveAccount = async (req, res) => {
       return res.redirect("/auth/approval");
     }
 
+    // Otomatis sambungkan ke mentor tunggal jika belum memiliki mentorId
+    let mentorId = user.mentorId;
+    if (!mentorId) {
+      const defaultMentor = await prisma.user.findFirst({
+        where: { role: "MENTOR" },
+        select: { id: true },
+      });
+      if (defaultMentor) mentorId = defaultMentor.id;
+    }
+
     await prisma.user.update({
       where: { id: userId },
-      data: { status: "ACTIVE" },
+      data: {
+        status: "ACTIVE",
+        ...(mentorId ? { mentorId } : {}),
+      },
     });
 
     req.session.messages = [

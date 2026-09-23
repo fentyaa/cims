@@ -57,14 +57,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Kedisiplinan <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="discipline"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.discipline : evaluation.discipline %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -72,14 +71,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Tanggung Jawab <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="responsibility"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.responsibility : evaluation.responsibility %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -87,14 +85,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Komunikasi <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="communication"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.communication : evaluation.communication %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -102,14 +99,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Kerjasama Tim <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="teamwork"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.teamwork : evaluation.teamwork %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -117,14 +113,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Inisiatif <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="initiative"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.initiative : evaluation.initiative %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -132,14 +127,13 @@
           <div class="col-12 col-md-6 col-lg-4">
             <label class="form-label fw-semibold small">Keterampilan Teknis <span class="text-danger">*</span></label>
             <input
-              type="number"
-              class="form-control form-control-lg bg-light"
+              type="text"
+              inputmode="decimal"
+              class="form-control form-control-lg bg-light score-input"
               name="technicalSkill"
-              min="0"
-              max="100"
               value="<%= typeof formData !== 'undefined' ? formData.technicalSkill : evaluation.technicalSkill %>"
               required
-              placeholder="0-100"
+              placeholder="0-100 (misal: 85 atau 85,5)"
             />
             <div class="invalid-feedback">Nilai harus antara 0-100.</div>
           </div>
@@ -150,9 +144,9 @@
           <div class="d-flex align-items-center gap-3">
             <i class="bi bi-calculator fs-4"></i>
             <div>
-              <small class="text-muted d-block">Nilai Saat Ini</small>
-              <strong>Final Score: <%= evaluation.finalScore %> | Grade: <%= evaluation.grade %></strong>
-              <small class="text-muted d-block">Nilai akan dihitung ulang setelah disimpan.</small>
+              <small class="text-muted d-block">Nilai & Grade (Kalkulasi Otomatis)</small>
+              <strong>Final Score: <span id="liveFinalScore"><%= evaluation.finalScore %></span> | Grade: <span id="liveGrade"><%= evaluation.grade %></span></strong>
+              <small class="text-muted d-block" id="scoreHelpText">Rentang nilai 0 s.d. 100 untuk setiap aspek kompetensi.</small>
             </div>
           </div>
         </div>

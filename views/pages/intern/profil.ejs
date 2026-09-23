@@ -115,26 +115,43 @@
           <% } %>
           <div class="col-12 col-md-6">
             <label class="small text-muted fw-semibold">Periode Magang</label>
-            <p class="mb-0"><%= user.internshipPeriod %></p>
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-semibold"><%= user.internshipPeriod %></span>
+              <span class="badge bg-light text-muted border" title="Terkunci permanen"><i class="bi bi-lock-fill"></i> Tetap</span>
+            </div>
           </div>
           <div class="col-12 col-md-6">
-            <label class="small text-muted fw-semibold">Mentor</label>
-            <p class="mb-0"><%= user.mentor ? user.mentor.fullName : '<span class="text-muted">Belum ditentukan</span>' %></p>
+            <label class="small text-muted fw-semibold">Mentor Pembimbing</label>
+            <p class="mb-0">
+              <% if (user.mentor && user.mentor.fullName) { %>
+                <%= user.mentor.fullName %>
+              <% } else { %>
+                <span class="text-muted">Belum ditentukan</span>
+              <% } %>
+            </p>
+          </div>
+          <div class="col-12">
+            <div class="p-2.5 rounded-3 bg-light border text-muted small">
+              <i class="bi bi-info-circle text-primary me-1"></i>
+              <strong>Ketentuan Data:</strong> Anda dapat mengoreksi kesalahan ketik (typo) pada Nama Lengkap, NIM/NIS, serta Nama Kampus/Sekolah pada form di bawah. 
+              Tanggal mulai dan selesai magang bersifat <strong>permanen & terkunci</strong> sejak pendaftaran awal untuk menjaga validitas perhitungan masa magang.
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Edit Profil Form -->
+    <!-- Edit Profil Form (Self-Service) -->
     <div class="card border-0 shadow-sm rounded-3">
       <div class="card-header bg-transparent border-bottom-0 pt-3 px-4">
         <h5 class="fw-bold mb-0">
-          <i class="bi bi-pencil-square me-2"></i>Edit Profil
+          <i class="bi bi-pencil-square me-2"></i>Koreksi & Edit Profil Saya
         </h5>
       </div>
       <div class="card-body p-4">
         <form action="/intern/profil" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
           <!-- Foto Profil -->
           <div class="mb-3">
             <label class="form-label fw-semibold small">Foto Profil</label>
@@ -158,9 +175,123 @@
             </div>
           </div>
 
+          <!-- Nama Lengkap (Self-service Typo Correction) -->
+          <div class="mb-3">
+            <label for="fullName" class="form-label fw-semibold small">Nama Lengkap <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light"><i class="bi bi-person text-primary"></i></span>
+              <input
+                type="text"
+                class="form-control form-control-lg bg-light"
+                id="fullName"
+                name="fullName"
+                value="<%= user.fullName %>"
+                required
+                minlength="3"
+              />
+              <div class="invalid-feedback">Nama lengkap harus diisi minimal 3 karakter.</div>
+            </div>
+            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">
+              <i class="bi bi-info-circle text-primary me-1"></i>Silakan koreksi jika terdapat salah ketik (typo) nama.
+            </small>
+          </div>
+
+          <!-- Data Akademik & Institusi (Koreksi Mandiri) -->
+          <% if (user.participantType === 'UNIVERSITY') { %>
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-md-6">
+                <label for="university" class="form-label fw-semibold small">Nama Perguruan Tinggi / Kampus <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-building text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="university"
+                    name="university"
+                    value="<%= user.university || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="studyProgram" class="form-label fw-semibold small">Program Studi <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-mortarboard text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="studyProgram"
+                    name="studyProgram"
+                    value="<%= user.studyProgram || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-12">
+                <label for="studentId" class="form-label fw-semibold small">NIM (Nomor Induk Mahasiswa) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-card-text text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="studentId"
+                    name="studentId"
+                    value="<%= user.studentId || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <div class="row g-2 mb-3">
+              <div class="col-12 col-md-6">
+                <label for="schoolName" class="form-label fw-semibold small">Nama Sekolah (SMK) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-building text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="schoolName"
+                    name="schoolName"
+                    value="<%= user.schoolName || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="major" class="form-label fw-semibold small">Jurusan / Kompetensi Keahlian <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-mortarboard text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="major"
+                    name="major"
+                    value="<%= user.major || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="col-12">
+                <label for="classGrade" class="form-label fw-semibold small">Kelas <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light"><i class="bi bi-tag text-primary"></i></span>
+                  <input
+                    type="text"
+                    class="form-control form-control-lg bg-light"
+                    id="classGrade"
+                    name="classGrade"
+                    value="<%= user.classGrade || '' %>"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          <% } %>
+
           <!-- Nomor HP -->
           <div class="mb-3">
-            <label for="phoneNumber" class="form-label fw-semibold small">Nomor HP</label>
+            <label for="phoneNumber" class="form-label fw-semibold small">Nomor HP / WhatsApp <span class="text-danger">*</span></label>
             <div class="input-group">
               <span class="input-group-text bg-light">
                 <i class="bi bi-phone text-primary"></i>

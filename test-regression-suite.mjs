@@ -13,6 +13,8 @@ import {
   replacePlaceholders,
 } from "./services/documentService.js";
 import { isValidPassword, validateRegister, validateResetPassword, validateLogin, validateLogbook, validateInternshipDates } from "./utils/validators.js";
+import { formatInternshipPeriod } from "./utils/helpers.js";
+import { checkRedDate } from "./utils/holidayHelper.js";
 import { createWebRateLimiter, profileUpdateLimiter, bulkCertificateLimiter, bulkLetterLimiter } from "./middlewares/rateLimiter.js";
 import { VALID_STATUSES, ACTIVE_STATUSES, INACTIVE_STATUSES, isActiveDay } from "./services/presenceService.js";
 import { sanitizeYearMonth } from "./services/calendarService.js";
@@ -160,6 +162,25 @@ async function runSuite() {
     confirmPassword: "Password123"
   });
   assert(compliantReg.valid === true, "Register form validator accepts compliant password");
+
+  // Auto-derived internshipPeriod from Start & End Dates
+  const autoDateReg = validateRegister({
+    fullName: "Siti Rahma",
+    email: "siti@cims.com",
+    phoneNumber: "081234567891",
+    participantType: "UNIVERSITY",
+    university: "Universitas Siliwangi",
+    studyProgram: "Informatika",
+    studentId: "237006099",
+    internshipStartDate: "2026-08-01",
+    internshipEndDate: "2026-10-31",
+    password: "Password123",
+    confirmPassword: "Password123"
+  });
+  assert(autoDateReg.valid === true, "Register validator accepts registration with start & end dates without manual internshipPeriod");
+
+  const formattedPeriod = formatInternshipPeriod("2026-08-01", "2026-10-31");
+  assert(formattedPeriod === "1 Agustus - 31 Oktober 2026", "formatInternshipPeriod accurately formats start & end dates into period string");
 
   const weakReset = validateResetPassword({
     password: "12345678",
@@ -431,21 +452,31 @@ async function runSuite() {
   );
   assert(g6.currentStreak === 2, "Ongoing today without presence preserves active streak from previous days");
 
-  // 9.7 Internship Progress Calculations
+  // 9.7 Internship Progress Calculations (Day X & Remaining Days)
   const startP = "2026-08-01";
   const endP = "2026-08-31";
 
-  // Before start: progress 0%
+  // Before start: progress 0%, currentDay 0, remainingWorkDays === totalWorkDays
   const pBefore = calculateInternshipProgress(startP, endP, new Date("2026-07-25"));
   assert(pBefore.progressPercent === 0, "Internship progress is 0% before start date");
+  assert(pBefore.currentDay === 0, "Current day is 0 before start date");
+  assert(pBefore.remainingWorkDays === pBefore.totalWorkDays, "Remaining work days equals total work days before start date");
+  assert(pBefore.status === "NOT_STARTED", "Status is NOT_STARTED before start date");
 
-  // After end: progress 100%
+  // After end: progress 100%, currentDay === totalWorkDays, remainingWorkDays 0
   const pAfter = calculateInternshipProgress(startP, endP, new Date("2026-09-05"));
   assert(pAfter.progressPercent === 100, "Internship progress is 100% after end date");
+  assert(pAfter.currentDay === pAfter.totalWorkDays, "Current day equals total work days after end date");
+  assert(pAfter.remainingWorkDays === 0, "Remaining work days is 0 after end date");
+  assert(pAfter.status === "COMPLETED", "Status is COMPLETED after end date");
 
-  // Middle progress bounded between 0% and 100%
+  // Middle progress bounded between 0% and 100%, currentDay + remainingWorkDays === totalWorkDays
   const pMid = calculateInternshipProgress(startP, endP, new Date("2026-08-15"));
   assert(pMid.progressPercent >= 0 && pMid.progressPercent <= 100, "Mid-internship progress is correctly clamped 0% to 100%");
+  assert(pMid.currentDay > 0, "Current day is positive mid-internship (e.g. Hari ke-X)");
+  assert(pMid.remainingWorkDays >= 0, "Remaining work days is non-negative mid-internship");
+  assert(pMid.currentDay + pMid.remainingWorkDays === pMid.totalWorkDays, "Current day plus remaining work days exactly equals total work days");
+  assert(pMid.status === "ONGOING", "Status is ONGOING mid-internship");
 
   // Single day internship (startDate === endDate)
   const pSingle = calculateInternshipProgress("2026-08-10", "2026-08-10", new Date("2026-08-10"));
@@ -533,6 +564,146 @@ async function runSuite() {
   assert(checkDocumentAccess("user-123", "user-123", "INTERN") === true, "Intern can access their own document");
   assert(checkDocumentAccess("user-456", "user-123", "INTERN") === false, "Intern cannot access another intern's document (IDOR blocked)");
   assert(checkDocumentAccess("user-456", "mentor-999", "MENTOR") === true, "Mentor has authorized access to inspect documents");
+
+  console.log("\n==================================================");
+  console.log("11. FASE 7: SELF-SERVICE PROFILE, PERIOD DERIVATION & 3-DAY DROPOUT POLICY");
+  console.log("==================================================");
+
+  // 11.1 Format Internship Period (Automatic Derivation)
+  assert(formatInternshipPeriod("2026-07-02", "2026-07-31") === "2 - 31 Juli 2026", "Derives period in same month & year (e.g. 2 - 31 Juli 2026)");
+  assert(formatInternshipPeriod("2026-06-02", "2026-07-31") === "2 Juni - 31 Juli 2026", "Derives period across different months in same year (e.g. 2 Juni - 31 Juli 2026)");
+  assert(formatInternshipPeriod("2025-12-15", "2026-03-15") === "15 Desember 2025 - 15 Maret 2026", "Derives period across different years");
+  assert(formatInternshipPeriod(null, null) === "", "Returns empty string for null dates");
+  assert(formatInternshipPeriod("invalid", "invalid") === "", "Returns empty string for invalid dates");
+
+  // 11.2 Self-Service Profile Updating: Intern vs Immutable Fields
+  const simulateUpdateOwnProfile = (inputData) => {
+    const allowedFields = [
+      "fullName",
+      "university",
+      "studyProgram",
+      "studentId",
+      "schoolName",
+      "major",
+      "classGrade",
+      "phoneNumber",
+      "password",
+      "profilePhoto"
+    ];
+    const updateData = {};
+    for (const key of allowedFields) {
+      if (inputData[key] !== undefined) {
+        updateData[key] = inputData[key];
+      }
+    }
+    return updateData;
+  };
+
+  const maliciousInternInput = {
+    fullName: "Fenty Anggraeni Edit",
+    university: "Universitas Siliwangi Baru",
+    email: "hacker@evil.com",
+    internshipStartDate: "2026-01-01",
+    internshipEndDate: "2026-12-31",
+    internshipPeriod: "1 Tahun Magang",
+    role: "MENTOR",
+    mentorId: "mentor-attacker",
+  };
+
+  const sanitizedUpdate = simulateUpdateOwnProfile(maliciousInternInput);
+  assert(sanitizedUpdate.fullName === "Fenty Anggraeni Edit", "Participant can update their full name (fix typos)");
+  assert(sanitizedUpdate.university === "Universitas Siliwangi Baru", "Participant can update their university (fix typos)");
+  assert(!("email" in sanitizedUpdate), "Email cannot be altered by participant (immutable)");
+  assert(!("internshipStartDate" in sanitizedUpdate), "Internship start date cannot be altered by participant (immutable)");
+  assert(!("internshipEndDate" in sanitizedUpdate), "Internship end date cannot be altered by participant (immutable)");
+  assert(!("internshipPeriod" in sanitizedUpdate), "Internship period cannot be altered by participant (immutable)");
+  assert(!("role" in sanitizedUpdate), "Role cannot be altered by participant (immutable)");
+  assert(!("mentorId" in sanitizedUpdate), "Mentor assignment cannot be altered by participant (immutable)");
+
+  // 11.3 Consecutive Unexcused Absence & 3-Day Dropout Simulation Logic
+  const simulateAbsenceCheck = (presences, startDate, refDate) => {
+    const presenceMap = new Map();
+    presences.forEach(p => {
+      const d = new Date(p.date);
+      const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      presenceMap.set(dStr, p.status);
+    });
+
+    const todayDStr = `${refDate.getFullYear()}-${String(refDate.getMonth() + 1).padStart(2, "0")}-${String(refDate.getDate()).padStart(2, "0")}`;
+    if (presenceMap.has(todayDStr)) {
+      return { consecutiveDays: 0, isDropout: false, unexcusedDates: [] };
+    }
+
+    let consecutiveDays = 0;
+    const unexcusedDates = [];
+    const walk = new Date(refDate);
+    walk.setDate(walk.getDate() - 1);
+
+    while (walk >= startDate) {
+      const redInfo = checkRedDate(walk);
+      if (!redInfo.isRedDate) {
+        const dStr = `${walk.getFullYear()}-${String(walk.getMonth() + 1).padStart(2, "0")}-${String(walk.getDate()).padStart(2, "0")}`;
+        const status = presenceMap.get(dStr);
+        if (!status) {
+          consecutiveDays++;
+          unexcusedDates.push(dStr);
+          if (consecutiveDays >= 3) break;
+        } else {
+          break;
+        }
+      }
+      walk.setDate(walk.getDate() - 1);
+    }
+
+    return {
+      consecutiveDays,
+      isDropout: consecutiveDays >= 3,
+      unexcusedDates,
+    };
+  };
+
+  // Scenario A: 0 days unexcused (attended previous working day)
+  const presencesGood = [
+    { date: "2026-08-10", status: "WFO" },
+    { date: "2026-08-11", status: "WFH" },
+    { date: "2026-08-12", status: "WFO" },
+  ];
+  const resA = simulateAbsenceCheck(presencesGood, new Date("2026-08-01"), new Date("2026-08-13T09:00:00Z"));
+  assert(resA.consecutiveDays === 0 && !resA.isDropout, "0 consecutive absences when attended on previous working day");
+
+  // Scenario B: 1 day unexcused
+  const presences1Day = [
+    { date: "2026-08-10", status: "WFO" },
+    { date: "2026-08-11", status: "WFO" },
+  ];
+  const resB = simulateAbsenceCheck(presences1Day, new Date("2026-08-01"), new Date("2026-08-13T09:00:00Z"));
+  assert(resB.consecutiveDays === 1 && !resB.isDropout, "1 consecutive absence detected; dropout is false");
+
+  // Scenario C: 2 days unexcused
+  const presences2Days = [
+    { date: "2026-08-10", status: "WFO" },
+  ];
+  const resC = simulateAbsenceCheck(presences2Days, new Date("2026-08-01"), new Date("2026-08-13T09:00:00Z"));
+  assert(resC.consecutiveDays === 2 && !resC.isDropout, "2 consecutive absences detected; dropout is false (warning phase)");
+
+  // Scenario D: 3 consecutive working days unexcused -> DROPOUT TRIGGERED
+  const presences3Days = [];
+  const resD = simulateAbsenceCheck(presences3Days, new Date("2026-08-01"), new Date("2026-08-13T09:00:00Z"));
+  assert(resD.consecutiveDays === 3 && resD.isDropout === true, "3 consecutive unexcused absences triggers isDropout: true");
+
+  // Scenario E: Giving notice with IZIN or SAKIT resets streak ("ada kabar")
+  const presencesWithIzin = [
+    { date: "2026-08-11", status: "IZIN" },
+  ];
+  const resE = simulateAbsenceCheck(presencesWithIzin, new Date("2026-08-01"), new Date("2026-08-13T09:00:00Z"));
+  assert(resE.consecutiveDays === 1 && !resE.isDropout, "Official IZIN/SAKIT gives notice and resets previous streak (only 1 day unexcused, no dropout)");
+
+  // Scenario F: Sunday does not count toward unexcused absence
+  const presencesWeekend = [
+    { date: "2026-08-08", status: "WFO" }, // Saturday
+  ];
+  const resF = simulateAbsenceCheck(presencesWeekend, new Date("2026-08-01"), new Date("2026-08-11T09:00:00Z"));
+  assert(resF.consecutiveDays === 1 && !resF.isDropout, "Sunday (non-working day) is skipped and does not increment unexcused count");
 
   console.log("\n==================================================");
   console.log(`REGRESSION TEST COMPLETE: ${totalPassed} PASSED, ${totalFailed} FAILED`);

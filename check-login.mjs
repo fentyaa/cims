@@ -2,9 +2,9 @@ import prisma from './config/database.js';
 import bcrypt from 'bcrypt';
 
 async function check() {
-  const user = await prisma.user.findUnique({ where: { email: 'mentor@cims.com' } });
+  const user = await prisma.user.findUnique({ where: { email: 'mentor.cims@gmail.com' } });
   if (!user) {
-    console.log('❌ USER mentor@cims.com NOT FOUND in database');
+    console.log('❌ USER mentor.cims@gmail.com NOT FOUND in database');
     await prisma.$disconnect();
     return;
   }

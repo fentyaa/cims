@@ -8,7 +8,7 @@
 
 import prisma from "../config/database.js";
 import evaluationService from "../services/evaluationService.js";
-import { validateEvaluation } from "../utils/validators.js";
+import { validateEvaluation, parseEvaluationScore } from "../utils/validators.js";
 
 // ============================================================
 // MENTOR: HALAMAN DAFTAR PENILAIAN
@@ -104,20 +104,21 @@ export const mentorCreate = async (req, res) => {
     const { userId } = req.params;
     const mentorId = req.session.user.id;
 
-    const formData = {
+    // Preservasi input asli dari form untuk re-render jika terjadi kesalahan validasi
+    const formInput = {
       userId,
-      discipline: parseInt(req.body.discipline) || 0,
-      responsibility: parseInt(req.body.responsibility) || 0,
-      communication: parseInt(req.body.communication) || 0,
-      teamwork: parseInt(req.body.teamwork) || 0,
-      initiative: parseInt(req.body.initiative) || 0,
-      technicalSkill: parseInt(req.body.technicalSkill) || 0,
-      mentorComment: req.body.mentorComment?.trim(),
-      recommendation: req.body.recommendation?.trim(),
+      discipline: req.body.discipline,
+      responsibility: req.body.responsibility,
+      communication: req.body.communication,
+      teamwork: req.body.teamwork,
+      initiative: req.body.initiative,
+      technicalSkill: req.body.technicalSkill,
+      mentorComment: req.body.mentorComment?.trim() || "",
+      recommendation: req.body.recommendation?.trim() || "",
     };
 
-    // Validasi
-    const validation = validateEvaluation(formData);
+    // Validasi input asli mentor
+    const validation = validateEvaluation(formInput);
     if (!validation.valid) {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       return res.render("pages/mentor/penilaian-buat", {
@@ -125,12 +126,24 @@ export const mentorCreate = async (req, res) => {
         layout: "layouts/dashboard",
         userName: req.session.user.fullName,
         participant: user,
-        formData,
+        formData: formInput,
         errors: validation.errors,
       });
     }
 
-    await evaluationService.createEvaluation(formData, mentorId);
+    const evaluationData = {
+      userId,
+      discipline: parseEvaluationScore(req.body.discipline),
+      responsibility: parseEvaluationScore(req.body.responsibility),
+      communication: parseEvaluationScore(req.body.communication),
+      teamwork: parseEvaluationScore(req.body.teamwork),
+      initiative: parseEvaluationScore(req.body.initiative),
+      technicalSkill: parseEvaluationScore(req.body.technicalSkill),
+      mentorComment: req.body.mentorComment?.trim(),
+      recommendation: req.body.recommendation?.trim(),
+    };
+
+    await evaluationService.createEvaluation(evaluationData, mentorId);
 
     req.session.messages = [
       { type: "success", text: "Penilaian berhasil dibuat (status: Draft)." },
@@ -197,19 +210,20 @@ export const mentorUpdate = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const formData = {
-      discipline: parseInt(req.body.discipline) || 0,
-      responsibility: parseInt(req.body.responsibility) || 0,
-      communication: parseInt(req.body.communication) || 0,
-      teamwork: parseInt(req.body.teamwork) || 0,
-      initiative: parseInt(req.body.initiative) || 0,
-      technicalSkill: parseInt(req.body.technicalSkill) || 0,
-      mentorComment: req.body.mentorComment?.trim(),
-      recommendation: req.body.recommendation?.trim(),
+    // Preservasi input asli dari form untuk re-render jika terjadi kesalahan validasi
+    const formInput = {
+      discipline: req.body.discipline,
+      responsibility: req.body.responsibility,
+      communication: req.body.communication,
+      teamwork: req.body.teamwork,
+      initiative: req.body.initiative,
+      technicalSkill: req.body.technicalSkill,
+      mentorComment: req.body.mentorComment?.trim() || "",
+      recommendation: req.body.recommendation?.trim() || "",
     };
 
-    // Validasi
-    const validation = validateEvaluation(formData);
+    // Validasi input asli mentor
+    const validation = validateEvaluation(formInput);
     if (!validation.valid) {
       const evaluation = await evaluationService.getEvaluationById(id);
       return res.render("pages/mentor/penilaian-edit", {
@@ -217,12 +231,23 @@ export const mentorUpdate = async (req, res) => {
         layout: "layouts/dashboard",
         userName: req.session.user.fullName,
         evaluation,
-        formData,
+        formData: formInput,
         errors: validation.errors,
       });
     }
 
-    await evaluationService.updateEvaluation(id, formData);
+    const evaluationData = {
+      discipline: parseEvaluationScore(req.body.discipline),
+      responsibility: parseEvaluationScore(req.body.responsibility),
+      communication: parseEvaluationScore(req.body.communication),
+      teamwork: parseEvaluationScore(req.body.teamwork),
+      initiative: parseEvaluationScore(req.body.initiative),
+      technicalSkill: parseEvaluationScore(req.body.technicalSkill),
+      mentorComment: req.body.mentorComment?.trim(),
+      recommendation: req.body.recommendation?.trim(),
+    };
+
+    await evaluationService.updateEvaluation(id, evaluationData);
 
     req.session.messages = [
       { type: "success", text: "Penilaian berhasil diperbarui." },

@@ -119,15 +119,52 @@ export const slugify = (text) => {
     .replace(/^-+|-+$/g, "");
 };
 
+/**
+ * Memformat rentang tanggal magang (mulai & selesai) ke format periode Indonesia.
+ * Contoh: "1 Agustus 2026 - 31 Oktober 2026"
+ * @param {Date|string} startDate
+ * @param {Date|string} endDate
+ * @returns {string} String periode magang
+ */
+export const formatInternshipPeriod = (startDate, endDate) => {
+  if (!startDate || !endDate) return "";
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) return "";
+
+  const months = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  ];
+
+  const startDay = start.getDate();
+  const startMonth = months[start.getMonth()];
+  const startYear = start.getFullYear();
+
+  const endDay = end.getDate();
+  const endMonth = months[end.getMonth()];
+  const endYear = end.getFullYear();
+
+  if (startYear === endYear) {
+    if (startMonth === endMonth) {
+      return `${startDay} - ${endDay} ${startMonth} ${startYear}`;
+    }
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${startYear}`;
+  }
+  return `${startDay} ${startMonth} ${startYear} - ${endDay} ${endMonth} ${endYear}`;
+};
+
 export default {
   getCurrentYear,
   getCurrentTimestamp,
   formatDate,
   formatDateLong,
+  formatInternshipPeriod,
   truncateText,
   sanitizeInput,
   generateParticipantId,
   sleep,
   slugify,
 };
+
 

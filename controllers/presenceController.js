@@ -67,12 +67,28 @@ export const internPresensiPage = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const filter = req.query.filter || "month";
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = 6; // 6 catatan per halaman agar pas dan tidak terlalu panjang di HP
 
     // Dapatkan presensi hari ini
     const todayPresence = await presenceService.getTodayPresence(userId);
 
     // Dapatkan riwayat presensi
-    const history = await presenceService.getPresenceHistory(userId, filter);
+    const allHistory = await presenceService.getPresenceHistory(userId, filter);
+    const total = allHistory.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const safePage = Math.min(page, totalPages);
+    const startIndex = (safePage - 1) * limit;
+    const history = allHistory.slice(startIndex, startIndex + limit);
+
+    const pagination = {
+      page: safePage,
+      limit,
+      total,
+      totalPages,
+      hasPrev: safePage > 1,
+      hasNext: safePage < totalPages,
+    };
 
     // Dapatkan data user untuk participantType
     const user = req.session.user;
@@ -90,6 +106,7 @@ export const internPresensiPage = async (req, res) => {
       todayRedDate,
       history,
       currentFilter: filter,
+      pagination,
     });
   } catch (error) {
     console.error("Presensi page error:", error);

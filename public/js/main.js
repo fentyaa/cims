@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Inisialisasi Smart Link Prefetching (pre-loading di background saat kursor hover)
   initializeInstantPrefetch();
+
+  // Inisialisasi validasi nilai evaluasi (rentang 0-100 & live kalkulasi)
+  initializeEvaluationScoreValidation();
 });
 
 // ============================================================
@@ -115,7 +118,24 @@ function initializeFormValidation() {
 
   forms.forEach((form) => {
     form.addEventListener("submit", (event) => {
-      if (!form.checkValidity()) {
+      // Validasi batas rentang 0 s.d. 100 untuk form yang memiliki input nilai evaluasi
+      const scoreInputs = form.querySelectorAll(".score-input");
+      let hasInvalidScore = false;
+      scoreInputs.forEach((input) => {
+        const raw = input.value.trim();
+        const num = Number(raw.replace(",", "."));
+        if (!raw || isNaN(num) || num < 0 || num > 100) {
+          input.setCustomValidity("Nilai harus antara 0-100.");
+          input.classList.add("is-invalid");
+          input.classList.remove("is-valid");
+          hasInvalidScore = true;
+        } else {
+          input.setCustomValidity("");
+          input.classList.remove("is-invalid");
+        }
+      });
+
+      if (hasInvalidScore || !form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -126,29 +146,156 @@ function initializeFormValidation() {
 }
 
 // ============================================================
+// Validasi Input Nilai Evaluasi & Kalkulasi Live Nilai Akhir
+// ============================================================
+
+function initializeEvaluationScoreValidation() {
+  const scoreInputs = document.querySelectorAll(".score-input");
+  if (scoreInputs.length === 0) return;
+
+  const liveFinalScoreEl = document.getElementById("liveFinalScore");
+  const liveGradeEl = document.getElementById("liveGrade");
+  const scoreHelpTextEl = document.getElementById("scoreHelpText");
+
+  const convertToGrade = (score) => {
+    if (score >= 85) return "A";
+    if (score >= 75) return "B";
+    if (score >= 65) return "C";
+    if (score >= 50) return "D";
+    return "E";
+  };
+
+  const updateLiveCalculation = () => {
+    let allFilled = true;
+    let hasOutOfRange = false;
+    let total = 0;
+    let count = 0;
+
+    scoreInputs.forEach((input) => {
+      const rawVal = input.value.trim();
+      if (!rawVal) {
+        allFilled = false;
+        return;
+      }
+      const num = Number(rawVal.replace(",", "."));
+      if (isNaN(num) || num < 0 || num > 100) {
+        hasOutOfRange = true;
+      } else {
+        total += num;
+        count += 1;
+      }
+    });
+
+    if (liveFinalScoreEl && liveGradeEl) {
+      if (hasOutOfRange) {
+        liveFinalScoreEl.textContent = "Tidak Valid";
+        liveFinalScoreEl.className = "text-danger fw-bold";
+        liveGradeEl.textContent = "-";
+        if (scoreHelpTextEl) {
+          scoreHelpTextEl.textContent = "Peringatan: Nilai harus berada dalam rentang 0 sampai 100!";
+          scoreHelpTextEl.className = "text-danger small d-block fw-semibold";
+        }
+      } else if (allFilled && count === 6) {
+        const avg = Math.round((total / 6) * 100) / 100;
+        const grade = convertToGrade(avg);
+        liveFinalScoreEl.textContent = avg.toLocaleString("id-ID", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        liveFinalScoreEl.className = "text-success fw-bold";
+        liveGradeEl.textContent = grade;
+        liveGradeEl.className = "badge bg-primary";
+        if (scoreHelpTextEl) {
+          scoreHelpTextEl.textContent = "Nilai akhir rata-rata dan grade terhitung otomatis.";
+          scoreHelpTextEl.className = "text-muted small d-block";
+        }
+      } else {
+        if (count > 0) {
+          const currentAvg = Math.round((total / count) * 100) / 100;
+          liveFinalScoreEl.textContent = `${currentAvg} (${count}/6 kriteria)`;
+          liveFinalScoreEl.className = "text-muted";
+          liveGradeEl.textContent = "-";
+        }
+      }
+    }
+  };
+
+  scoreInputs.forEach((input) => {
+    const validateField = () => {
+      const val = input.value.trim();
+      if (!val) {
+        input.setCustomValidity("Nilai wajib diisi.");
+        input.classList.remove("is-valid");
+      } else {
+        const num = Number(val.replace(",", "."));
+        if (isNaN(num) || num < 0 || num > 100) {
+          input.setCustomValidity("Nilai harus antara 0-100.");
+          input.classList.add("is-invalid");
+          input.classList.remove("is-valid");
+        } else {
+          input.setCustomValidity("");
+          input.classList.remove("is-invalid");
+          input.classList.add("is-valid");
+        }
+      }
+      updateLiveCalculation();
+    };
+
+    input.addEventListener("input", validateField);
+    input.addEventListener("change", validateField);
+    input.addEventListener("blur", validateField);
+  });
+
+  // Hitung kalkulasi awal jika halaman edit sudah memuat data
+  updateLiveCalculation();
+}
+
+// ============================================================
 // Toggle Password Visibility
 // ============================================================
 
-function initializePasswordToggle() {
-  const toggleButtons = document.querySelectorAll(".toggle-password");
+// Global helper agar bisa dipanggil langsung via onclick maupun listener
+let lastPasswordToggleTime = 0;
+window.togglePasswordVisibility = function (targetId, button) {
+  const now = Date.now();
+  if (now - lastPasswordToggleTime < 250) {
+    return; // Cegah double toggle dari rapid click / touch event ganda
+  }
+  lastPasswordToggleTime = now;
 
-  toggleButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      const targetId = this.getAttribute("data-target");
-      const passwordInput = document.getElementById(targetId);
+  if (!targetId && button) {
+    targetId = button.getAttribute("data-target");
+  }
+  const passwordInput = document.getElementById(targetId);
+  if (!passwordInput) return;
 
-      if (passwordInput) {
-        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-        passwordInput.setAttribute("type", type);
+  const currentType = passwordInput.getAttribute("type") || passwordInput.type;
+  const isPassword = currentType === "password";
+  const newType = isPassword ? "text" : "password";
 
-        // Toggle icon
-        const icon = this.querySelector("i");
-        if (icon) {
-          icon.classList.toggle("bi-eye");
-          icon.classList.toggle("bi-eye-slash");
-        }
+  passwordInput.type = newType;
+  passwordInput.setAttribute("type", newType);
+
+  if (button) {
+    const icon = button.querySelector("i");
+    if (icon) {
+      if (isPassword) {
+        icon.className = "bi bi-eye-slash";
+      } else {
+        icon.className = "bi bi-eye";
       }
-    });
+    }
+  }
+};
+
+function initializePasswordToggle() {
+  // Delegated click listener pada document agar selalu aktif di HP / Desktop
+  document.addEventListener("click", function (e) {
+    const button = e.target.closest(".toggle-password");
+    if (!button) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const targetId = button.getAttribute("data-target");
+    window.togglePasswordVisibility(targetId, button);
   });
 }
 
@@ -248,6 +395,17 @@ function initializePhotoPreview() {
       const file = event.target.files[0];
 
       if (file) {
+        // Validasi ukuran maksimal 2 MB (2 * 1024 * 1024 bytes)
+        const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+        if (file.size > MAX_SIZE_BYTES) {
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          alert(`Ukuran foto (${fileSizeMB} MB) melebihi batas maksimal 2 MB. Silakan pilih foto dengan ukuran lebih kecil.`);
+          photoInput.value = "";
+          photoPreview.innerHTML = `<i class="bi bi-camera text-muted" style="font-size: 2rem;"></i>`;
+          photoPreview.classList.add("bg-light");
+          return;
+        }
+
         const reader = new FileReader();
 
         reader.onload = function (e) {
@@ -304,9 +462,27 @@ function initializeSidebarActive() {
 
 function initializeSidebarCollapse() {
   const wrapper = document.querySelector('.dashboard-wrapper');
-  const desktopToggle = document.getElementById('desktopSidebarNavbarToggle');
+  if (!wrapper) return;
 
-  if (!wrapper || !desktopToggle) return;
+  const toggleButtons = document.querySelectorAll('#desktopSidebarToggleTopBtn');
+  const brandLink = document.getElementById('sidebarBrandLogo') || document.querySelector('.dashboard-sidebar .sidebar-brand .brand-link');
+  const sidebarBrand = document.querySelector('.dashboard-sidebar .sidebar-brand');
+
+  function updateToggleState(isCollapsed) {
+    toggleButtons.forEach(btn => {
+      const icon = btn.querySelector('i');
+      if (icon) icon.className = isCollapsed ? 'bi bi-chevron-right fs-6' : 'bi bi-chevron-left fs-6';
+      btn.setAttribute('title', isCollapsed ? 'Buka Sidebar' : 'Tutup Sidebar');
+    });
+
+    if (sidebarBrand) {
+      if (isCollapsed) {
+        sidebarBrand.setAttribute('title', 'Klik untuk membuka sidebar');
+      } else {
+        sidebarBrand.removeAttribute('title');
+      }
+    }
+  }
 
   // Restore saved collapse state on desktop (>= 992px)
   if (window.innerWidth >= 992) {
@@ -314,20 +490,41 @@ function initializeSidebarCollapse() {
       const isCollapsed = localStorage.getItem('cims_sidebar_collapsed') === 'true';
       if (isCollapsed) {
         wrapper.classList.add('sidebar-collapsed');
+        updateToggleState(true);
       }
     } catch (e) {
       console.warn('localStorage not accessible:', e);
     }
   }
 
-  desktopToggle.addEventListener('click', function () {
-    const collapsed = wrapper.classList.toggle('sidebar-collapsed');
-    try {
-      localStorage.setItem('cims_sidebar_collapsed', collapsed ? 'true' : 'false');
-    } catch (e) {
-      console.warn('localStorage not accessible:', e);
-    }
+  // Bind click on all in-sidebar toggle buttons
+  toggleButtons.forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const collapsed = wrapper.classList.toggle('sidebar-collapsed');
+      updateToggleState(collapsed);
+      try {
+        localStorage.setItem('cims_sidebar_collapsed', collapsed ? 'true' : 'false');
+      } catch (err) {
+        console.warn('localStorage not accessible:', err);
+      }
+    });
   });
+
+  // When collapsed, clicking brand logo or brand area expands the sidebar
+  if (sidebarBrand) {
+    sidebarBrand.addEventListener('click', function (e) {
+      if (wrapper.classList.contains('sidebar-collapsed')) {
+        if (!e.target.closest('#desktopSidebarToggleTopBtn')) {
+          wrapper.classList.remove('sidebar-collapsed');
+          updateToggleState(false);
+          try {
+            localStorage.setItem('cims_sidebar_collapsed', 'false');
+          } catch (err) {}
+        }
+      }
+    });
+  }
 }
 
 // ============================================================
@@ -394,14 +591,14 @@ function showLoading(containerId, message = "Memuat data...") {
 
 function initializeThemeToggle() {
   const toggleBtns = document.querySelectorAll('#themeToggleBtn, .theme-toggle-btn');
-  const themeIcons = document.querySelectorAll('#themeIcon, .theme-icon');
 
   function updateIcons(theme) {
+    const themeIcons = document.querySelectorAll('#themeIcon, .theme-icon');
     themeIcons.forEach(icon => {
       if (theme === 'dark') {
-        icon.className = 'bi bi-sun fs-5';
+        icon.className = 'bi bi-sun fs-5 theme-icon';
       } else {
-        icon.className = 'bi bi-moon-stars fs-5';
+        icon.className = 'bi bi-moon-stars fs-5 theme-icon';
       }
     });
   }
