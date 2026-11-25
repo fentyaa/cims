@@ -1,25 +1,39 @@
 /**
  * Seed Script - Internship Management System (IMS) / CIMS
  * 
- * Membuat data awal & dummy data realistis wilayah Tasikmalaya & Ciamis:
- * 1. Akun Default Mentor: mentor.cims@gmail.com (Password: Mentor123!)
- * 2. 11 Akun Peserta Magang (Mahasiswa & Siswa SMK di Tasikmalaya / Ciamis) dengan password: Intern123!
- *    - 8 Akun ACTIVE & ON GOING (Periode berjalan: 1 Agustus s.d. 31 Oktober 2026, progres ~48%)
- *      * Presensi terisi lengkap 100% untuk seluruh hari kerja yang telah terlewati sampai hari ini (tanpa ada yang kosong).
- *      * Logbook memiliki entri REVIEWED dan PENDING (logbook terbaru menunggu review mentor).
- *      * Penilaian bervariasi (Sebagian DRAFT mid-term, sebagian belum dinilai / NONE agar mentor dapat membuat penilaian, dan 1 PUBLISHED).
- *      * Fenty Anggraeni (Universitas Siliwangi - UNSIL Tasikmalaya) - ONGOING
- *      * Ahmad Fauzi (Universitas Siliwangi - UNSIL Tasikmalaya) - Senior Intern (Published)
- *      * Siti Nurhaliza (Universitas Galuh - UNIGAL Ciamis) - ONGOING (Draft Mid-term)
- *      * Rizky Pratama (SMKN 1 Tasikmalaya) - ONGOING (Belum Dinilai)
- *      * Dewi Lestari (UPI Kampus Tasikmalaya) - ONGOING (Belum Dinilai)
- *      * Bayu Nugroho (SMKN 2 Ciamis) - ONGOING (Belum Dinilai)
- *      * Anisa Rahmawati (Universitas BSI Kampus Tasikmalaya) - ONGOING (Belum Dinilai)
- *      * Dimas Arya Saputra (SMKN 4 Tasikmalaya) - ONGOING (Belum Dinilai)
- *    - 1 Akun PENDING (Kevin Sanjaya - UNPER Tasikmalaya, menunggu approval mentor)
- *    - 1 Akun ARCHIVED (Maya Putri - SMKN 1 Ciamis, alumni yang sudah selesai)
- *    - 1 Akun REJECTED (Fajar Ramadhan - STMIK DCI Tasikmalaya)
- * 3. Seluruh email berdomain @gmail.com
+ * Data Dummy Realistis Wilayah Tasikmalaya & Ciamis
+ * dengan Periode Magang yang Beragam, Proporsional & Sinkron:
+ * 
+ * 1. Default Mentor: mentor.cims@gmail.com (Password: Mentor123!)
+ * 
+ * 2. Keragaman Periode & Status Magang:
+ *    - PESERTA LULUS (ARCHIVED / ALUMNI):
+ *      * Maya Putri (SMKN 1 Ciamis): 1 Juni 2026 - 31 Agustus 2026 (3 Bulan PKL).
+ *        Nilai: PUBLISHED (92.5 A) & Surat Keterangan / Sertifikat Magang TERBIT.
+ *    - PESERTA AKTIF (ACTIVE) - Periode Beragam:
+ *      * Fenty Anggraeni (UNSIL)     : 1 Agustus 2026 - 30 November 2026 (4 Bulan Magang Industri)
+ *      * Ahmad Fauzi (UNSIL)         : 1 Juli 2026 - 31 Desember 2026 (6 Bulan Program MBKM)
+ *      * Siti Nurhaliza (UNIGAL)     : 1 September 2026 - 30 November 2026 (3 Bulan Kerja Praktik)
+ *      * Rizky Pratama (SMKN 1)      : 1 September 2026 - 31 Desember 2026 (4 Bulan PKL SMK Semester Ganjil)
+ *      * Dewi Lestari (UPI)          : 15 Agustus 2026 - 15 Desember 2026 (4 Bulan Magang Desain Kreatif)
+ *      * Bayu Nugroho (SMKN 2)       : 1 Juli 2026 - 30 November 2026 (5 Bulan PKL Industri SMK)
+ *      * Anisa Rahmawati (BSI)       : 1 Oktober 2026 - 31 Desember 2026 (3 Bulan Magang Reguler)
+ *      * Dimas Arya Saputra (SMKN 4) : 15 Juli 2026 - 30 November 2026 (4.5 Bulan PKL SMK)
+ *    - CALON PESERTA BARU (PENDING APPROVAL) - Periode Beragam:
+ *      * Kevin Sanjaya (UNPER)       : 1 Desember 2026 - 28 Februari 2027 (3 Bulan)
+ *      * Dini Nurlaila (SMKN 1)      : 15 Desember 2026 - 15 April 2027 (4 Bulan PKL Semester Genap)
+ *    - PENDAFTARAN DITOLAK (REJECTED):
+ *      * Fajar Ramadhan (STMIK DCI)  : 1 Januari 2027 - 31 Maret 2027 (3 Bulan, ditolak verifikasi berkas)
+ * 
+ * 3. Logika Presensi & Logbook yang Menyesuaikan Tanggal Mulai Masing-Masing:
+ *    - Presensi peserta HANYA tercatat sejak tanggal mulai magang masing-masing s.d. 26 November 2026.
+ *    - Siswa SMK: 100% WFO di kantor (tidak pernah WFH).
+ *    - Mahasiswa: Kombinasi WFO dan WFH (maks. 2 hari WFH/minggu).
+ *    - Hari Libur Resmi / Minggu: Libur dan tidak ada presensi.
+ *    - Hari IZIN / SAKIT: TIDAK MENGISI logbook.
+ *    - Status Logbook:
+ *      * Tanggal lampau (s.d. 23 Nov 2026): REVIEWED dengan catatan mentor.
+ *      * Tanggal terkini (24, 25, 26 Nov 2026): PENDING menunggu review mentor.
  */
 
 import dotenv from "dotenv";
@@ -33,13 +47,13 @@ import { checkRedDate } from "./utils/holidayHelper.js";
 
 const SALT_ROUNDS = 10;
 
-// Helper membuat tanggal pada UTC/Local 00:00:00
+// Helper membuat tanggal UTC midnight (00:00:00.000)
 const createDate = (year, month, day) => {
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
 };
 
 export async function runSeed() {
-  console.log("🌱 Memulai proses seeding database CIMS (Data Ongoing Tasikmalaya & Ciamis)...\n");
+  console.log("🌱 Memulai proses seeding data CIMS (Periode Magang Beragam & Realistis)...\n");
 
   // ============================================================
   // 0. RESET DATA LAMA (RESET BERSIH)
@@ -91,7 +105,6 @@ export async function runSeed() {
   // ============================================================
   // 1. DEFAULT MENTOR ACCOUNT (@gmail.com)
   // ============================================================
-
   const mentorEmail = process.env.DEFAULT_MENTOR_EMAIL || "mentor.cims@gmail.com";
   const mentorPassword = process.env.DEFAULT_MENTOR_PASSWORD || "Mentor123!";
   const mentorName = process.env.DEFAULT_MENTOR_NAME || "Admin Mentor";
@@ -134,24 +147,25 @@ export async function runSeed() {
   const hashedInternPassword = await bcrypt.hash("Intern123!", SALT_ROUNDS);
 
   // ============================================================
-  // 2. DAFTAR 11 PESERTA MAGANG (TASIKMALAYA & CIAMIS - @gmail.com)
-  //    PERIODE BERJALAN (ON GOING: 1 AGUSTUS s.d. 31 OKTOBER 2026)
+  // 2. DAFTAR PESERTA DENGAN PERIODE MAGANG YANG SANGAT BERAGAM
   // ============================================================
-
   const dummyInterns = [
+    // ------------------------------------------------------------
+    // A. PESERTA AKTIF (ACTIVE: Tanggal Mulai & Durasi Beragam)
+    // ------------------------------------------------------------
     {
       fullName: "Fenty Anggraeni",
       email: "fenty.anggraeni@gmail.com",
       phoneNumber: "081234567800",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "ACTIVE", // ONGOING
+      status: "ACTIVE",
       university: "Universitas Siliwangi (UNSIL) Tasikmalaya",
       studyProgram: "Informatika",
       studentId: "237006068",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
+      internshipPeriod: "1 Agustus 2026 - 30 November 2026", // 4 Bulan
       internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipEndDate: createDate(2026, 11, 30),
       mentorId: mentor.id,
       evaluation: {
         discipline: 95,
@@ -163,8 +177,8 @@ export async function runSeed() {
         finalScore: 94.0,
         grade: "A",
         mentorComment: "Fenty menunjukkan dedikasi, inisiatif, dan kapabilitas teknis luar biasa dalam perancangan serta implementasi sistem web CIMS di Cikara Studio.",
-        recommendation: "Sangat direkomendasikan untuk bergabung sebagai Junior Software Engineer / Full Stack Web Developer.",
-        status: "DRAFT", // DRAFT: Mid-term evaluation sedang berlangsung (bisa diedit/disahkan mentor)
+        recommendation: "Sangat direkomendasikan untuk posisi Junior Full Stack Web Developer.",
+        status: "DRAFT", // DRAFT: Menjelang akhir periode, belum dipublikasikan
       },
     },
     {
@@ -177,24 +191,11 @@ export async function runSeed() {
       university: "Universitas Siliwangi (UNSIL) Tasikmalaya",
       studyProgram: "Informatika",
       studentId: "217006001",
-      internshipPeriod: "1 Juli 2026 - 30 September 2026",
+      internshipPeriod: "1 Juli 2026 - 31 Desember 2026", // 6 Bulan (Program MBKM)
       internshipStartDate: createDate(2026, 7, 1),
-      internshipEndDate: createDate(2026, 9, 30),
+      internshipEndDate: createDate(2026, 12, 31),
       mentorId: mentor.id,
-      evaluation: {
-        discipline: 90,
-        responsibility: 88,
-        communication: 86,
-        teamwork: 88,
-        initiative: 90,
-        technicalSkill: 92,
-        finalScore: 89.0,
-        grade: "A",
-        mentorComment: "Ahmad menunjukkan pemahaman logika pemrograman backend dan integrasi database yang sangat solid.",
-        recommendation: "Direkomendasikan untuk posisi Junior Backend Developer.",
-        status: "PUBLISHED", // Telah selesai dinilai
-        publishedAt: createDate(2026, 9, 8),
-      },
+      // Belum dinilai: Masih aktif sampai akhir Desember
     },
     {
       fullName: "Siti Nurhaliza",
@@ -202,27 +203,15 @@ export async function runSeed() {
       phoneNumber: "081234567802",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "ACTIVE", // ONGOING
+      status: "ACTIVE",
       university: "Universitas Galuh (UNIGAL) Ciamis",
       studyProgram: "Sistem Informasi",
       studentId: "210321045",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "1 September 2026 - 30 November 2026", // 3 Bulan (Kerja Praktik Reguler)
+      internshipStartDate: createDate(2026, 9, 1),
+      internshipEndDate: createDate(2026, 11, 30),
       mentorId: mentor.id,
-      evaluation: {
-        discipline: 92,
-        responsibility: 90,
-        communication: 94,
-        teamwork: 90,
-        initiative: 90,
-        technicalSkill: 90,
-        finalScore: 91.0,
-        grade: "A",
-        mentorComment: "Siti sangat proaktif dalam komunikasi tim dan memiliki analisis kebutuhan sistem yang matang.",
-        recommendation: "Sangat direkomendasikan untuk posisi System Analyst.",
-        status: "DRAFT", // DRAFT: Sedang proses evaluasi
-      },
+      // Belum dinilai
     },
     {
       fullName: "Rizky Pratama",
@@ -230,15 +219,15 @@ export async function runSeed() {
       phoneNumber: "081234567803",
       role: "INTERN",
       participantType: "SMK",
-      status: "ACTIVE", // ONGOING - Belum dinilai (Tombol 'Buat Penilaian' aktif untuk mentor)
+      status: "ACTIVE",
       schoolName: "SMKN 1 Tasikmalaya",
       major: "Rekayasa Perangkat Lunak",
       classGrade: "XII RPL 1",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "1 September 2026 - 31 Desember 2026", // 4 Bulan (PKL Semester Ganjil)
+      internshipStartDate: createDate(2026, 9, 1),
+      internshipEndDate: createDate(2026, 12, 31),
       mentorId: mentor.id,
-      // evaluation: null (ONGOING, belum dinilai)
+      // Belum dinilai
     },
     {
       fullName: "Dewi Lestari",
@@ -246,15 +235,15 @@ export async function runSeed() {
       phoneNumber: "081234567804",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "ACTIVE", // ONGOING - Belum dinilai
+      status: "ACTIVE",
       university: "Universitas Pendidikan Indonesia (UPI) Kampus Tasikmalaya",
       studyProgram: "Desain Komunikasi Visual",
       studentId: "2204901",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "15 Agustus 2026 - 15 Desember 2026", // 4 Bulan (Magang Desain Kreatif)
+      internshipStartDate: createDate(2026, 8, 15),
+      internshipEndDate: createDate(2026, 12, 15),
       mentorId: mentor.id,
-      // evaluation: null (ONGOING)
+      // Belum dinilai
     },
     {
       fullName: "Bayu Nugroho",
@@ -262,15 +251,15 @@ export async function runSeed() {
       phoneNumber: "081234567805",
       role: "INTERN",
       participantType: "SMK",
-      status: "ACTIVE", // ONGOING - Belum dinilai
+      status: "ACTIVE",
       schoolName: "SMKN 2 Ciamis",
       major: "Teknik Komputer dan Jaringan",
       classGrade: "XII TKJ 2",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "1 Juli 2026 - 30 November 2026", // 5 Bulan (PKL Industri Panjang)
+      internshipStartDate: createDate(2026, 7, 1),
+      internshipEndDate: createDate(2026, 11, 30),
       mentorId: mentor.id,
-      // evaluation: null (ONGOING)
+      // Belum dinilai
     },
     {
       fullName: "Anisa Rahmawati",
@@ -278,15 +267,15 @@ export async function runSeed() {
       phoneNumber: "081234567806",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "ACTIVE", // ONGOING - Belum dinilai
+      status: "ACTIVE",
       university: "Universitas BSI Kampus Tasikmalaya",
       studyProgram: "Teknologi Informasi",
       studentId: "12210050",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "1 Oktober 2026 - 31 Desember 2026", // 3 Bulan (Magang Semester Ganjil)
+      internshipStartDate: createDate(2026, 10, 1),
+      internshipEndDate: createDate(2026, 12, 31),
       mentorId: mentor.id,
-      // evaluation: null (ONGOING)
+      // Belum dinilai
     },
     {
       fullName: "Dimas Arya Saputra",
@@ -294,64 +283,105 @@ export async function runSeed() {
       phoneNumber: "081234567807",
       role: "INTERN",
       participantType: "SMK",
-      status: "ACTIVE", // ONGOING - Belum dinilai
+      status: "ACTIVE",
       schoolName: "SMKN 4 Tasikmalaya",
       major: "Rekayasa Perangkat Lunak",
       classGrade: "XII RPL 2",
-      internshipPeriod: "1 Agustus 2026 - 31 Oktober 2026",
-      internshipStartDate: createDate(2026, 8, 1),
-      internshipEndDate: createDate(2026, 10, 31),
+      internshipPeriod: "15 Juli 2026 - 30 November 2026", // 4.5 Bulan (PKL SMK)
+      internshipStartDate: createDate(2026, 7, 15),
+      internshipEndDate: createDate(2026, 11, 30),
       mentorId: mentor.id,
-      // evaluation: null (ONGOING)
+      // Belum dinilai
     },
+
+    // ------------------------------------------------------------
+    // B. CALON PESERTA BARU (PENDING APPROVAL: Periode Masa Depan Beragam)
+    // ------------------------------------------------------------
     {
       fullName: "Kevin Sanjaya",
       email: "kevin.sanjaya@gmail.com",
       phoneNumber: "081234567808",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "PENDING", // PENDING: Menunggu persetujuan akun di halaman Approval
+      status: "PENDING",
       university: "Universitas Perjuangan Tasikmalaya (UNPER)",
       studyProgram: "Teknik Informatika",
       studentId: "2301987654",
-      internshipPeriod: "1 Oktober 2026 - 31 Desember 2026",
-      internshipStartDate: createDate(2026, 10, 1),
-      internshipEndDate: createDate(2026, 12, 31),
+      internshipPeriod: "1 Desember 2026 - 28 Februari 2027", // 3 Bulan
+      internshipStartDate: createDate(2026, 12, 1),
+      internshipEndDate: createDate(2027, 2, 28),
       mentorId: mentor.id,
     },
+    {
+      fullName: "Dini Nurlaila",
+      email: "dini.nurlaila@gmail.com",
+      phoneNumber: "081234567811",
+      role: "INTERN",
+      participantType: "SMK",
+      status: "PENDING",
+      schoolName: "SMKN 1 Kawali Ciamis",
+      major: "Pengembangan Perangkat Lunak dan Gim",
+      classGrade: "XII PPLG 2",
+      internshipPeriod: "15 Desember 2026 - 15 April 2027", // 4 Bulan PKL Semester Genap
+      internshipStartDate: createDate(2026, 12, 15),
+      internshipEndDate: createDate(2027, 4, 15),
+      mentorId: mentor.id,
+    },
+
+    // ------------------------------------------------------------
+    // C. PESERTA LULUS (ARCHIVED / ALUMNI: Periode Masa Lampau)
+    // ------------------------------------------------------------
     {
       fullName: "Maya Putri",
       email: "maya.putri@gmail.com",
       phoneNumber: "081234567809",
       role: "INTERN",
       participantType: "SMK",
-      status: "ARCHIVED", // ARCHIVED: Alumni periode sebelumnya yang telah selesai
+      status: "ARCHIVED",
       schoolName: "SMKN 1 Ciamis",
       major: "Pengembangan Perangkat Lunak dan Gim",
       classGrade: "XII PPLG 1",
-      internshipPeriod: "1 April 2026 - 30 Juni 2026",
-      internshipStartDate: createDate(2026, 4, 1),
-      internshipEndDate: createDate(2026, 6, 30),
+      internshipPeriod: "1 Juni 2026 - 31 Agustus 2026", // 3 Bulan PKL Musim Panas (Sudah Selesai)
+      internshipStartDate: createDate(2026, 6, 1),
+      internshipEndDate: createDate(2026, 8, 31),
       mentorId: mentor.id,
+      evaluation: {
+        discipline: 92,
+        responsibility: 93,
+        communication: 90,
+        teamwork: 94,
+        initiative: 91,
+        technicalSkill: 95,
+        finalScore: 92.5,
+        grade: "A",
+        mentorComment: "Maya telah menyelesaikan seluruh periode magang dengan predikat sangat baik dan berhasil menyelesaikan modul antarmuka CIMS.",
+        recommendation: "Sangat direkomendasikan untuk berkarier sebagai Frontend Web Designer atau melanjutkan studi sarjana komputer.",
+        status: "PUBLISHED",
+        publishedAt: createDate(2026, 8, 31),
+      },
     },
+
+    // ------------------------------------------------------------
+    // D. PENDAFTARAN DITOLAK (REJECTED: Periode Masa Depan)
+    // ------------------------------------------------------------
     {
       fullName: "Fajar Ramadhan",
       email: "fajar.ramadhan@gmail.com",
       phoneNumber: "081234567810",
       role: "INTERN",
       participantType: "UNIVERSITY",
-      status: "REJECTED", // REJECTED: Pendaftaran ditolak (berkas tidak lengkap)
+      status: "REJECTED",
       university: "STMIK DCI Tasikmalaya",
       studyProgram: "Teknik Informatika",
       studentId: "22110088",
-      internshipPeriod: "1 Juli 2026 - 30 September 2026",
-      internshipStartDate: createDate(2026, 7, 1),
-      internshipEndDate: createDate(2026, 9, 30),
+      internshipPeriod: "1 Januari 2027 - 31 Maret 2027", // 3 Bulan (Ditolak saat pendaftaran)
+      internshipStartDate: createDate(2027, 1, 1),
+      internshipEndDate: createDate(2027, 3, 31),
       mentorId: mentor.id,
     },
   ];
 
-  console.log("\n📦 Menyiapkan 11 akun peserta magang Tasikmalaya & Ciamis...");
+  console.log("\n📦 Menyiapkan akun pengguna CIMS dengan periode magang yang beragam...");
 
   const createdInternMap = new Map();
 
@@ -362,11 +392,10 @@ export async function runSeed() {
     const savedUser = await prisma.user.create({
       data: userData,
     });
-    console.log(`   ✨ Dibuat: ${savedUser.fullName} (${savedUser.email}) - [${savedUser.status}] [${savedUser.university || savedUser.schoolName}]`);
+    console.log(`   ✨ Dibuat: ${savedUser.fullName.padEnd(20)} [${savedUser.status.padEnd(8)}] Periode: ${savedUser.internshipPeriod}`);
 
     createdInternMap.set(savedUser.email, savedUser);
 
-    // Buat evaluasi jika ada
     if (evaluation) {
       await prisma.evaluation.create({
         data: {
@@ -379,114 +408,128 @@ export async function runSeed() {
   }
 
   // ============================================================
-  // 3. SEED PRESENSI LENGKAP SAMPAI HARI INI (TANPA ADA YANG KOSONG)
+  // 3. SEED PRESENSI SINKRON DENGAN TANGGAL MULAI MASING-MASING
   // ============================================================
+  console.log("\n📅 Menyiapkan riwayat presensi harian sesuai periode masing-masing s.d. 26 November 2026...");
 
-  console.log("\n📅 Menyiapkan riwayat presensi harian lengkap tanpa ada hari kerja yang kosong...");
+  const targetEndDate = createDate(2026, 11, 26);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Buat kalender hari kerja resmi dari tanggal paling awal peserta aktif (1 Juli 2026) s.d. 26 November 2026
+  const masterWorkDays = [];
+  const walkDate = createDate(2026, 7, 1);
 
-  // Ambil seluruh hari kerja (Senin-Sabtu di luar Hari Libur Nasional) dari 45 hari kalender yang lalu sampai hari ini
-  const recentWorkDays = [];
-  const walkDate = new Date(today);
-  walkDate.setDate(walkDate.getDate() - 45); // Mundur 45 hari kalender
-
-  while (walkDate <= today) {
+  while (walkDate <= targetEndDate) {
     const redInfo = checkRedDate(walkDate);
-    // Hanya hari kerja resmi (bukan Minggu dan bukan Hari Libur Nasional)
     if (!redInfo.isRedDate) {
-      recentWorkDays.push(new Date(Date.UTC(walkDate.getFullYear(), walkDate.getMonth(), walkDate.getDate(), 0, 0, 0, 0)));
+      masterWorkDays.push(new Date(Date.UTC(walkDate.getFullYear(), walkDate.getMonth(), walkDate.getDate(), 0, 0, 0, 0)));
     }
     walkDate.setDate(walkDate.getDate() + 1);
   }
 
-  // Urutkan tanggal dari yang terlama ke terbaru (HANYA hari kerja resmi Senin-Sabtu di luar Libur Nasional)
-  recentWorkDays.sort((a, b) => a.getTime() - b.getTime());
+  masterWorkDays.sort((a, b) => a.getTime() - b.getTime());
+  console.log(`   🗓️ Master hari kerja resmi (1 Juli - 26 November 2026): ${masterWorkDays.length} hari.`);
 
-  const activeInterns = dummyInterns.filter((i) => i.status === "ACTIVE");
+  // Konfigurasi aktivitas tanggal 24, 25, 26 November 2026
+  const date24Nov = createDate(2026, 11, 24).getTime();
+  const date25Nov = createDate(2026, 11, 25).getTime();
+  const date26Nov = createDate(2026, 11, 26).getTime();
 
-  // Konfigurasi profil presensi untuk setiap peserta dummy
-  const internPresenceProfiles = {
+  const specialDayActivities = {
     "fenty.anggraeni@gmail.com": {
-      wfhInterval: 3, // Mahasiswa: WFH berkala hari Rabu
-      breakDay: null, // Kehadiran 100% Sempurna (Disiplin Terbaik)
+      [date24Nov]: { status: "WFO", notes: "Hadir tepat waktu di Cikara Studio menyelesaikan pengujian integrasi akhir sistem CIMS" },
+      [date25Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio melakukan asistensi dokumen dan evaluasi bersama mentor" },
+      [date26Nov]: { status: "WFO", notes: "Hadir tepat waktu mempresentasikan demonstrasi fitur lengkap CIMS kepada tim mentor" },
     },
     "ahmad.fauzi@gmail.com": {
-      wfhInterval: 3,
-      breakDay: null, // Kehadiran 100% Sempurna
+      [date24Nov]: { status: "WFH", notes: "Bekerja dari rumah (WFH) optimasi query pooler database PostgreSQL" },
+      [date25Nov]: { status: "WFH", notes: "Bekerja dari rumah (WFH) code review modul ekspor laporan CSV" },
+      [date26Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio untuk sinkronisasi deployment dan backup database" },
     },
     "siti.nurhaliza@gmail.com": {
-      wfhInterval: 4,
-      breakOffset: 12,
-      breakType: "IZIN",
-      breakNote: "Izin bimbingan KRS online di kampus UNIGAL Ciamis",
+      [date24Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio menyusun panduan penggunaan sistem (User Guide)" },
+      [date25Nov]: { status: "IZIN", notes: "Izin mengikuti seminar akademik di kampus UNIGAL Ciamis (surat izin terlampir)" },
+      [date26Nov]: { status: "WFH", notes: "Bekerja dari rumah (WFH) menyusun draf laporan akhir magang bab analisis sistem" },
     },
     "rizky.pratama@gmail.com": {
-      wfhInterval: null, // SMK: WFO 100%
-      breakOffset: 8,
-      breakType: "IZIN",
-      breakNote: "Izin pengurusan berkas di SMKN 1 Tasikmalaya",
+      [date24Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio mengerjakan slicing komponen antarmuka" },
+      [date25Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio implementasi modal dialog Bootstrap" },
+      [date26Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio serah terima tugas slicing profil peserta" },
     },
     "dewi.lestari@gmail.com": {
-      wfhInterval: 3,
-      breakOffset: 15,
-      breakType: "IZIN",
-      breakNote: "Izin asistensi studio DKV UPI Tasikmalaya",
+      [date24Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio finalisasi mockup aset grafis aplikasi" },
+      [date25Nov]: { status: "SAKIT", notes: "Sakit demam dan flu, istirahat di rumah sesuai surat keterangan dokter" },
+      [date26Nov]: { status: "WFO", notes: "Hadir di kantor studio setelah pulih, melanjutkan perapian ikon UI" },
     },
     "bayu.nugroho@gmail.com": {
-      wfhInterval: null, // SMK: WFO 100%
-      breakOffset: 6,
-      breakType: "SAKIT",
-      breakNote: "Sakit flu ringan, istirahat di rumah",
+      [date24Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio maintenance jaringan lokal" },
+      [date25Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio konfigurasi router dan monitoring server" },
+      [date26Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio pengecekan akhir stabilitas koneksi jaringan" },
     },
     "anisa.rahmawati@gmail.com": {
-      wfhInterval: 4,
-      breakOffset: 18,
-      breakType: "IZIN",
-      breakNote: "Izin pengurusan administrasi kampus BSI Tasikmalaya",
+      [date24Nov]: { status: "WFH", notes: "Bekerja dari rumah (WFH) menjalankan skenario pengujian black-box" },
+      [date25Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio mendokumentasikan temuan uji fungsional" },
+      [date26Nov]: { status: "IZIN", notes: "Izin pengurusan berkas administrasi dan yudisium di kampus BSI Tasikmalaya" },
     },
     "dimas.arya@gmail.com": {
-      wfhInterval: null, // SMK: WFO 100%
-      breakOffset: 10,
-      breakType: "SAKIT",
-      breakNote: "Sakit demam, istirahat",
+      [date24Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio testing responsivitas layout mobile" },
+      [date25Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio penyesuaian CSS dark mode" },
+      [date26Nov]: { status: "WFO", notes: "Hadir di kantor Cikara Studio finalisasi modul kalender kegiatan" },
     },
   };
 
-  const totalWorkDaysCount = recentWorkDays.length;
+  const activeInterns = dummyInterns.filter((i) => i.status === "ACTIVE");
   const allPresencesToCreate = [];
 
   for (const internDef of activeInterns) {
     const internUser = createdInternMap.get(internDef.email);
     if (!internUser) continue;
 
-    const profile = internPresenceProfiles[internDef.email] || { wfhInterval: 3, breakDay: null };
     const isSmk = internDef.participantType === "SMK";
+    const specialMap = specialDayActivities[internDef.email] || {};
+    const startDateMs = internDef.internshipStartDate.getTime();
 
-    for (let idx = 0; idx < totalWorkDaysCount; idx++) {
-      const date = recentWorkDays[idx];
-      const daysFromToday = (totalWorkDaysCount - 1) - idx; // 0 = Hari ini, 1 = Kemarin, dst.
+    // Saring HANYA hari kerja yang >= tanggal mulai magang peserta bersangkutan
+    const internWorkDays = masterWorkDays.filter((d) => d.getTime() >= startDateMs);
+    const internWorkDaysCount = internWorkDays.length;
+
+    for (let idx = 0; idx < internWorkDaysCount; idx++) {
+      const date = internWorkDays[idx];
+      const dateTime = date.getTime();
 
       let status = "WFO";
       let notes = isSmk
         ? "Hadir di kantor Cikara Studio melaksanakan praktik kerja lapangan"
         : "Hadir tepat waktu di kantor Cikara Studio";
 
-      if (profile.breakOffset && daysFromToday === profile.breakOffset) {
-        // Hari Izin / Sakit yang terencana
-        status = profile.breakType || "IZIN";
-        notes = profile.breakNote || "Izin keperluan akademik";
-      } else if (!isSmk && profile.wfhInterval && daysFromToday % profile.wfhInterval === 0) {
-        // WFH berkala untuk mahasiswa
-        status = "WFH";
-        notes = "Bekerja dari rumah (WFH) mengerjakan sprint tugas projek CIMS";
+      if (specialMap[dateTime]) {
+        status = specialMap[dateTime].status;
+        notes = specialMap[dateTime].notes;
       } else {
-        // Hari-hari kerja lainnya: WFO
+        const daysFromEnd = internWorkDaysCount - 1 - idx;
+        if (!isSmk && daysFromEnd % 4 === 0) {
+          status = "WFH";
+          notes = "Bekerja dari rumah (WFH) mengerjakan sprint tugas projek CIMS";
+        } else if (daysFromEnd === 18 && internDef.email === "siti.nurhaliza@gmail.com") {
+          status = "IZIN";
+          notes = "Izin bimbingan akademik di kampus UNIGAL Ciamis";
+        } else if (daysFromEnd === 25 && internDef.email === "bayu.nugroho@gmail.com") {
+          status = "SAKIT";
+          notes = "Sakit radang tenggorokan ringan, istirahat di rumah";
+        } else if (daysFromEnd === 32 && internDef.email === "dewi.lestari@gmail.com") {
+          status = "IZIN";
+          notes = "Izin asistensi pameran karya DKV UPI Tasikmalaya";
+        } else {
+          status = "WFO";
+          notes = isSmk
+            ? "Hadir di kantor Cikara Studio melaksanakan praktik kerja lapangan"
+            : "Hadir tepat waktu di kantor Cikara Studio";
+        }
+      }
+
+      // Validasi ketat aturan CIMS: Siswa SMK tidak boleh WFH
+      if (isSmk && status === "WFH") {
         status = "WFO";
-        notes = isSmk
-          ? "Hadir di kantor Cikara Studio melaksanakan praktik kerja lapangan"
-          : "Hadir tepat waktu di kantor Cikara Studio";
+        notes = "Hadir di kantor Cikara Studio melaksanakan praktik kerja lapangan";
       }
 
       allPresencesToCreate.push({
@@ -496,6 +539,30 @@ export async function runSeed() {
         notes,
       });
     }
+
+    console.log(`      -> ${internDef.fullName.padEnd(20)}: ${internWorkDaysCount} hari presensi (Mulai: ${internDef.internshipStartDate.toISOString().slice(0, 10)})`);
+  }
+
+  // Presensi Maya Putri (Lulus / ARCHIVED) Juni - Agustus 2026 (100% WFO SMK)
+  const mayaUser = createdInternMap.get("maya.putri@gmail.com");
+  if (mayaUser) {
+    const mayaWalk = createDate(2026, 6, 1);
+    const mayaEnd = createDate(2026, 8, 31);
+    let mayaDaysCount = 0;
+    while (mayaWalk <= mayaEnd) {
+      const redInfo = checkRedDate(mayaWalk);
+      if (!redInfo.isRedDate) {
+        allPresencesToCreate.push({
+          userId: mayaUser.id,
+          date: new Date(Date.UTC(mayaWalk.getFullYear(), mayaWalk.getMonth(), mayaWalk.getDate(), 0, 0, 0, 0)),
+          status: "WFO",
+          notes: "Hadir di kantor Cikara Studio melaksanakan PKL",
+        });
+        mayaDaysCount++;
+      }
+      mayaWalk.setDate(mayaWalk.getDate() + 1);
+    }
+    console.log(`      -> ${"Maya Putri (Alumni)".padEnd(20)}: ${mayaDaysCount} hari presensi (Periode Juni-Agustus 2026)`);
   }
 
   if (allPresencesToCreate.length > 0) {
@@ -504,110 +571,169 @@ export async function runSeed() {
       skipDuplicates: true,
     });
   }
-  console.log(`   ✅ Riwayat presensi lengkap (${allPresencesToCreate.length} record) berhasil dibuat untuk ${activeInterns.length} peserta aktif.`);
-  console.log(`   ✅ Seluruh ${totalWorkDaysCount} hari kerja terisi tanpa ada hari yang kosong.`);
+  console.log(`   ✅ Total riwayat presensi proporsional: ${allPresencesToCreate.length} record.`);
 
   // ============================================================
-  // 4. SEED LOGBOOK HARIAN (CAMPURAN REVIEWED & PENDING REVIEW)
-  //    (Mencerminkan Aktivitas Magang yang Masih ON GOING!)
+  // 4. SEED LOGBOOK HARIAN SINKRON (14 HARI KERJA TERAKHIR)
   // ============================================================
+  console.log("\n📝 Menyiapkan catatan logbook harian peserta...");
 
-  console.log("\n📝 Menyiapkan catatan logbook harian peserta (Reviewed & Pending)...");
-
-  const logbookActivities = [
+  const logbookActivityBank = [
     {
-      activity: "Setup project environment CIMS, eksplorasi schema database PostgreSQL, dan integrasi Prisma ORM.",
-      obstacle: "Konfigurasi SSL mode pada koneksi database Supabase memerlukan penyesuaian parameter query string.",
-      nextPlan: "Mengimplementasikan middleware otentikasi login berbasis session.",
-      mentorComment: "Bagus, environment lokal dan dependencies terinstal rapi.",
-      status: "REVIEWED",
+      activity: "Setup project environment CIMS, konfigurasi Prisma ORM, dan pengujian koneksi basis data PostgreSQL.",
+      obstacle: "Koneksi database cloud memerlukan penyesuaian query parameter SSL mode.",
+      nextPlan: "Mengimplementasikan middleware otentikasi login berbasis Express Session.",
+      mentorComment: "Bagus, konfigurasi dependensi dan environment lokal sudah rapi.",
     },
     {
-      activity: "Pengembangan middleware keamanan Express: Helmet, CSRF protection, dan rate limiter untuk rute auth.",
-      obstacle: "Sinkronisasi CSRF token dengan session Express memerlukan pembersihan cookie saat logout.",
-      nextPlan: "Membuat endpoint registrasi dan validasi input data mahasiswa magang dan siswa PKL.",
-      mentorComment: "Kerja bagus, aspek keamanan fail-closed sudah diuji dengan baik.",
-      status: "REVIEWED",
+      activity: "Pengembangan middleware keamanan Express: Helmet header, CSRF protection, dan rate limiter rute autentikasi.",
+      obstacle: "Sinkronisasi token CSRF dengan sesi Express memerlukan penanganan khusus pada browser.",
+      nextPlan: "Membuat endpoint registrasi dan validasi input data mahasiswa magang dan siswa SMK.",
+      mentorComment: "Sangat baik, aspek keamanan sistem sudah diperhatikan sejak awal.",
     },
     {
-      activity: "Slicing antarmuka responsif Dashboard CIMS menggunakan Bootstrap 5 dan penyesuaian tema Dark/Light mode.",
-      obstacle: "Penyelarasan kontras warna tabel pada dark mode memerlukan penyesuaian CSS variables.",
-      nextPlan: "Mengintegrasikan widget kalender presensi bulanan dan streak kehadiran.",
-      mentorComment: "Tampilan dashboard rapi dan responsif di berbagai resolusi layar.",
-      status: "REVIEWED",
+      activity: "Slicing antarmuka responsif Dashboard CIMS menggunakan Bootstrap 5 dan penyesuaian palet warna institusi.",
+      obstacle: "Penyelarasan kontras warna tabel pada dark mode memerlukan penyesuaian custom CSS.",
+      nextPlan: "Mengintegrasikan widget kalender presensi bulanan dan kartu statistik kehadiran.",
+      mentorComment: "Desain rapi, konsisten, dan nyaman dilihat di berbagai perangkat.",
     },
     {
-      activity: "Implementasi modul presensi harian mandiri dengan deteksi otomatis hari libur dan kalender nasional.",
-      obstacle: "Penanganan presensi siswa PKL SMK yang diwajibkan 100% WFO di kantor.",
-      nextPlan: "Membuat rekapitulasi kehadiran dan grafik KPI presensi untuk mentor.",
-      mentorComment: "Aturan bisnis pembedaan mahasiswa dan siswa SMK sudah tepat.",
-      status: "REVIEWED",
+      activity: "Implementasi modul presensi harian mandiri dengan deteksi otomatis hari libur nasional dan pembatasan WFH.",
+      obstacle: "Validasi jam operasional kantor dan pencegahan presensi ganda pada tanggal yang sama.",
+      nextPlan: "Membuat rekapitulasi kehadiran dan grafik status kehadiran untuk akun mentor.",
+      mentorComment: "Logika validasi hari libur dan aturan WFH mahasiswa sudah berjalan tepat.",
     },
     {
-      activity: "Penyusunan modul review logbook mentor dengan fitur filter status, pencarian, dan feedback komentar.",
-      obstacle: "Pengaturan pagination pada daftar entri logbook peserta yang banyak.",
-      nextPlan: "Menambahkan indikator badge status pending dan reviewed.",
-      mentorComment: "Alur review logbook intuitif dan mempermudah pemantauan.",
-      status: "REVIEWED",
+      activity: "Penyusunan modul review logbook mentor dengan fitur penyaringan status, pencarian nama, dan input feedback.",
+      obstacle: "Pengaturan pagination pada daftar entri logbook peserta yang bertambah banyak.",
+      nextPlan: "Menambahkan indikator badge status PENDING dan REVIEWED.",
+      mentorComment: "Alur pemeriksaan logbook intuitif dan sangat memudahkan mentor.",
     },
     {
-      activity: "Implementasi lembar evaluasi capaian kompetensi magang dengan 6 parameter penilaian terstandar.",
-      obstacle: "Kalkulasi bobot nilai akhir dan penentuan grade A, B, C secara otomatis.",
-      nextPlan: "Membuat tampilan cetak lembar nilai resmi untuk kampus dan sekolah.",
-      mentorComment: "Rubrik penilaian komprehensif dan objektif.",
-      status: "REVIEWED",
+      activity: "Implementasi lembar evaluasi capaian kompetensi magang dengan 6 aspek penilaian terstandar industri.",
+      obstacle: "Kalkulasi nilai akhir desimal dan konversi otomatis predikat nilai A s.d. E.",
+      nextPlan: "Menyediakan modul publikasi nilai agar hasil evaluasi dapat dilihat oleh peserta.",
+      mentorComment: "Rubrik penilaian objektif dan sesuai standar evaluasi Cikara Studio.",
     },
     {
-      activity: "Penyusunan modul Laporan Perkembangan Peserta Magang dengan agregasi data kehadiran, logbook, dan nilai.",
-      obstacle: "Optimasi query analitik multi-tabel dengan Prisma ORM agar latensi tetap rendah.",
-      nextPlan: "Menambahkan fitur ekspor rekapitulasi data ke format file CSV.",
-      mentorComment: "Fitur laporan sangat informatif untuk pelaporan ke institusi mitra.",
-      status: "REVIEWED",
-    },
-    // 3 Entri Terbaru: PENDING REVIEW (Masih On Going & Menunggu Review Mentor!)
-    {
-      activity: "Refactoring query database dan pengujian performa endpoint dashboard peserta dan mentor.",
-      obstacle: "Penyesuaian indexing pada kolom date di tabel presensi.",
-      nextPlan: "Menjalankan stress-test load data.",
-      mentorComment: null,
-      status: "PENDING", // PENDING: Menunggu review mentor
+      activity: "Penyusunan modul Laporan Perkembangan Magang dengan agregasi data presensi, logbook, dan predikat nilai.",
+      obstacle: "Optimasi query analitik multi-tabel Prisma ORM agar response time halaman tetap cepat.",
+      nextPlan: "Menambahkan fitur ekspor rekapitulasi data magang ke format file CSV.",
+      mentorComment: "Fitur rekapitulasi sangat bermanfaat untuk dokumentasi laporan ke kampus.",
     },
     {
-      activity: "Penyusunan dokumentasi teknis sistem CIMS dan penulisan draft bab 4 laporan magang.",
-      obstacle: "Penyusunan diagram alur sistem dan visualisasi arsitektur.",
-      nextPlan: "Melakukan asistensi bab 4 dengan mentor lapangan.",
-      mentorComment: null,
-      status: "PENDING", // PENDING: Menunggu review mentor
+      activity: "Refactoring query database, perapian rute modular, dan pengujian performa endpoint dashboard peserta.",
+      obstacle: "Penyesuaian indexing pada kolom date dan userId di tabel presensi PostgreSQL.",
+      nextPlan: "Melakukan pengujian black-box menyeluruh pada seluruh skenario fungsional.",
+      mentorComment: "Kerja bagus, waktu pemuatan halaman dasbor kini meningkat signifikan.",
     },
     {
-      activity: "Pengerjaan modul analitik presensi mingguan dan penyempurnaan UI komponen notifikasi.",
-      obstacle: "Tidak ada kendala, pengerjaan sesuai rencana sprint.",
-      nextPlan: "Konsultasi evaluasi mingguan bersama mentor pembimbing.",
-      mentorComment: null,
-      status: "PENDING", // PENDING: Hari ini / kemarin menunggu review mentor
+      activity: "Pengembangan fitur gamifikasi: perhitungan streak kehadiran aktif dan badge apresiasi kedisiplinan peserta.",
+      obstacle: "Perhitungan streak yang tidak boleh terputus oleh hari libur nasional dan hari Minggu.",
+      nextPlan: "Menampilkan widget lencana penghargaan pada halaman profil peserta magang.",
+      mentorComment: "Inovasi gamifikasi yang sangat menarik untuk memotivasi keaktifan peserta.",
+    },
+    {
+      activity: "Penyusunan dokumentasi teknis sistem CIMS dan penyesuaian diagram alur UML untuk laporan kerja praktik.",
+      obstacle: "Penyelarasan diagram Use Case dan Activity Diagram dengan alur implementasi aktual.",
+      nextPlan: "Melakukan asistensi bab 5 perancangan sistem bersama mentor pembimbing lapangan.",
+      mentorComment: "Dokumentasi diagram tersusun komprehensif dan mudah dipahami.",
     },
   ];
 
-  // Ambil 10 hari kerja terakhir hingga hari ini untuk entri logbook
-  const recentLogbookDays = recentWorkDays.slice(-10);
+  // 14 hari kerja terakhir master (Bulan November 2026 s.d. 26 November 2026)
+  const recentLogbookDays = masterWorkDays.slice(-14);
   const allLogbooksToCreate = [];
 
   for (const internDef of activeInterns) {
     const internUser = createdInternMap.get(internDef.email);
     if (!internUser) continue;
 
+    const specialMap = specialDayActivities[internDef.email] || {};
+
     for (let idx = 0; idx < recentLogbookDays.length; idx++) {
       const logDate = recentLogbookDays[idx];
-      const sampleEntry = logbookActivities[idx % logbookActivities.length];
+      const logDateTime = logDate.getTime();
+
+      // Aturan CIMS: Hari Izin atau Sakit TIDAK ADA LOGBOOK
+      const specialStatus = specialMap[logDateTime]?.status;
+      if (specialStatus === "IZIN" || specialStatus === "SAKIT") {
+        continue;
+      }
+
+      let isPending = false;
+      let activityText = "";
+      let obstacleText = "";
+      let nextPlanText = "";
+      let mentorComment = null;
+
+      if (logDateTime === date26Nov) {
+        // 26 November 2026: PENDING REVIEW
+        isPending = true;
+        activityText = "Finalisasi implementasi sprint akhir projek CIMS, pengujian modul terintegrasi, dan demonstrasi hasil implementasi kepada mentor.";
+        obstacleText = "Tidak ada kendala berarti, seluruh fungsi siap diserahkan.";
+        nextPlanText = "Evaluasi akhir bersama pembimbing lapangan Cikara Studio.";
+      } else if (logDateTime === date25Nov) {
+        // 25 November 2026: PENDING REVIEW
+        isPending = true;
+        activityText = "Penyusunan rekapitulasi data kehadiran dan perapian antarmuka dasbor sebelum evaluasi akhir.";
+        obstacleText = "Sinkronisasi filter periode tanggal pada modul kalender.";
+        nextPlanText = "Melakukan review kelengkapan data bersama mentor.";
+      } else if (logDateTime === date24Nov) {
+        // 24 November 2026: Fenty & Bayu PENDING, sisanya REVIEWED
+        if (internDef.email === "fenty.anggraeni@gmail.com" || internDef.email === "bayu.nugroho@gmail.com") {
+          isPending = true;
+          activityText = "Pengujian menyeluruh integrasi modul presensi dan logbook serta verifikasi token CSRF.";
+          obstacleText = "Memastikan keamanan endpoint berjalan fail-closed.";
+          nextPlanText = "Asistensi hasil pengujian dengan mentor pembimbing.";
+        } else {
+          isPending = false;
+          const bankItem = logbookActivityBank[idx % logbookActivityBank.length];
+          activityText = bankItem.activity;
+          obstacleText = bankItem.obstacle;
+          nextPlanText = bankItem.nextPlan;
+          mentorComment = bankItem.mentorComment;
+        }
+      } else {
+        // Hari-hari lampau: REVIEWED
+        isPending = false;
+        const bankItem = logbookActivityBank[idx % logbookActivityBank.length];
+        activityText = bankItem.activity;
+        obstacleText = bankItem.obstacle;
+        nextPlanText = bankItem.nextPlan;
+        mentorComment = bankItem.mentorComment;
+      }
 
       allLogbooksToCreate.push({
         userId: internUser.id,
         date: logDate,
-        activity: sampleEntry.activity,
-        obstacle: sampleEntry.obstacle,
-        nextPlan: sampleEntry.nextPlan,
-        mentorComment: sampleEntry.mentorComment || null,
-        status: sampleEntry.status,
+        activity: activityText,
+        obstacle: obstacleText,
+        nextPlan: nextPlanText,
+        mentorComment: isPending ? null : mentorComment,
+        status: isPending ? "PENDING" : "REVIEWED",
+      });
+    }
+  }
+
+  // Tambahkan logbook reviewed untuk Maya Putri (Alumni)
+  if (mayaUser) {
+    const mayaLogbookDates = [
+      createDate(2026, 8, 25),
+      createDate(2026, 8, 26),
+      createDate(2026, 8, 27),
+      createDate(2026, 8, 28),
+      createDate(2026, 8, 29),
+    ];
+    for (const mDate of mayaLogbookDates) {
+      allLogbooksToCreate.push({
+        userId: mayaUser.id,
+        date: mDate,
+        activity: "Penyelesaian dan serah terima modul laporan antarmuka CIMS.",
+        obstacle: "Tidak ada kendala.",
+        nextPlan: "Penyusunan berkas kelulusan magang.",
+        mentorComment: "Kerja yang sangat baik dan tuntas.",
+        status: "REVIEWED",
       });
     }
   }
@@ -621,32 +747,100 @@ export async function runSeed() {
 
   const pendingLogbookCount = allLogbooksToCreate.filter((l) => l.status === "PENDING").length;
   const reviewedLogbookCount = allLogbooksToCreate.filter((l) => l.status === "REVIEWED").length;
-  console.log(`   ✅ Catatan logbook (${allLogbooksToCreate.length} record: ${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Review) berhasil diisi untuk ${activeInterns.length} peserta aktif.`);
+  console.log(`   ✅ Total logbook: ${allLogbooksToCreate.length} record (${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Review).`);
 
   // ============================================================
-  // 5. SEED PENGUMUMAN CIKARA STUDIO (TASIKMALAYA)
+  // 5. SEED TEMPLATE DOKUMEN & DOKUMEN KELULUSAN MAYA PUTRI
   // ============================================================
+  console.log("\n📄 Menyiapkan template resmi & dokumen kelulusan CIMS...");
 
+  const templateSuratKet = await prisma.documentTemplate.create({
+    data: {
+      name: "Surat Keterangan Selesai Magang PT. Cikara Bakti Nusantara",
+      documentType: "LETTER",
+      version: "1.0",
+      filePath: "storage/templates/surat-keterangan-cikara.html",
+      status: "ACTIVE",
+      uploadedById: mentor.id,
+    },
+  });
+
+  const templateSertifikat = await prisma.documentTemplate.create({
+    data: {
+      name: "Sertifikat Magang PT. Cikara Bakti Nusantara",
+      documentType: "CERTIFICATE",
+      version: "1.0",
+      filePath: "storage/templates/sertifikat-cikara.html",
+      status: "ACTIVE",
+      uploadedById: mentor.id,
+    },
+  });
+
+  await prisma.documentTemplate.create({
+    data: {
+      name: "Surat Balasan Kerja Magang PT. Cikara Bakti Nusantara",
+      documentType: "LETTER",
+      version: "1.0",
+      filePath: "storage/templates/surat-balasan-magang-cikara.html",
+      status: "ACTIVE",
+      uploadedById: mentor.id,
+    },
+  });
+
+  if (mayaUser) {
+    await prisma.document.create({
+      data: {
+        userId: mayaUser.id,
+        documentType: "LETTER",
+        templateId: templateSuratKet.id,
+        filePath: "storage/documents/surat-keterangan-maya-putri.html",
+        generatedById: mentor.id,
+      },
+    });
+
+    await prisma.document.create({
+      data: {
+        userId: mayaUser.id,
+        documentType: "CERTIFICATE",
+        templateId: templateSertifikat.id,
+        filePath: "storage/documents/sertifikat-maya-putri.html",
+        generatedById: mentor.id,
+      },
+    });
+
+    await prisma.generationHistory.create({
+      data: {
+        userId: mayaUser.id,
+        documentType: "CERTIFICATE",
+        templateId: templateSertifikat.id,
+        generatedById: mentor.id,
+        status: "SUCCESS",
+      },
+    });
+    console.log("   ✅ Dokumen kelulusan resmi (Surat Keterangan & Sertifikat) untuk Maya Putri berhasil diterbitkan.");
+  }
+
+  // ============================================================
+  // 6. SEED PENGUMUMAN RESMI PERUSAHAAN
+  // ============================================================
   console.log("\n📢 Menyiapkan pengumuman resmi perusahaan...");
-
-  await prisma.announcement.deleteMany();
 
   const announcements = [
     {
       title: "Selamat Datang Peserta Magang & PKL Wilayah Tasikmalaya - Ciamis",
-      content: "Selamat bergabung di program kerja praktik & magang industri Cikara Studio Tasikmalaya. Mohon memastikan seluruh peserta mengisi presensi harian tepat waktu dan melengkapi logbook setiap sore hari.",
+      content: "Selamat bergabung di program kerja praktik & magang industri PT Cikara Bakti Nusantara. Mohon memastikan seluruh peserta mengisi presensi harian tepat waktu dan melengkapi logbook setiap sore hari kerja.",
       category: "INFORMASI",
       targetType: "ALL",
-      publishDate: createDate(2026, 8, 1),
+      publishDate: createDate(2026, 7, 1),
       status: "PUBLISHED",
       createdById: mentor.id,
     },
     {
       title: "Ketentuan Hari Kerja Resmi & Presensi Harian (Senin s.d. Sabtu)",
-      content: "Diberitahukan kepada seluruh peserta magang (Mahasiswa & Siswa PKL) bahwa hari kerja operasional Cikara Studio berlangsung dari hari Senin s.d. Sabtu (6 hari kerja; Minggu libur). Presensi harian wajib diisi pada pukul 07.00 - 18.00 WIB. Bagi mahasiswa dipersilakan WFO/WFH sesuai pembagian jadwal sprint, dan siswa PKL melaksanakan WFO di studio.",
+      content: "Diberitahukan kepada seluruh peserta magang bahwa hari kerja operasional Cikara Studio berlangsung dari hari Senin s.d. Sabtu (6 hari kerja; Minggu libur). Presensi harian wajib diisi pada pukul 07.00 - 18.00 WIB. Bagi mahasiswa dipersilakan WFO/WFH sesuai pembagian sprint, dan siswa PKL melaksanakan 100% WFO di studio.",
       category: "INFORMASI",
       targetType: "ALL",
-      publishDate: createDate(2026, 8, 3),
+      publishDate: createDate(2026, 7, 5),
       status: "PUBLISHED",
       createdById: mentor.id,
     },
@@ -655,16 +849,34 @@ export async function runSeed() {
       content: "Sesi evaluasi dan one-on-one review kemajuan magang diselenggarakan bersama mentor pembimbing. Silakan persiapkan progres jurnal logbook masing-masing.",
       category: "JADWAL",
       targetType: "ALL",
-      publishDate: createDate(2026, 8, 15),
+      publishDate: createDate(2026, 9, 15),
       status: "PUBLISHED",
       createdById: mentor.id,
     },
     {
-      title: "Briefing Penulisan Laporan Akhir Magang & PKL SMK",
-      content: "Bagi seluruh peserta magang mahasiswa (UNSIL, UPI, UNIGAL, BSI) dan siswa PKL (SMKN 1 Tasikmalaya, SMKN 2 Ciamis, SMKN 4 Tasikmalaya), format penulisan laporan akhir magang telah dapat dikonsultasikan dengan mentor pembimbing.",
+      title: "Instruksi Pelaksanaan Sprint Bulan November 2026",
+      content: "Memasuki bulan November 2026, seluruh peserta magang diharapkan fokus menyelesaikan integrasi modul utama serta menyusun laporan kemajuan berkala.",
+      category: "INFORMASI",
+      targetType: "ALL",
+      publishDate: createDate(2026, 11, 2),
+      status: "PUBLISHED",
+      createdById: mentor.id,
+    },
+    {
+      title: "Jadwal Pengumpulan Draf Laporan Akhir Magang & PKL SMK",
+      content: "Bagi seluruh peserta magang mahasiswa (UNSIL, UPI, UNIGAL, BSI) dan siswa PKL (SMKN 1 Tasikmalaya, SMKN 2 Ciamis, SMKN 4 Tasikmalaya), format draf laporan akhir magang wajib dikonsultasikan dengan mentor pembimbing paling lambat akhir November 2026.",
       category: "TUGAS",
       targetType: "ALL",
-      publishDate: createDate(2026, 9, 1),
+      publishDate: createDate(2026, 11, 10),
+      status: "PUBLISHED",
+      createdById: mentor.id,
+    },
+    {
+      title: "Briefing Penutupan Sprint & Demonstrasi Akhir Projek CIMS",
+      content: "Demonstrasi hasil implementasi projek aplikasi CIMS akan dilaksanakan pada tanggal 26 November 2026. Seluruh peserta magang wajib mempersiapkan modul yang dikerjakan beserta dokumentasi teknisnya.",
+      category: "JADWAL",
+      targetType: "ALL",
+      publishDate: createDate(2026, 11, 20),
       status: "PUBLISHED",
       createdById: mentor.id,
     },
@@ -676,15 +888,15 @@ export async function runSeed() {
   }
 
   // ============================================================
-  // 6. SUMMARY & INFORMASI LOGIN
+  // 7. SUMMARY & KREDENSIAL LOGIN
   // ============================================================
-
   const totalUsers = await prisma.user.count();
   const mentorCount = await prisma.user.count({ where: { role: "MENTOR" } });
   const internCount = await prisma.user.count({ where: { role: "INTERN" } });
   const activeCount = await prisma.user.count({ where: { status: "ACTIVE" } });
   const pendingCount = await prisma.user.count({ where: { status: "PENDING" } });
   const archivedCount = await prisma.user.count({ where: { status: "ARCHIVED" } });
+  const rejectedCount = await prisma.user.count({ where: { status: "REJECTED" } });
   const presenceCount = await prisma.presence.count();
   const logbookCount = await prisma.logbook.count();
   const publishedEvalCount = await prisma.evaluation.count({ where: { status: "PUBLISHED" } });
@@ -692,32 +904,20 @@ export async function runSeed() {
   const unevaluatedCount = activeCount - (publishedEvalCount + draftEvalCount);
 
   console.log("\n============================================================");
-  console.log("🎉 SEEDING DATABASE SELESAI (DATA REALISTIS ON GOING)!");
+  console.log("🎉 SEEDING SELESAI (PERIODE MAGANG BERAGAM & NATURAL)!");
   console.log("============================================================");
-  console.log("📊 Statistik Database Baru (Tasikmalaya & Ciamis):");
-  console.log(`   - Total Pengguna       : ${totalUsers}`);
-  console.log(`   - Akun Mentor          : ${mentorCount} (${mentorEmail})`);
-  console.log(`   - Akun Intern          : ${internCount}`);
-  console.log(`     * Sedang Aktif/On Going: ${activeCount} Peserta (Periode 1 Agt - 31 Okt 2026, progres ~48%)`);
-  console.log(`     * Menunggu Approval    : ${pendingCount} Peserta (Kevin Sanjaya - UNPER Tasikmalaya)`);
-  console.log(`     * Arsip / Selesai      : ${archivedCount} Peserta (Maya Putri - SMKN 1 Ciamis)`);
-  console.log(`   - Total Presensi       : ${presenceCount} (Seluruh ${totalWorkDaysCount} hari kerja sampai hari ini terisi 100% tanpa kosong)`);
-  console.log(`   - Total Logbook        : ${logbookCount} (${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Menunggu Review)`);
-  console.log(`   - Status Penilaian     : ${publishedEvalCount} Published, ${draftEvalCount} Draft Mid-term, ${unevaluatedCount} Belum Dinilai (Bisa dibuat mentor)`);
-  console.log("------------------------------------------------------------");
-  console.log("🔑 Kredensial Login yang Siap Digunakan (Semua @gmail.com):");
-  console.log(`   1. Mentor : ${mentorEmail} | Password: ${mentorPassword}`);
-  console.log(`   2. Fenty Anggraeni (UNSIL Tasikmalaya)     : fenty.anggraeni@gmail.com | Password: Intern123! [ON GOING - Draft Mid-term]`);
-  console.log(`   3. Ahmad Fauzi (UNSIL Tasikmalaya)         : ahmad.fauzi@gmail.com     | Password: Intern123! [Senior Intern - Published]`);
-  console.log(`   4. Siti Nurhaliza (UNIGAL Ciamis)          : siti.nurhaliza@gmail.com  | Password: Intern123! [ON GOING - Draft]`);
-  console.log(`   5. Rizky Pratama (SMKN 1 Tasikmalaya)      : rizky.pratama@gmail.com   | Password: Intern123! [ON GOING - Belum Dinilai]`);
-  console.log(`   6. Dewi Lestari (UPI Kampus Tasikmalaya)   : dewi.lestari@gmail.com    | Password: Intern123! [ON GOING - Belum Dinilai]`);
-  console.log(`   7. Bayu Nugroho (SMKN 2 Ciamis)            : bayu.nugroho@gmail.com    | Password: Intern123! [ON GOING - Belum Dinilai]`);
-  console.log(`   8. Anisa Rahmawati (Universitas BSI Tasik) : anisa.rahmawati@gmail.com | Password: Intern123! [ON GOING - Belum Dinilai]`);
-  console.log(`   9. Dimas Arya (SMKN 4 Tasikmalaya)         : dimas.arya@gmail.com      | Password: Intern123! [ON GOING - Belum Dinilai]`);
-  console.log(`  10. Kevin Sanjaya (Pending - UNPER Tasik)   : kevin.sanjaya@gmail.com   | Password: Intern123! [Menunggu Approval]`);
-  console.log(`  11. Maya Putri (Archived - SMKN 1 Ciamis)   : maya.putri@gmail.com      | Password: Intern123! [Arsip / Selesai]`);
-  console.log(`  12. Fajar Ramadhan (Rejected - STMIK DCI)   : fajar.ramadhan@gmail.com  | Password: Intern123! [Ditolak]`);
+  console.log("📊 Statistik Database CIMS Terkini:");
+  console.log(`   - Total Pengguna           : ${totalUsers}`);
+  console.log(`   - Akun Mentor              : ${mentorCount} (${mentorEmail})`);
+  console.log(`   - Akun Intern              : ${internCount}`);
+  console.log(`     * Sedang Aktif (ACTIVE)  : ${activeCount} Peserta (Periode & Tanggal Mulai Beragam)`);
+  console.log(`     * Calon Baru (PENDING)   : ${pendingCount} Peserta (Batch Des 2026, Presensi 0, Logbook 0)`);
+  console.log(`     * Selesai Magang (ARCHIVED): ${archivedCount} Peserta (Maya Putri, Lulus, Nilai 92.5 A Published, Sertifikat Terbit)`);
+  console.log(`     * Ditolak (REJECTED)     : ${rejectedCount} Peserta (Fajar Ramadhan, Pendaftaran Ditolak, Presensi 0, Logbook 0)`);
+  console.log(`   - Total Presensi           : ${presenceCount} (Tercatat akurat sesuai tanggal mulai masing-masing)`);
+  console.log(`   - Total Logbook            : ${logbookCount} (${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Menunggu Review)`);
+  console.log(`   - Total Pengumuman         : ${announcements.length}`);
+  console.log(`   - Status Penilaian         : ${publishedEvalCount} Published (Maya Putri), ${draftEvalCount} Draft (Fenty Anggraeni), ${unevaluatedCount} Belum Dinilai`);
   console.log("============================================================\n");
 
   return {
@@ -728,6 +928,7 @@ export async function runSeed() {
     activeCount,
     pendingCount,
     archivedCount,
+    rejectedCount,
     presenceCount,
     logbookCount,
     pendingLogbookCount,
@@ -735,7 +936,6 @@ export async function runSeed() {
     publishedEvalCount,
     draftEvalCount,
     unevaluatedCount,
-    totalWorkDaysCount,
   };
 }
 

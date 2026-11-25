@@ -6,6 +6,7 @@
  */
 
 import prisma from "../config/database.js";
+import { normalizeToUtcMidnight } from "../utils/helpers.js";
 
 /**
  * Mendapatkan logbook milik peserta tertentu.
@@ -43,9 +44,8 @@ export const getInternLogbooks = async (userId, { page = 1, limit = 10 } = {}) =
  * @param {Date} date
  * @returns {Object|null}
  */
-export const getTodayLogbook = async (userId, date) => {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
+export const getTodayLogbook = async (userId, date = new Date()) => {
+  const startOfDay = normalizeToUtcMidnight(date);
 
   return prisma.logbook.findUnique({
     where: {
@@ -64,8 +64,7 @@ export const getTodayLogbook = async (userId, date) => {
  * @returns {Object} Logbook yang dibuat
  */
 export const createLogbook = async (userId, data) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
   // 1. Cek status presensi hari ini: jika IZIN atau SAKIT, tolak pengisian logbook
   const todayPresence = await prisma.presence.findUnique({
@@ -120,8 +119,7 @@ export const updateLogbook = async (logbookId, userId, data) => {
   }
 
   // Cek status presensi pada tanggal logbook: jika IZIN atau SAKIT, tolak perubahan
-  const logbookDate = new Date(logbook.date);
-  logbookDate.setHours(0, 0, 0, 0);
+  const logbookDate = normalizeToUtcMidnight(logbook.date);
 
   const presenceOnDate = await prisma.presence.findUnique({
     where: {
@@ -161,8 +159,7 @@ export const getAllLogbooks = async ({
   const skip = (page - 1) * limit;
 
   // Date range filter
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
   let dateFilter = {};
 
@@ -294,10 +291,9 @@ export const reviewLogbook = async (logbookId, comment) => {
  * @returns {Object}
  */
 export const getMentorDashboardStats = async () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const startOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 
   const [todayLogbooks, pendingReview, reviewed] = await Promise.all([
     prisma.logbook.count({
@@ -325,10 +321,9 @@ export const getMentorDashboardStats = async () => {
  * @returns {Object}
  */
 export const getInternDashboardStats = async (userId) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
-  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const startOfMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
 
   const [todayLogbook, totalThisMonth] = await Promise.all([
     getTodayLogbook(userId, today),
@@ -352,8 +347,7 @@ export const getInternDashboardStats = async (userId) => {
  * @returns {Object} { total, pending, reviewed, today }
  */
 export const getLogbookStats = async () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
   const endOfToday = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 

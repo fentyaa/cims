@@ -44,6 +44,9 @@ if (missingEnvVars.length > 0) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Percayai reverse proxy (Render, Railway, Fly.io, Nginx) agar HTTPS & secure session cookie berfungsi
+app.set("trust proxy", 1);
+
 // Mendapatkan __dirname setara untuk ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,7 +104,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 menit
-  max: 30, // maksimal 30 request per IP
+  max: process.env.NODE_ENV === "development" ? 1000 : 30, // Longgarkan di development agar tidak terblokir saat pengujian
   message: {
     success: false,
     message: "Terlalu banyak permintaan. Silakan coba lagi setelah 15 menit.",

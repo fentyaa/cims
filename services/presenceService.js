@@ -10,6 +10,7 @@
 
 import prisma from "../config/database.js";
 import { checkRedDate } from "../utils/holidayHelper.js";
+import { normalizeToUtcMidnight } from "../utils/helpers.js";
 
 export const VALID_STATUSES = ["WFO", "WFH", "IZIN", "SAKIT"];
 export const ACTIVE_STATUSES = ["WFO", "WFH"];
@@ -57,12 +58,11 @@ export const submitPresence = async (userId, { status, notes = null, date = null
     );
   }
 
-  // 3. Normalisasi Tanggal ke midnight (00:00:00.000)
-  const targetDate = date ? new Date(date) : new Date();
+  // 3. Normalisasi Tanggal ke UTC midnight (mencegah bug timezone WIB -> UTC shift)
+  const targetDate = normalizeToUtcMidnight(date || new Date());
   if (isNaN(targetDate.getTime())) {
     throw new Error("Format tanggal tidak valid.");
   }
-  targetDate.setHours(0, 0, 0, 0);
 
   // 4. Validasi Tanggal Merah / Libur Resmi (Hari Minggu & Libur Nasional)
   const redInfo = checkRedDate(targetDate);
@@ -117,8 +117,7 @@ export const submitPresence = async (userId, { status, notes = null, date = null
  * @returns {Promise<Object|null>}
  */
 export const getTodayPresence = async (userId) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
   return prisma.presence.findUnique({
     where: {
@@ -188,9 +187,8 @@ export const getAllPresences = async ({ date, type, status } = {}) => {
 
   // Filter tanggal
   if (date && date !== "all" && date.trim() !== "") {
-    const selectedDate = new Date(date);
+    const selectedDate = normalizeToUtcMidnight(date);
     if (!isNaN(selectedDate.getTime())) {
-      selectedDate.setHours(0, 0, 0, 0);
       const nextDate = new Date(selectedDate);
       nextDate.setDate(nextDate.getDate() + 1);
 
@@ -241,8 +239,7 @@ export const getAllPresences = async ({ date, type, status } = {}) => {
  * @returns {Promise<Object>}
  */
 export const getMentorDashboardStats = async () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -310,8 +307,7 @@ export const getMentorDashboardStats = async () => {
  * @returns {Promise<Object>}
  */
 export const getInternDashboardStats = async (userId) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = normalizeToUtcMidnight(new Date());
 
   const presence = await prisma.presence.findUnique({
     where: {

@@ -154,12 +154,33 @@ export const formatInternshipPeriod = (startDate, endDate) => {
   return `${startDay} ${startMonth} ${startYear} - ${endDay} ${endMonth} ${endYear}`;
 };
 
+/**
+ * Normalisasi tanggal ke UTC Midnight (00:00:00.000Z) berdasarkan tanggal kalender lokal pengguna (WIB).
+ * Mencegah pergeseran tanggal ke hari sebelumnya (UTC-offset shift) saat disimpan ke kolom PostgreSQL @db.Date.
+ * @param {Date|string|number} input
+ * @returns {Date}
+ */
+export const normalizeToUtcMidnight = (input = new Date()) => {
+  if (typeof input === "string") {
+    const parts = input.split("T")[0].split("-");
+    if (parts.length === 3) {
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      return new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
+    }
+  }
+  const d = input instanceof Date ? input : new Date(input);
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0));
+};
+
 export default {
   getCurrentYear,
   getCurrentTimestamp,
   formatDate,
   formatDateLong,
   formatInternshipPeriod,
+  normalizeToUtcMidnight,
   truncateText,
   sanitizeInput,
   generateParticipantId,

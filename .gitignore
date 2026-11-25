@@ -38,6 +38,9 @@ coverage/
 # === Non-system Archives & Local Materials ===
 *.zip
 *.docx
+*.pptx
+*.pdf
+trash/
 paper kp*/
 paper kp*
 powershell.cmd
