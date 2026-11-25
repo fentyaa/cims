@@ -15,6 +15,7 @@ import { mkdirSync, existsSync, writeFileSync, readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,15 +25,23 @@ const __dirname = path.dirname(__filename);
 // ============================================================
 
 const PROJECT_ROOT = path.resolve(__dirname, "..");
-const DOCUMENTS_DIR = path.join(PROJECT_ROOT, "storage", "documents");
-const TEMPLATES_DIR = path.join(PROJECT_ROOT, "storage", "templates");
+const STORAGE_ROOT = process.env.VERCEL
+  ? path.join(os.tmpdir(), "cims_storage")
+  : path.join(PROJECT_ROOT, "storage");
+
+const DOCUMENTS_DIR = path.join(STORAGE_ROOT, "documents");
+const TEMPLATES_DIR = path.join(STORAGE_ROOT, "templates");
 
 // Pastikan direktori storage tersedia
-if (!existsSync(DOCUMENTS_DIR)) {
-  mkdirSync(DOCUMENTS_DIR, { recursive: true });
-}
-if (!existsSync(TEMPLATES_DIR)) {
-  mkdirSync(TEMPLATES_DIR, { recursive: true });
+try {
+  if (!existsSync(DOCUMENTS_DIR)) {
+    mkdirSync(DOCUMENTS_DIR, { recursive: true });
+  }
+  if (!existsSync(TEMPLATES_DIR)) {
+    mkdirSync(TEMPLATES_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn("Notice: Storage directory check:", err.message);
 }
 
 // ============================================================

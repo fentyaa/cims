@@ -13,6 +13,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import crypto from "crypto";
 import { mkdirSync, existsSync } from "fs";
+import os from "os";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -97,14 +98,22 @@ const validateFile = (file, allowedMap, errorMessage, cb) => {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadPath;
-    if (file.fieldname === "templateFile") {
+    if (process.env.VERCEL) {
+      uploadPath = file.fieldname === "templateFile"
+        ? path.join(os.tmpdir(), "cims_uploads", "templates")
+        : path.join(os.tmpdir(), "cims_uploads");
+    } else if (file.fieldname === "templateFile") {
       uploadPath = path.join(__dirname, "..", "public", "uploads", "templates");
     } else {
       uploadPath = path.join(__dirname, "..", "public", "uploads");
     }
 
-    if (!existsSync(uploadPath)) {
-      mkdirSync(uploadPath, { recursive: true });
+    try {
+      if (!existsSync(uploadPath)) {
+        mkdirSync(uploadPath, { recursive: true });
+      }
+    } catch (err) {
+      console.warn("Notice: Upload directory check:", err.message);
     }
     cb(null, uploadPath);
   },

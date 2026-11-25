@@ -316,13 +316,15 @@ function getLocalIpAddress() {
   return "127.0.0.1";
 }
 
-app.listen(PORT, "0.0.0.0", () => {
-  const localIp = getLocalIpAddress();
-  console.log(`🚀 Server IMS berjalan di:`);
-  console.log(`   - Laptop / Komputer : http://localhost:${PORT}`);
-  console.log(`   - HP (Jaringan Sama): http://${localIp}:${PORT}`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, "0.0.0.0", () => {
+    const localIp = getLocalIpAddress();
+    console.log(`🚀 Server IMS berjalan di:`);
+    console.log(`   - Laptop / Komputer : http://localhost:${PORT}`);
+    console.log(`   - HP (Jaringan Sama): http://${localIp}:${PORT}`);
+    console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+  });
+}
 
 export default app;
 
