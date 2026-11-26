@@ -3,19 +3,10 @@
  */
 
 import { generateToken, csrfProtection, regenerateCsrfToken } from "../middlewares/csrf.js";
-import {
-  escapeHtml,
-  generateSafeDocumentFilename,
-  formatDateDot,
-  formatDateEn,
-  formatDateIndonesian,
-  preparePlaceholderData,
-  replacePlaceholders,
-} from "../services/documentService.js";
 import { isValidPassword, validateRegister, validateResetPassword, validateLogin, validateLogbook, validateInternshipDates } from "../utils/validators.js";
-import { formatInternshipPeriod } from "../utils/helpers.js";
+import { formatInternshipPeriod, escapeHtml } from "../utils/helpers.js";
 import { checkRedDate } from "../utils/holidayHelper.js";
-import { createWebRateLimiter, profileUpdateLimiter, bulkCertificateLimiter, bulkLetterLimiter } from "../middlewares/rateLimiter.js";
+import { createWebRateLimiter, profileUpdateLimiter } from "../middlewares/rateLimiter.js";
 import { VALID_STATUSES, ACTIVE_STATUSES, INACTIVE_STATUSES, isActiveDay } from "../services/presenceService.js";
 import { sanitizeYearMonth } from "../services/calendarService.js";
 import { calculateWorkDaysBetween, calculateInternshipProgress, calculateActiveDaysAndStreaks } from "../services/gamificationService.js";
@@ -109,23 +100,7 @@ async function runSuite() {
   assert(safeGetRes.type === "next", "GET requests bypass CSRF mutation check");
 
   console.log("\n==================================================");
-  console.log("2. HTML ESCAPING & PATH TRAVERSAL IN DOCUMENT GENERATION");
-  console.log("==================================================");
-
-  assert(escapeHtml("<script>alert(1)</script>") === "&lt;script&gt;alert(1)&lt;/script&gt;", "Escapes script tags");
-  assert(escapeHtml('"test" & \'single\'') === "&quot;test&quot; &amp; &#39;single&#39;", "Escapes quotes and ampersands");
-  assert(escapeHtml(12345) === "12345", "Handles numeric input safely");
-  assert(escapeHtml(null) === "", "Handles null input safely");
-
-  const safeCert = generateSafeDocumentFilename("CERTIFICATE", "Budi Santoso", "2026-08-23");
-  assert(safeCert.startsWith("sertifikat-budi-santoso-2026-08-23-"), "Safe certificate filename format generated");
-  assert(!safeCert.includes("..") && !safeCert.includes("/") && !safeCert.includes("\\"), "Filename has no directory traversal characters");
-
-  const safeLetter = generateSafeDocumentFilename("LETTER", "../../etc/passwd", "2026-08-23");
-  assert(!safeLetter.includes("..") && !safeLetter.includes("/") && !safeLetter.includes("\\"), "Path traversal stripped from name in filename");
-
-  console.log("\n==================================================");
-  console.log("3. PASSWORD COMPLEXITY & VALIDATION CONSISTENCY");
+  console.log("2. PASSWORD COMPLEXITY & VALIDATION CONSISTENCY");
   console.log("==================================================");
 
   assert(isValidPassword("12345678") === false, "Rejects numbers-only password");
@@ -195,7 +170,7 @@ async function runSuite() {
   assert(loginCheck.valid === true, "Login form validator preserves compatibility for existing passwords");
 
   console.log("\n==================================================");
-  console.log("4. TARGETED RATE LIMITING LOGIC");
+  console.log("3. TARGETED RATE LIMITING LOGIC");
   console.log("==================================================");
 
   const testLimiter = createWebRateLimiter({
@@ -222,11 +197,9 @@ async function runSuite() {
   assert(r3.messages && r3.messages.length > 0 && r3.messages[0].text === "Limit reached", "Flash message populated in session");
 
   assert(typeof profileUpdateLimiter === "function", "profileUpdateLimiter is initialized");
-  assert(typeof bulkCertificateLimiter === "function", "bulkCertificateLimiter is initialized");
-  assert(typeof bulkLetterLimiter === "function", "bulkLetterLimiter is initialized");
 
   console.log("\n==================================================");
-  console.log("5. FASE 2: DAILY PRESENCE LOGIC & ACTIVE DAYS");
+  console.log("4. FASE 2: DAILY PRESENCE LOGIC & ACTIVE DAYS");
   console.log("==================================================");
 
   assert(VALID_STATUSES.includes("WFO"), "Valid status includes WFO");
@@ -242,7 +215,7 @@ async function runSuite() {
   assert(isActiveDay("INVALID") === false, "Invalid status is not active day");
 
   console.log("\n==================================================");
-  console.log("6. FASE 3: LOGBOOK VALIDATION & AUTHORIZATION");
+  console.log("5. FASE 3: LOGBOOK VALIDATION & AUTHORIZATION");
   console.log("==================================================");
 
   // 6.1 Validation of activity field length
@@ -263,7 +236,7 @@ async function runSuite() {
   assert(isEditable("REVIEWED") === false, "Reviewed logbook is locked and cannot be edited by intern");
 
   console.log("\n==================================================");
-  console.log("7. FASE 4: STRUCTURED INTERNSHIP DATES VALIDATION");
+  console.log("6. FASE 4: STRUCTURED INTERNSHIP DATES VALIDATION");
   console.log("==================================================");
 
   // 7.1 Valid start/end dates
@@ -301,7 +274,7 @@ async function runSuite() {
   assert(v9.valid === true, "Empty date strings accepted without breaking validation");
 
   console.log("\n==================================================");
-  console.log("8. FASE 4: INTERNSHIP CALENDAR LOGIC & RULES");
+  console.log("7. FASE 4: INTERNSHIP CALENDAR LOGIC & RULES");
   console.log("==================================================");
 
   // 8.1 Year and Month Sanitization
@@ -353,7 +326,7 @@ async function runSuite() {
   assert(jsonString.includes("<script>"), "JSON stringify preserves raw text without executing in script context");
 
   console.log("\n==================================================");
-  console.log("9. FASE 5: GAMIFICATION, STREAKS, & PROGRESS");
+  console.log("8. FASE 5: GAMIFICATION, STREAKS, & PROGRESS");
   console.log("==================================================");
 
   // 9.1 Active Days calculation (Senin WFO, Selasa WFH, Rabu IZIN, Kamis SAKIT, Jumat WFO, Sabtu WFH, Minggu)
@@ -487,86 +460,7 @@ async function runSuite() {
   assert(pNull === null, "Null dates return null progress (no guessing)");
 
   console.log("\n==================================================");
-  console.log("10. FASE 6: DOCUMENT GENERATION & TEMPLATE PLACEHOLDER LOGIC");
-  console.log("==================================================");
-
-  // 10.1 Date formatting helpers
-  const sampleDate = new Date("2026-07-31T00:00:00.000Z");
-  assert(formatDateDot(sampleDate) === "31.07.2026", "formatDateDot formats date to DD.MM.YYYY");
-  assert(formatDateEn(sampleDate).includes("July 31, 2026"), "formatDateEn formats date to English Month D, YYYY");
-  assert(formatDateIndonesian(sampleDate).includes("31 Juli 2026"), "formatDateIndonesian formats date to Indonesian D Month YYYY");
-
-  // 10.2 Single participant placeholder mapping
-  const mockUser = {
-    id: "user-123",
-    fullName: "Fenty Anggraeni",
-    email: "fenty@cikarastudio.com",
-    phoneNumber: "08123456789",
-    participantType: "UNIVERSITY",
-    university: "Universitas Siliwangi",
-    studyProgram: "Informatika",
-    studentId: "237006068",
-    internshipStartDate: new Date("2026-06-02"),
-    internshipEndDate: new Date("2026-07-31"),
-    internshipPeriod: "2 Juni 2026 s/d 31 Juli 2026",
-  };
-
-  const mockEval = {
-    finalScore: 92.5,
-    grade: "A",
-    mentorComment: "Sangat kompeten dan teliti.",
-    recommendation: "Direkomendasikan untuk posisi Game Developer.",
-  };
-
-  const mockMentor = {
-    fullName: "Wahyu Muhamad Rizqi., S.Kom.",
-    email: "cikarastudio@gmail.com",
-  };
-
-  const dataMap = preparePlaceholderData(mockUser, mockEval, mockMentor);
-  assert(dataMap["{{NAMA_PESERTA}}"] === "Fenty Anggraeni", "Maps participant full name accurately");
-  assert(dataMap["{{NPM}}"] === "237006068", "Maps student NPM accurately");
-  assert(dataMap["{{UNIVERSITAS}}"] === "Universitas Siliwangi", "Maps university accurately");
-  assert(dataMap["{{TANGGAL_SELESAI_DOT}}"] === "31.07.2026", "Maps certificate date to DD.MM.YYYY end date");
-  assert(dataMap["{{NAMA_CHIEF}}"] === "Wahyu M. Rizqi, S.Kom", "Chief signature uses real CEO name");
-  assert(dataMap["{{JABATAN_CHIEF}}"] === "CHIEF EXECUTIVE OFFICER", "Chief title uses CHIEF EXECUTIVE OFFICER");
-  assert(dataMap["{{NAMA_PERUSAHAAN}}"] === "PT. CIKARA BAKTI NUSANTARA", "Company name is PT. CIKARA BAKTI NUSANTARA");
-
-  // 10.3 Replace Placeholders in Template
-  const rawTpl = "Sertifikat untuk {{NAMA_PESERTA}} ({{NPM}}) tertanggal {{TANGGAL_SELESAI_DOT}} oleh {{NAMA_CHIEF}}";
-  const rendered = replacePlaceholders(rawTpl, dataMap);
-  assert(rendered === "Sertifikat untuk Fenty Anggraeni (237006068) tertanggal 31.07.2026 oleh Wahyu M. Rizqi, S.Kom", "Replaces all placeholders cleanly without leaving any {{TAG}}");
-
-  // 10.4 Multiple participants dynamic table in letter
-  const mockGroup = [
-    { fullName: "Fenty Anggraeni", studentId: "237006068", studyProgram: "Informatika" },
-    { fullName: "Budi Santoso", studentId: "237006069", studyProgram: "Sistem Informasi" }
-  ];
-  const groupDataMap = preparePlaceholderData(mockUser, mockEval, mockMentor, { participants: mockGroup });
-  assert(groupDataMap["{{TABEL_PESERTA_ROWS}}"].includes("Fenty Anggraeni") && groupDataMap["{{TABEL_PESERTA_ROWS}}"].includes("Budi Santoso"), "Renders multiple participant table rows without overflow");
-
-  // 10.5 XSS Injection defense in dynamic document fields
-  const maliciousUser = {
-    ...mockUser,
-    fullName: "<script>alert('pwned')</script>",
-    university: "<img src=x onerror=alert(1)>",
-  };
-  const safeDataMap = preparePlaceholderData(maliciousUser, mockEval, mockMentor);
-  assert(!safeDataMap["{{NAMA_PESERTA}}"].includes("<script>"), "Escapes XSS in participant full name");
-  assert(!safeDataMap["{{UNIVERSITAS}}"].includes("<img"), "Escapes XSS in participant university name");
-
-  // 10.6 IDOR Protection Logic Check
-  const checkDocumentAccess = (docUserId, sessionUserId, userRole) => {
-    if (userRole === "MENTOR") return true;
-    return docUserId === sessionUserId;
-  };
-
-  assert(checkDocumentAccess("user-123", "user-123", "INTERN") === true, "Intern can access their own document");
-  assert(checkDocumentAccess("user-456", "user-123", "INTERN") === false, "Intern cannot access another intern's document (IDOR blocked)");
-  assert(checkDocumentAccess("user-456", "mentor-999", "MENTOR") === true, "Mentor has authorized access to inspect documents");
-
-  console.log("\n==================================================");
-  console.log("11. FASE 7: SELF-SERVICE PROFILE, PERIOD DERIVATION & 3-DAY DROPOUT POLICY");
+  console.log("9. FASE 6: SELF-SERVICE PROFILE, PERIOD DERIVATION & 3-DAY DROPOUT POLICY");
   console.log("==================================================");
 
   // 11.1 Format Internship Period (Automatic Derivation)

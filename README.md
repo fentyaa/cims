@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-Supabase-336791?logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma&logoColor=white" alt="Prisma ORM" />
   <img src="https://img.shields.io/badge/Bootstrap-5.3-7952B3?logo=bootstrap&logoColor=white" alt="Bootstrap" />
-  <img src="https://img.shields.io/badge/Tests-134%20Passed-success" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-128%20Passed-success" alt="Tests" />
   <img src="https://img.shields.io/badge/Security-Hardened-blue" alt="Security" />
 </p>
 
@@ -22,7 +22,7 @@
 
 ## 📌 Tentang CIMS
 
-**CIMS (Cikara Internship Management System)** adalah aplikasi web monolitik modern yang dirancang untuk mengotomatisasi seluruh siklus pelaksanaan program magang industri di **PT Cikara Bakti Nusantara**. Sistem ini memfasilitasi kolaborasi antara **Mentor Perusahaan** dan **Peserta Magang** (Mahasiswa Perguruan Tinggi & Siswa PKL SMK) mulai dari penerimaan akun, absensi harian, logbook kegiatan, hingga evaluasi akhir dan penerbitan sertifikat magang.
+**CIMS (Cikara Internship Management System)** adalah aplikasi web monolitik modern yang dirancang untuk mengotomatisasi seluruh siklus pelaksanaan program magang industri di **PT Cikara Bakti Nusantara**. Sistem ini memfasilitasi kolaborasi antara **Mentor Perusahaan** dan **Peserta Magang** (Mahasiswa Perguruan Tinggi & Siswa PKL SMK) mulai dari penerimaan akun, absensi harian, logbook kegiatan, hingga evaluasi akhir dan penilaian capaian program magang.
 
 ---
 
@@ -57,14 +57,11 @@
 - **Persentase Progres Magang**: Visualisasi hari kerja terlalui vs sisa hari kerja secara proporsional.
 - **Kebijakan Dropout Otomatis**: Deteksi 3 hari berturut-turut alpa tanpa keterangan resmi.
 
-### 6. 📊 Evaluasi Akhir & Otomatisasi Dokumen
-- Penilaian kompetensi kinerja peserta oleh mentor di akhir periode magang.
-- Otomatisasi konversi skor angka ke predikat huruf (Grade A, B, C, D).
-- **Penerbitan Dokumen Resmi**:
-  - Surat Balasan / Penerimaan Magang
-  - Surat Keterangan Selesai Magang
-  - Sertifikat Kelulusan Magang (*Print-Ready* HTML & siap cetak)
-- Mekanisme proteksi IDOR (*Insecure Direct Object Reference*) untuk melindungi privasi dokumen antar peserta.
+### 6. 📊 Evaluasi Akhir Magang & Rekap Nilai
+- Penilaian kompetensi kinerja dan performa magang oleh mentor di akhir periode.
+- Perhitungan skor kumulatif otomatis berdasarkan indikator capaian kinerja.
+- Konversi objektif skor angka ke predikat huruf (Grade A, B, C, D).
+- Transparansi status penyelesaian magang dan riwayat evaluasi peserta.
 
 ### 7. 📢 Pengumuman Perusahaan
 - Publikasi pengumuman internal dari mentor dengan target penerima (Semua Peserta, Mahasiswa saja, atau SMK saja).
@@ -78,7 +75,7 @@ Aplikasi CIMS telah melalui audit keamanan komprehensif:
 * **CSRF Protection**: Implementasi *Double-Submit Cookie Pattern* menggunakan `crypto.timingSafeEqual()`.
 * **Password Hashing**: Enkripsi password menggunakan **Bcrypt** dengan salt rounds tinggi.
 * **Brute-Force Defense**: *Rate Limiting* berbasis window request pada endpoint otentikasi dan aksi kritis.
-* **XSS Defense**: Sanitasi input dan escaping otomatis pada kompilasi template EJS & generator dokumen.
+* **XSS Defense**: Sanitasi input dan escaping kontekstual otomatis pada kompilasi view template EJS.
 * **Secure File Upload**: Validasi ganda ekstensi dan MIME type (*whitelist-based*) serta pencegahan eksekusi skrip berbahaya.
 * **HTTP Security Headers**: Penerapan `Helmet.js` untuk mengamankan header HTTP (X-Frame-Options, X-Content-Type-Options).
 
@@ -96,7 +93,7 @@ Aplikasi CIMS telah melalui audit keamanan komprehensif:
 | **Frontend Styling** | Bootstrap 5.3, Bootstrap Icons, Plus Jakarta Sans Font |
 | **Session Store** | Express-Session dengan `connect-pg-simple` (PostgreSQL Pool) |
 | **Email Service** | Nodemailer (Gmail SMTP / App Passwords) |
-| **Testing** | Node.js Test Suite (134 Automated Tests) |
+| **Testing** | Node.js Test Suite (128 Automated Tests) |
 | **Deployment** | Vercel (`vercel.json`) Ready |
 
 ---
@@ -107,7 +104,7 @@ Aplikasi CIMS telah melalui audit keamanan komprehensif:
 cims/
 ├── api/                    # Serverless handler untuk deployment Vercel
 ├── config/                 # Konfigurasi database Prisma & mailer SMTP
-├── controllers/            # Controller HTTP (Auth, Presensi, Logbook, Dokumen, dll)
+├── controllers/            # Controller HTTP (Auth, Presensi, Logbook, Evaluasi, dll)
 ├── docs/                   # Dokumentasi teknis & arsitektur sistem
 │   ├── diagrams/           # Diagram arsitektur UML & alur sistem
 │   └── SECURITY_HARDENING.md
@@ -116,9 +113,8 @@ cims/
 ├── prisma/                 # Skema Prisma (schema.prisma) & target engine
 ├── public/                 # Aset publik statis (CSS, JS, Images, Uploads)
 ├── routes/                 # Definisi rute HTTP aplikasi
-├── scripts/                # Tool generator diagram & seeder template
+├── scripts/                # Tool generator diagram alur & visualisasi sistem
 ├── services/               # Lapisan logika bisnis (Business Logic Layer)
-├── storage/templates/      # Berkas template HTML dokumen resmi CIMS
 ├── tests/                  # Automated Regression & Security Test Suite
 ├── utils/                  # Helper fungsi, validasi, dan kalender libur
 ├── views/                  # Halaman antarmuka EJS dinamis & layout
@@ -192,7 +188,7 @@ Aplikasi ini dilengkapi pengujian regresi dan keamanan menyeluruh:
 ```bash
 npm test
 ```
-*Output: 134 PASSED, 0 FAILED (100% test coverage).*
+*Output: 128 PASSED, 0 FAILED (100% test coverage).*
 
 ---
 
@@ -206,7 +202,7 @@ Setelah menjalankan `node seed.js`, Anda dapat langsung masuk menggunakan akun d
 | **Intern (Mahasiswa)** | `fenty.anggraeni@gmail.com` | `Intern123!` | Akun mahasiswa aktif (UNSIL, siap evaluasi akhir) |
 | **Intern (Mahasiswa)** | `ahmad.fauzi@gmail.com` | `Intern123!` | Akun magang MBKM 6 bulan |
 | **Intern (Siswa SMK)** | `rizky.pratama@gmail.com` | `Intern123!` | Akun siswa PKL SMK (aturan 100% WFO) |
-| **Alumni (Lulus)** | `maya.putri@gmail.com` | `Intern123!` | Akun berstatus selesai, nilai terbit & sertifikat aktif |
+| **Alumni (Lulus)** | `maya.putri@gmail.com` | `Intern123!` | Akun berstatus selesai magang dengan evaluasi nilai akhir terbit |
 
 ---
 

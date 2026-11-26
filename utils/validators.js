@@ -423,33 +423,6 @@ export const validateEvaluation = (data) => {
   };
 };
 
-/**
- * Validasi upload template dokumen.
- * @param {Object} data - { name, documentType }
- * @returns {Object} { valid: boolean, errors: string[] }
- */
-export const validateDocumentTemplate = (data) => {
-  const errors = [];
-
-  if (!data.name || data.name.trim().length < 3) {
-    errors.push("Nama template minimal 3 karakter.");
-  }
-
-  const validTypes = ["CERTIFICATE", "LETTER"];
-  if (!data.documentType || !validTypes.includes(data.documentType)) {
-    errors.push("Jenis dokumen harus Sertifikat atau Surat Selesai Magang.");
-  }
-
-  if (!data.version || data.version.trim().length < 1) {
-    errors.push("Versi template harus diisi.");
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-  };
-};
-
 export default {
   isValidEmail,
   isValidPassword,
@@ -464,6 +437,5 @@ export default {
   validateAnnouncement,
   parseEvaluationScore,
   validateEvaluation,
-  validateDocumentTemplate,
 };
 

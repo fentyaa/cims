@@ -3,8 +3,7 @@
  */
 
 import { generateToken, csrfProtection } from "../middlewares/csrf.js";
-import { upload, uploadAttachment, uploadTemplate } from "../middlewares/upload.js";
-import { escapeHtml, generateSafeDocumentFilename } from "../services/documentService.js";
+import { upload, uploadAttachment } from "../middlewares/upload.js";
 import path from "path";
 
 let passedCount = 0;
@@ -178,47 +177,6 @@ async function runUploadTests() {
 }
 
 await runUploadTests();
-
-console.log("\n==================================================");
-console.log("TEST SUITE 3: DOCUMENT GENERATION & SECURITY");
-console.log("==================================================");
-
-// Test 3.1: HTML Escaping
-const xssPayload1 = "<script>alert('XSS')</script>";
-const escaped1 = escapeHtml(xssPayload1);
-assert(escaped1 === "&lt;script&gt;alert(&#39;XSS&#39;)&lt;/script&gt;", "escapeHtml sanitizes <script> and single quotes");
-assert(!escaped1.includes("<") && !escaped1.includes(">"), "Escaped output contains no raw angle brackets");
-
-const xssPayload2 = `"><img src=x onerror="alert(1)">`;
-const escaped2 = escapeHtml(xssPayload2);
-assert(escaped2 === "&quot;&gt;&lt;img src=x onerror=&quot;alert(1)&quot;&gt;", "escapeHtml sanitizes double quotes and angle brackets");
-
-const nullEscape = escapeHtml(null);
-assert(nullEscape === "", "escapeHtml handles null gracefully");
-
-const undefEscape = escapeHtml(undefined);
-assert(undefEscape === "", "escapeHtml handles undefined gracefully");
-
-// Test 3.2: Safe filename generation
-const normalName = "John Doe";
-const fnNormal = generateSafeDocumentFilename("CERTIFICATE", normalName, "2026-08-23");
-assert(fnNormal.startsWith("sertifikat-john-doe-2026-08-23-"), "Safe filename generated for normal name");
-assert(fnNormal.endsWith(".html"), "Filename ends with .html");
-assert(/^[a-zA-Z0-9_.-]+$/.test(fnNormal), "Filename contains only allowed safe characters");
-
-// Test 3.3: Path traversal attempt in name
-const maliciousName1 = "../../../etc/passwd";
-const fnMalicious1 = generateSafeDocumentFilename("LETTER", maliciousName1, "2026-08-23");
-assert(!fnMalicious1.includes("..") && !fnMalicious1.includes("/"), "Path traversal ../ eliminated from filename");
-assert(fnMalicious1.startsWith("surat-doc-etcpasswd-"), "Malicious path characters stripped cleanly");
-
-const maliciousName2 = "..\\..\\windows\\system32\\cmd";
-const fnMalicious2 = generateSafeDocumentFilename("CERTIFICATE", maliciousName2, "2026-08-23");
-assert(!fnMalicious2.includes("\\") && !fnMalicious2.includes(".."), "Backslashes and path traversal eliminated from filename");
-
-const xssName = `<script>alert("test")</script>`;
-const fnXss = generateSafeDocumentFilename("CERTIFICATE", xssName, "2026-08-23");
-assert(!fnXss.includes("<") && !fnXss.includes(">") && !fnXss.includes('"'), "HTML tags stripped from filename slug");
 
 console.log("\n==================================================");
 console.log(`TEST SUMMARY: ${passedCount} PASSED, ${failedCount} FAILED`);

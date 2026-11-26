@@ -24,13 +24,8 @@ import presenceController from "../controllers/presenceController.js";
 import logbookController from "../controllers/logbookController.js";
 import announcementController from "../controllers/announcementController.js";
 import evaluationController from "../controllers/evaluationController.js";
-import documentController from "../controllers/documentController.js";
 import calendarController from "../controllers/calendarController.js";
-import {
-  profileUpdateLimiter,
-  bulkCertificateLimiter,
-  bulkLetterLimiter,
-} from "../middlewares/rateLimiter.js";
+import { profileUpdateLimiter } from "../middlewares/rateLimiter.js";
 
 const router = Router();
 
@@ -111,9 +106,6 @@ router.get("/mentor/penilaian/:id", isAuthenticated, mentorOnly, evaluationContr
 router.post("/mentor/penilaian/:id/publish", isAuthenticated, mentorOnly, evaluationController.mentorPublish);
 router.post("/mentor/penilaian/:id/archive", isAuthenticated, mentorOnly, evaluationController.mentorArchive);
 
-// Dokumen (Mentor) - Dinonaktifkan sesuai kebutuhan lingkup proyek
-router.use("/mentor/dokumen", isAuthenticated, mentorOnly, (req, res) => res.redirect("/mentor/dashboard"));
-
 // Laporan (Mentor)
 router.get("/mentor/laporan", isAuthenticated, mentorOnly, mentorController.laporan);
 
@@ -168,9 +160,6 @@ router.get("/intern/pengumuman/:id", isAuthenticated, internOnly, announcementCo
 
 // Nilai (Evaluation)
 router.get("/intern/nilai", isAuthenticated, internOnly, evaluationController.internNilai);
-
-// Dokumen (Intern) - Dinonaktifkan sesuai kebutuhan lingkup proyek
-router.use("/intern/dokumen", isAuthenticated, internOnly, (req, res) => res.redirect("/intern/dashboard"));
 
 // ============================================================
 // DEVELOPMENT SEED ENDPOINT (Hanya aktif di mode development)

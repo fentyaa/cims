@@ -75,35 +75,7 @@ export const profileUpdateLimiter = createWebRateLimiter({
   includeIpInUserKey: true,
 });
 
-/**
- * 2. Bulk Certificate Generation Limiter
- * Melindungi dari disk I/O flood dan transaksi database massal berulang.
- * Kuota: 10 request per 5 menit per mentor.
- */
-export const bulkCertificateLimiter = createWebRateLimiter({
-  windowMs: 5 * 60 * 1000, // 5 menit
-  max: 10,
-  message: "Terlalu banyak permintaan generate sertifikat massal. Silakan tunggu 5 menit.",
-  fallbackRedirect: "/mentor/dokumen/sertifikat",
-  includeIpInUserKey: false,
-});
-
-/**
- * 3. Bulk Letter Generation Limiter
- * Melindungi dari disk I/O flood dan transaksi database massal berulang.
- * Kuota: 10 request per 5 menit per mentor.
- */
-export const bulkLetterLimiter = createWebRateLimiter({
-  windowMs: 5 * 60 * 1000, // 5 menit
-  max: 10,
-  message: "Terlalu banyak permintaan generate surat massal. Silakan tunggu 5 menit.",
-  fallbackRedirect: "/mentor/dokumen/surat",
-  includeIpInUserKey: false,
-});
-
 export default {
   createWebRateLimiter,
   profileUpdateLimiter,
-  bulkCertificateLimiter,
-  bulkLetterLimiter,
 };

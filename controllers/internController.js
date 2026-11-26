@@ -16,7 +16,6 @@ import presenceService from "../services/presenceService.js";
 import logbookService from "../services/logbookService.js";
 import evaluationService from "../services/evaluationService.js";
 import gamificationService from "../services/gamificationService.js";
-import documentService from "../services/documentService.js";
 import { isValidPassword, isValidFullName } from "../utils/validators.js";
 
 /**
@@ -31,7 +30,6 @@ export const dashboard = async (req, res) => {
       logbookStats,
       evalStatus,
       gamificationStats,
-      documents,
       absenceInfo,
     ] = await Promise.all([
       prisma.user.findUnique({
@@ -42,7 +40,6 @@ export const dashboard = async (req, res) => {
       logbookService.getInternLogbookStats(userId),
       evaluationService.getInternEvaluationStatus(userId),
       gamificationService.getInternGamificationStats(userId),
-      documentService.getDocumentsByUser(userId),
       presenceService.checkConsecutiveUnexcusedAbsences(userId).catch(() => ({ consecutiveDays: 0, isDropout: false, unexcusedDates: [] })),
     ]);
 
@@ -66,7 +63,6 @@ export const dashboard = async (req, res) => {
       evalStatus,
       gamificationStats,
       absenceInfo,
-      documents: documents || [],
     });
   } catch (error) {
     console.error("Dashboard error:", error);

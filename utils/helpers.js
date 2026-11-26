@@ -72,14 +72,32 @@ export const truncateText = (text, maxLength = 100) => {
 export const sanitizeInput = (str) => {
   if (!str) return "";
   const htmlEntities = {
-    "&": "&" + "amp;",
-    "<": "&" + "lt;",
-    ">": "&" + "gt;",
-    '"': "&" + "quot;",
-    "'": "&#" + "x27;",
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
   };
   const regex = /[&<>"']/g;
   return str.replace(regex, (match) => htmlEntities[match]);
+};
+
+/**
+ * Escapes HTML characters for safe text insertion.
+ * @param {string|number} str
+ * @returns {string}
+ */
+export const escapeHtml = (str) => {
+  if (str === null || str === undefined) return "";
+  const s = String(str);
+  const htmlEntities = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+  return s.replace(/[&<>"']/g, (match) => htmlEntities[match]);
 };
 
 /**
@@ -183,6 +201,7 @@ export default {
   normalizeToUtcMidnight,
   truncateText,
   sanitizeInput,
+  escapeHtml,
   generateParticipantId,
   sleep,
   slugify,

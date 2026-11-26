@@ -39,18 +39,6 @@ const ATTACHMENT_ALLOWED_TYPES = {
   ".png": ["image/png"],
 };
 
-// Template dokumen: HTML, HTM, PDF, DOCX, DOC, JPG, JPEG, PNG (max 10 MB)
-const TEMPLATE_ALLOWED_TYPES = {
-  ".html": ["text/html"],
-  ".htm": ["text/html"],
-  ".pdf": ["application/pdf"],
-  ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-  ".doc": ["application/msword", "application/vnd.ms-word"],
-  ".jpg": ["image/jpeg"],
-  ".jpeg": ["image/jpeg"],
-  ".png": ["image/png"],
-};
-
 // Ekstensi terlarang yang berpotensi mengeksekusi script / binary berbahaya
 const DANGEROUS_EXTENSIONS = new Set([
   ".xhtml", ".shtml", ".svg", ".xml",
@@ -99,11 +87,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     let uploadPath;
     if (process.env.VERCEL) {
-      uploadPath = file.fieldname === "templateFile"
-        ? path.join(os.tmpdir(), "cims_uploads", "templates")
-        : path.join(os.tmpdir(), "cims_uploads");
-    } else if (file.fieldname === "templateFile") {
-      uploadPath = path.join(__dirname, "..", "public", "uploads", "templates");
+      uploadPath = path.join(os.tmpdir(), "cims_uploads");
     } else {
       uploadPath = path.join(__dirname, "..", "public", "uploads");
     }
@@ -126,7 +110,6 @@ const storage = multer.diskStorage({
     const prefixMap = {
       profilePhoto: "profile",
       attachment: "attachment",
-      templateFile: "template",
     };
     const prefix = prefixMap[file.fieldname] || "file";
     cb(null, `${prefix}-${uniqueSuffix}${ext}`);
@@ -142,15 +125,6 @@ const profileFileFilter = (req, file, cb) => {
     file,
     PROFILE_ALLOWED_TYPES,
     "Format file foto profil tidak didukung. Gunakan JPG, JPEG, atau PNG.",
-    cb
-  );
-};
-
-const templateFileFilter = (req, file, cb) => {
-  validateFile(
-    file,
-    TEMPLATE_ALLOWED_TYPES,
-    "Format file template tidak didukung. Gunakan PDF, DOCX, DOC, JPG, JPEG, atau PNG.",
     cb
   );
 };
@@ -196,15 +170,6 @@ export const uploadAttachment = multer({
   },
 });
 
-// Upload template dokumen (max 10 MB)
-export const uploadTemplate = multer({
-  storage,
-  fileFilter: templateFileFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB
-  },
-});
-
 // ============================================================
 // ERROR HANDLING MIDDLEWARE
 // ============================================================
@@ -218,8 +183,6 @@ export const handleUploadError = (err, req, res, next) => {
         errorMessage = "Ukuran foto profil melebihi batas maksimal 2 MB. Silakan pilih berkas foto dengan ukuran lebih kecil (maksimal 2 MB, format JPG/JPEG/PNG).";
       } else if (err.field === "attachment") {
         errorMessage = "Ukuran berkas lampiran melebihi batas maksimal 10 MB. Silakan gunakan berkas dengan ukuran lebih kecil.";
-      } else if (err.field === "templateFile") {
-        errorMessage = "Ukuran berkas template dokumen melebihi batas maksimal 10 MB.";
       } else {
         errorMessage = "Ukuran berkas yang diunggah melebihi batas maksimal 2 MB. Silakan pilih berkas dengan ukuran lebih kecil.";
       }

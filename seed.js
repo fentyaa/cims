@@ -62,10 +62,7 @@ export async function runSeed() {
   await prisma.presence.deleteMany();
   await prisma.logbook.deleteMany();
   await prisma.evaluation.deleteMany();
-  await prisma.document.deleteMany();
-  await prisma.generationHistory.deleteMany();
   await prisma.announcement.deleteMany();
-  await prisma.documentTemplate.deleteMany();
 
   // Putus relasi mentor-mentee sebelum delete user
   await prisma.user.updateMany({
@@ -86,20 +83,6 @@ export async function runSeed() {
       ],
     },
   });
-
-  const documentsStorageDir = path.resolve(process.cwd(), "storage/documents");
-  if (fs.existsSync(documentsStorageDir)) {
-    const docFiles = fs.readdirSync(documentsStorageDir);
-    for (const f of docFiles) {
-      if (f.endsWith(".html") || f.endsWith(".pdf")) {
-        try {
-          fs.unlinkSync(path.join(documentsStorageDir, f));
-        } catch (e) {
-          // ignore
-        }
-      }
-    }
-  }
   console.log("   ✅ Data lama berhasil dibersihkan.\n");
 
   // ============================================================
@@ -750,78 +733,7 @@ export async function runSeed() {
   console.log(`   ✅ Total logbook: ${allLogbooksToCreate.length} record (${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Review).`);
 
   // ============================================================
-  // 5. SEED TEMPLATE DOKUMEN & DOKUMEN KELULUSAN MAYA PUTRI
-  // ============================================================
-  console.log("\n📄 Menyiapkan template resmi & dokumen kelulusan CIMS...");
-
-  const templateSuratKet = await prisma.documentTemplate.create({
-    data: {
-      name: "Surat Keterangan Selesai Magang PT. Cikara Bakti Nusantara",
-      documentType: "LETTER",
-      version: "1.0",
-      filePath: "storage/templates/surat-keterangan-cikara.html",
-      status: "ACTIVE",
-      uploadedById: mentor.id,
-    },
-  });
-
-  const templateSertifikat = await prisma.documentTemplate.create({
-    data: {
-      name: "Sertifikat Magang PT. Cikara Bakti Nusantara",
-      documentType: "CERTIFICATE",
-      version: "1.0",
-      filePath: "storage/templates/sertifikat-cikara.html",
-      status: "ACTIVE",
-      uploadedById: mentor.id,
-    },
-  });
-
-  await prisma.documentTemplate.create({
-    data: {
-      name: "Surat Balasan Kerja Magang PT. Cikara Bakti Nusantara",
-      documentType: "LETTER",
-      version: "1.0",
-      filePath: "storage/templates/surat-balasan-magang-cikara.html",
-      status: "ACTIVE",
-      uploadedById: mentor.id,
-    },
-  });
-
-  if (mayaUser) {
-    await prisma.document.create({
-      data: {
-        userId: mayaUser.id,
-        documentType: "LETTER",
-        templateId: templateSuratKet.id,
-        filePath: "storage/documents/surat-keterangan-maya-putri.html",
-        generatedById: mentor.id,
-      },
-    });
-
-    await prisma.document.create({
-      data: {
-        userId: mayaUser.id,
-        documentType: "CERTIFICATE",
-        templateId: templateSertifikat.id,
-        filePath: "storage/documents/sertifikat-maya-putri.html",
-        generatedById: mentor.id,
-      },
-    });
-
-    await prisma.generationHistory.create({
-      data: {
-        userId: mayaUser.id,
-        documentType: "CERTIFICATE",
-        templateId: templateSertifikat.id,
-        generatedById: mentor.id,
-        status: "SUCCESS",
-      },
-    });
-    console.log("   ✅ Dokumen kelulusan resmi (Surat Keterangan & Sertifikat) untuk Maya Putri berhasil diterbitkan.");
-  }
-
-  // ============================================================
-  // 6. SEED PENGUMUMAN RESMI PERUSAHAAN
+  // 5. SEED PENGUMUMAN RESMI PERUSAHAAN
   // ============================================================
   console.log("\n📢 Menyiapkan pengumuman resmi perusahaan...");
 
@@ -912,7 +824,7 @@ export async function runSeed() {
   console.log(`   - Akun Intern              : ${internCount}`);
   console.log(`     * Sedang Aktif (ACTIVE)  : ${activeCount} Peserta (Periode & Tanggal Mulai Beragam)`);
   console.log(`     * Calon Baru (PENDING)   : ${pendingCount} Peserta (Batch Des 2026, Presensi 0, Logbook 0)`);
-  console.log(`     * Selesai Magang (ARCHIVED): ${archivedCount} Peserta (Maya Putri, Lulus, Nilai 92.5 A Published, Sertifikat Terbit)`);
+  console.log(`     * Selesai Magang (ARCHIVED): ${archivedCount} Peserta (Maya Putri, Lulus, Nilai 92.5 A Published, Evaluasi Selesai)`);
   console.log(`     * Ditolak (REJECTED)     : ${rejectedCount} Peserta (Fajar Ramadhan, Pendaftaran Ditolak, Presensi 0, Logbook 0)`);
   console.log(`   - Total Presensi           : ${presenceCount} (Tercatat akurat sesuai tanggal mulai masing-masing)`);
   console.log(`   - Total Logbook            : ${logbookCount} (${reviewedLogbookCount} Reviewed, ${pendingLogbookCount} Pending Menunggu Review)`);
