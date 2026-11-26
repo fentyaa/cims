@@ -97,7 +97,7 @@ Aplikasi CIMS telah melalui audit keamanan komprehensif:
 | **Session Store** | Express-Session dengan `connect-pg-simple` (PostgreSQL Pool) |
 | **Email Service** | Nodemailer (Gmail SMTP / App Passwords) |
 | **Testing** | Node.js Test Suite (134 Automated Tests) |
-| **Deployment** | Vercel (`vercel.json`) & Render (`render.yaml`) Ready |
+| **Deployment** | Vercel (`vercel.json`) Ready |
 
 ---
 
@@ -125,7 +125,6 @@ cims/
 ├── app.js                  # Entry point utama aplikasi Express.js
 ├── package.json            # Manifest proyek & dependensi
 ├── seed.js                 # Data awal database (12 peserta dengan aktivitas realistis)
-├── render.yaml             # Blueprint konfigurasi deployment Render
 └── vercel.json             # Konfigurasi deployment Vercel
 ```
 
