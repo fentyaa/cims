@@ -22,7 +22,7 @@
 
 ## 📌 Tentang CIMS
 
-**CIMS (Cikara Internship Management System)** adalah aplikasi web monolitik modern yang dirancang untuk mengotomatisasi seluruh siklus pelaksanaan program magang industri di **PT Cikara Bakti Nusantara**. Sistem ini memfasilitasi kolaborasi antara **Mentor Perusahaan** dan **Peserta Magang** (Mahasiswa Perguruan Tinggi & Siswa PKL SMK) mulai dari penerimaan akun, absensi harian, logbook kegiatan, hingga evaluasi akhir dan penerbitan sertifikat digital.
+**CIMS (Cikara Internship Management System)** adalah aplikasi web monolitik modern yang dirancang untuk mengotomatisasi seluruh siklus pelaksanaan program magang industri di **PT Cikara Bakti Nusantara**. Sistem ini memfasilitasi kolaborasi antara **Mentor Perusahaan** dan **Peserta Magang** (Mahasiswa Perguruan Tinggi & Siswa PKL SMK) mulai dari penerimaan akun, absensi harian, logbook kegiatan, hingga evaluasi akhir dan penerbitan sertifikat magang.
 
 ---
 
@@ -63,7 +63,7 @@
 - **Penerbitan Dokumen Resmi**:
   - Surat Balasan / Penerimaan Magang
   - Surat Keterangan Selesai Magang
-  - Sertifikat Kelulusan Resmi Digital (*Print-Ready* HTML & PDF export)
+  - Sertifikat Kelulusan Magang (*Print-Ready* HTML & siap cetak)
 - Mekanisme proteksi IDOR (*Insecure Direct Object Reference*) untuk melindungi privasi dokumen antar peserta.
 
 ### 7. 📢 Pengumuman Perusahaan
