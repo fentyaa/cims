@@ -13,7 +13,6 @@ import {
 import {
   upload,
   uploadAttachment,
-  uploadTemplate,
   handleUploadError,
 } from "../middlewares/upload.js";
 import { csrfProtection } from "../middlewares/csrf.js";
